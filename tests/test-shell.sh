@@ -52,6 +52,13 @@ WUTPACK_TEST_ROOT="$TEST_ROOT" WUTPACK_INSTALL_ROOT="$INSTALL_ROOT" \
   "$INSTALL_ROOT/bin/wut" routes | grep -Fq 'technical-deck'
 test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" WUTPACK_INSTALL_ROOT="$INSTALL_ROOT" "$INSTALL_ROOT/bin/wut" version)" = "0.1.0"
 
+PIPE_USER_ROOT="$TEST_ROOT/piped-user"
+PIPE_INSTALL_ROOT="$TEST_ROOT/piped-source"
+printf '' | WUTPACK_SOURCE_DIR="$REPO_ROOT" WUTPACK_TEST_ROOT="$PIPE_USER_ROOT" \
+  WUTPACK_INSTALL_ROOT="$PIPE_INSTALL_ROOT" /bin/bash "$REPO_ROOT/install.sh" \
+  --skills-only --host both >/dev/null
+test -L "$PIPE_USER_ROOT/.local/bin/wut"
+
 DRY_ROOT="$TEST_ROOT/dry-run-user"
 WUTPACK_TEST_ROOT="$DRY_ROOT" "$REPO_ROOT/setup" --skills-only --host both --dry-run >/dev/null
 test ! -e "$DRY_ROOT"

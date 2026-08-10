@@ -42,8 +42,9 @@ mkdir -p "$INSTALL_ROOT"
 ditto "$SOURCE_ROOT" "$INSTALL_ROOT"
 chmod +x "$INSTALL_ROOT/setup" "$INSTALL_ROOT/bin/wut"
 
-if [ -r /dev/tty ] && [ -w /dev/tty ]; then
-  "$INSTALL_ROOT/setup" "$@" </dev/tty
+if { exec 3<>/dev/tty; } 2>/dev/null; then
+  "$INSTALL_ROOT/setup" "$@" <&3
+  exec 3>&-
 else
   "$INSTALL_ROOT/setup" "$@"
 fi
