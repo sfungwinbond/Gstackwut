@@ -198,6 +198,25 @@ install_requirements() {
   done < "$manifest"
 }
 
+install_full_knowledge_requirements() {
+  local python_bin="$1"
+  local core_manifest="$2"
+  local ml_manifest="$3"
+
+  # Resolve both layers together because they share transitive dependencies.
+  # Installing the ML layer separately can upgrade packages beyond constraints
+  # imposed by the core layer even though each manifest resolves on its own.
+  if run "$UV_BIN" pip install --python "$python_bin" --upgrade \
+    -r "$core_manifest" -r "$ml_manifest"; then
+    return 0
+  fi
+
+  record_failure "Full knowledge Python dependency resolution failed"
+  warn "Falling back to the core knowledge layer"
+  install_requirements "$python_bin" "$core_manifest" "Core Python"
+  return 1
+}
+
 ensure_python_env() {
   local env_dir="$1"
   if [ ! -x "$env_dir/bin/python" ]; then
@@ -222,11 +241,15 @@ install_python_layers() {
   export PLAYWRIGHT_BROWSERS_PATH="$CACHE_ROOT/playwright"
   run_checked "Could not install managed Python 3.12" "$UV_BIN" python install 3.12 || true
   ensure_python_env "$KNOWLEDGE_ENV" || return
-  install_requirements "$KNOWLEDGE_ENV/bin/python" "$PROJECT_ROOT/manifests/python-core.txt" "Core Python"
   if [ "$PROFILE" = "full" ]; then
-    install_requirements "$KNOWLEDGE_ENV/bin/python" "$PROJECT_ROOT/manifests/python-ml.txt" "ML Python"
+    install_full_knowledge_requirements \
+      "$KNOWLEDGE_ENV/bin/python" \
+      "$PROJECT_ROOT/manifests/python-core.txt" \
+      "$PROJECT_ROOT/manifests/python-ml.txt" || true
     ensure_python_env "$AGENT_ENV" || return
     install_requirements "$AGENT_ENV/bin/python" "$PROJECT_ROOT/manifests/python-agents.txt" "Agent Python"
+  else
+    install_requirements "$KNOWLEDGE_ENV/bin/python" "$PROJECT_ROOT/manifests/python-core.txt" "Core Python"
   fi
   run_checked "Knowledge Python dependency check failed" \
     "$UV_BIN" pip check --python "$KNOWLEDGE_ENV/bin/python" || true

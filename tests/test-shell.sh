@@ -71,8 +71,11 @@ WUTPACK_TEST_ROOT="$DRY_ROOT" "$REPO_ROOT/setup" --skills-only --host both --dry
 test ! -e "$DRY_ROOT"
 
 FRESH_DRY_ROOT="$TEST_ROOT/fresh-dry-run-user"
+FRESH_DRY_LOG="$TEST_ROOT/fresh-dry-run.log"
 env PATH=/usr/bin:/bin:/usr/sbin:/sbin WUTPACK_TEST_ROOT="$FRESH_DRY_ROOT" \
-  /bin/bash "$REPO_ROOT/setup" --dry-run --skip-casks --skip-ai-clis >/dev/null
+  /bin/bash "$REPO_ROOT/setup" --dry-run --skip-casks --skip-ai-clis >"$FRESH_DRY_LOG"
 test ! -e "$FRESH_DRY_ROOT"
+test "$(grep -c 'python-ml\.txt' "$FRESH_DRY_LOG")" = "1"
+grep -Eq 'python-core\.txt .*python-ml\.txt' "$FRESH_DRY_LOG"
 
 printf 'Shell and isolated-install checks passed.\n'
