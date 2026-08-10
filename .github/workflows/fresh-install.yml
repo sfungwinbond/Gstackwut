@@ -48,8 +48,8 @@ jobs:
     runs-on: macos-15-intel
     timeout-minutes: 90
     env:
-      WUTPACK_TEST_ROOT: ${{ runner.temp }}/wutpack-user
-      WUTPACK_INSTALL_ROOT: ${{ runner.temp }}/wutpack-source
+      WUTPACK_TEST_ROOT: /tmp/wutpack-ci-user
+      WUTPACK_INSTALL_ROOT: /tmp/wutpack-ci-source
     steps:
       - uses: actions/checkout@v4
 
