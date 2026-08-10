@@ -2,10 +2,13 @@
 
 [![validate](https://github.com/sfungwinbond/Gstackwut/actions/workflows/validate.yml/badge.svg)](https://github.com/sfungwinbond/Gstackwut/actions/workflows/validate.yml)
 [![fresh install](https://github.com/sfungwinbond/Gstackwut/actions/workflows/fresh-install.yml/badge.svg)](https://github.com/sfungwinbond/Gstackwut/actions/workflows/fresh-install.yml)
+[![website](https://img.shields.io/badge/website-live-176b4d)](https://sfungwinbond.github.io/Gstackwut/)
 
 **The persistent knowledge-work harness for Codex and Claude Code.**
 
 One install. Twelve specialists. A Mac workbench that is still there tomorrow.
+
+[See the small-business landing page →](https://sfungwinbond.github.io/Gstackwut/)
 
 WutPack turns a fresh Codex or Claude Code setup into a practical knowledge-work
 station. It is the environment-and-workflow layer around the agent: durable

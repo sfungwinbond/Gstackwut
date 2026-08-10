@@ -6,6 +6,7 @@ import argparse
 import os
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,6 +24,32 @@ EXPECTED_SKILLS = {
     "review-gate",
     "ship-check",
 }
+
+
+class LandingPageParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.ids: list[str] = []
+        self.links: list[str] = []
+        self.title_depth = 0
+        self.title_text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if attributes.get("id"):
+            self.ids.append(attributes["id"] or "")
+        if tag == "a" and attributes.get("href"):
+            self.links.append(attributes["href"] or "")
+        if tag == "title":
+            self.title_depth += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "title":
+            self.title_depth = max(0, self.title_depth - 1)
+
+    def handle_data(self, data: str) -> None:
+        if self.title_depth:
+            self.title_text.append(data)
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -124,6 +151,55 @@ def validate_public_examples(errors: list[str]) -> None:
             fail(errors, f"{path.relative_to(ROOT)}: must state that the example is fictional")
 
 
+def validate_landing_page(errors: list[str]) -> None:
+    path = ROOT / "site/index.html"
+    if not path.is_file():
+        fail(errors, "missing site/index.html")
+        return
+
+    text = path.read_text(encoding="utf-8")
+    parser = LandingPageParser()
+    parser.feed(text)
+
+    duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
+    if duplicate_ids:
+        fail(errors, f"site/index.html: duplicate ids {duplicate_ids}")
+
+    id_set = set(parser.ids)
+    for required_id in {"main", "new-mac-start", "work", "specialists", "install", "questions"}:
+        if required_id not in id_set:
+            fail(errors, f"site/index.html: missing required section id {required_id!r}")
+    for target in parser.links:
+        if target.startswith("#") and target[1:] not in id_set:
+            fail(errors, f"site/index.html: broken page anchor {target}")
+
+    normalized_title = " ".join("".join(parser.title_text).split())
+    if "WutPack" not in normalized_title or "small business" not in normalized_title.lower():
+        fail(errors, "site/index.html: title must name WutPack and the small-business audience")
+
+    required_fragments = [
+        "MIT licensed",
+        "install.sh | bash",
+        "The honest boundary",
+        "Apple silicon and Intel",
+        "Codex or Claude Code",
+        "Command-Space",
+        "Terminal shows no dots",
+        "wut doctor",
+        "Do I need to be a programmer?",
+        *EXPECTED_SKILLS,
+    ]
+    for fragment in required_fragments:
+        if fragment not in text:
+            fail(errors, f"site/index.html: missing required content {fragment!r}")
+
+    forbidden_fragments = ["lorem ipsum", "chip erase", "serial flash", "W77Q"]
+    lowered = text.lower()
+    for fragment in forbidden_fragments:
+        if fragment.lower() in lowered:
+            fail(errors, f"site/index.html: contains forbidden product-specific content {fragment!r}")
+
+
 def validate_repository(errors: list[str]) -> None:
     required = [
         "README.md",
@@ -138,6 +214,11 @@ def validate_repository(errors: list[str]) -> None:
         "examples/market-entry-scorecard.csv",
         "examples/executive-consulting-demo.pptx",
         "docs/images/editable-executive-roadmap.png",
+        "site/index.html",
+        "site/favicon.svg",
+        "site/robots.txt",
+        "site/sitemap.xml",
+        ".github/workflows/pages.yml",
     ]
     for relative in required:
         if not (ROOT / relative).exists():
@@ -163,6 +244,7 @@ def main() -> int:
         validate_repository(errors)
         validate_readme_examples(errors)
         validate_public_examples(errors)
+        validate_landing_page(errors)
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)

@@ -1,0 +1,2108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <meta name="description" content="Turn a new Mac into a free AI office for small business. WutPack sets up Codex or Claude Code with durable tools for documents, spreadsheets, presentations, research, PDFs, and more.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="WutPack | Turn a new Mac into a free AI office">
+  <meta property="og:description" content="Open Terminal, paste one command, and give your new Mac twelve specialists for everyday small-business work.">
+  <meta property="og:url" content="https://sfungwinbond.github.io/Gstackwut/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="WutPack | Turn a new Mac into a free AI office">
+  <meta name="twitter:description" content="A beginner-friendly path from a new Mac to twelve persistent knowledge-work specialists.">
+  <link rel="canonical" href="https://sfungwinbond.github.io/Gstackwut/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+  <title>WutPack | Turn a new Mac into a free AI office for small business</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f3f0e8;
+      --paper-raised: #fbfaf6;
+      --ink: #14201d;
+      --muted: #58615d;
+      --line: #c8ccc4;
+      --line-strong: #87918b;
+      --green: #176b4d;
+      --green-bright: #b8f36b;
+      --orange: #f26b38;
+      --yellow: #f5d969;
+      --blue: #306ab2;
+      --terminal: #101714;
+      --terminal-ink: #e9f4ed;
+      --success: #208259;
+      --font-display: "Instrument Serif", Georgia, serif;
+      --font-body: "DM Sans", system-ui, sans-serif;
+      --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+      --space-1: 0.4rem;
+      --space-2: 0.75rem;
+      --space-3: 1rem;
+      --space-4: 1.5rem;
+      --space-5: 2rem;
+      --space-6: 3rem;
+      --space-7: 4.5rem;
+      --space-8: 7rem;
+      --radius-sm: 0.45rem;
+      --radius-md: 0.9rem;
+      --max-width: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 6rem;
+    }
+
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+    }
+
+    body::before {
+      position: fixed;
+      z-index: -1;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 42px 42px;
+      opacity: 0.13;
+      content: "";
+      pointer-events: none;
+    }
+
+    a {
+      color: inherit;
+      text-underline-offset: 0.2em;
+    }
+
+    button,
+    a {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--orange);
+      outline-offset: 4px;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      top: 0.75rem;
+      left: 0.75rem;
+      padding: 0.7rem 1rem;
+      transform: translateY(-160%);
+      background: var(--ink);
+      color: var(--paper-raised);
+      font-weight: 700;
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .shell {
+      width: min(calc(100% - 2rem), var(--max-width));
+      margin-inline: auto;
+    }
+
+    .site-header {
+      position: sticky;
+      z-index: 50;
+      top: 0;
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav {
+      display: flex;
+      min-height: 4.75rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: var(--ink);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 2.1rem;
+      height: 2.1rem;
+      place-items: center;
+      border: 2px solid var(--ink);
+      background: var(--green-bright);
+      color: #14201d;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      transform: rotate(-2deg);
+    }
+
+    .brand-version {
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: 1.5rem;
+      font-size: 0.92rem;
+      font-weight: 600;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+    }
+
+    .nav-links a:not(.button):hover {
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+    }
+
+    .menu-button {
+      display: inline-flex;
+      min-width: 44px;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: var(--paper-raised);
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    .menu-button svg {
+      width: 1.3rem;
+      height: 1.3rem;
+    }
+
+    .mobile-menu {
+      display: grid;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 220ms ease;
+    }
+
+    .mobile-menu[data-open="true"] {
+      max-height: 20rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .mobile-menu[hidden] {
+      display: none;
+    }
+
+    .mobile-menu a {
+      min-height: 48px;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--line);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 0.55rem;
+      padding: 0.72rem 1.05rem;
+      border: 1px solid var(--ink);
+      border-radius: var(--radius-sm);
+      background: var(--ink);
+      color: var(--paper-raised);
+      font-weight: 700;
+      line-height: 1.1;
+      text-decoration: none;
+      transition: transform 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      background: var(--green);
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .button.secondary:hover {
+      background: var(--paper-raised);
+    }
+
+    .button svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin: 0 0 1.15rem;
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 1.8rem;
+      height: 2px;
+      background: currentColor;
+      content: "";
+    }
+
+    .hero {
+      padding: clamp(4.25rem, 9vw, 8.5rem) 0 var(--space-7);
+    }
+
+    .hero h1 {
+      max-width: 1050px;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(3.7rem, 10vw, 8.4rem);
+      font-weight: 400;
+      letter-spacing: -0.055em;
+      line-height: 0.86;
+    }
+
+    .hero h1 em {
+      color: var(--green);
+      font-weight: 400;
+    }
+
+    .hero-lower {
+      display: grid;
+      gap: var(--space-5);
+      margin-top: clamp(2rem, 5vw, 4rem);
+    }
+
+    .hero-copy {
+      max-width: 41rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(1.08rem, 2vw, 1.3rem);
+      line-height: 1.55;
+    }
+
+    .hero-copy strong {
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: var(--space-4);
+    }
+
+    .hero-facts {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-top: 1px solid var(--line-strong);
+      border-left: 1px solid var(--line-strong);
+    }
+
+    .fact {
+      min-height: 6.5rem;
+      padding: 1rem;
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .fact strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .fact span {
+      display: block;
+      margin-top: 0.45rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .workbench {
+      position: relative;
+      margin-top: clamp(3.5rem, 8vw, 6rem);
+      border: 1px solid var(--ink);
+      background: var(--paper-raised);
+    }
+
+    .workbench::after {
+      position: absolute;
+      z-index: -1;
+      right: -9px;
+      bottom: -9px;
+      width: 100%;
+      height: 100%;
+      background: var(--green-bright);
+      content: "";
+    }
+
+    .window-bar {
+      display: flex;
+      min-height: 3.2rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper-raised);
+    }
+
+    .window-title {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .window-dots {
+      display: flex;
+      gap: 0.35rem;
+    }
+
+    .window-dots span {
+      width: 0.58rem;
+      height: 0.58rem;
+      border: 1px solid #87918b;
+      border-radius: 50%;
+    }
+
+    .window-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    .window-state::before {
+      width: 0.45rem;
+      height: 0.45rem;
+      border-radius: 50%;
+      background: currentColor;
+      content: "";
+    }
+
+    .workbench-grid {
+      display: grid;
+    }
+
+    .route-rail {
+      display: none;
+      padding: 1rem;
+      border-right: 1px solid var(--line-strong);
+      background: color-mix(in srgb, var(--paper) 72%, var(--green-bright));
+    }
+
+    .route-label {
+      margin: 0 0 0.8rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .route-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.68rem 0.55rem;
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+    }
+
+    .route-item.active {
+      border: 1px solid var(--ink);
+      background: var(--paper-raised);
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .route-index {
+      color: var(--green);
+    }
+
+    .deliverable {
+      min-width: 0;
+      padding: clamp(1.2rem, 4vw, 2.5rem);
+    }
+
+    .file-tabs {
+      display: flex;
+      gap: 0.35rem;
+      margin-bottom: 1.2rem;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    .file-tab {
+      flex: 0 0 auto;
+      padding: 0.55rem 0.7rem;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      white-space: nowrap;
+    }
+
+    .file-tab.active {
+      border-color: var(--ink);
+      background: var(--yellow);
+      color: #14201d;
+    }
+
+    .document-page {
+      border: 1px solid var(--line-strong);
+      background: #fffefa;
+      color: #14201d;
+    }
+
+    .document-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.2rem;
+      border-bottom: 1px solid #d5d8d1;
+    }
+
+    .document-kicker {
+      margin: 0 0 0.25rem;
+      color: #53605a;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .document-head h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 5vw, 3.1rem);
+      font-weight: 400;
+      line-height: 0.98;
+    }
+
+    .validated-stamp {
+      flex: 0 0 auto;
+      padding: 0.38rem 0.5rem;
+      border: 1px solid #176b4d;
+      color: #176b4d;
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transform: rotate(2deg);
+    }
+
+    .document-body {
+      display: grid;
+      gap: 1.3rem;
+      padding: 1.2rem;
+    }
+
+    .editable-copy {
+      min-height: var(--measured-height, auto);
+      margin: 0;
+      color: #38443e;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    .editable-copy[contenteditable="true"] {
+      cursor: text;
+    }
+
+    .editable-copy[contenteditable="true"]:focus {
+      background: #f6f2dc;
+    }
+
+    .mini-chart {
+      display: grid;
+      min-height: 10.5rem;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: end;
+      gap: 0.6rem;
+      padding: 1rem 1rem 0.6rem;
+      border-left: 1px solid #b9beb8;
+      border-bottom: 1px solid #b9beb8;
+    }
+
+    .bar-wrap {
+      display: grid;
+      align-items: end;
+      gap: 0.35rem;
+      height: 100%;
+    }
+
+    .bar {
+      min-height: 1rem;
+      border: 1px solid #14201d;
+      background: var(--green-bright);
+    }
+
+    .bar.orange {
+      background: var(--orange);
+    }
+
+    .bar-label {
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 0.52rem;
+      text-align: center;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .output-strip {
+      display: grid;
+      gap: 0.65rem;
+      padding: 1rem;
+      border-top: 1px solid var(--line-strong);
+      background: var(--terminal);
+      color: var(--terminal-ink);
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+    }
+
+    .output-row {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .output-check {
+      color: var(--green-bright);
+      font-weight: 600;
+    }
+
+    .output-file {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .marquee {
+      overflow: hidden;
+      border-block: 1px solid var(--ink);
+      background: var(--green-bright);
+      color: #14201d;
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 32s linear infinite;
+    }
+
+    .marquee-group {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .marquee-group span::before {
+      margin-right: 2rem;
+      content: "✳";
+    }
+
+    @keyframes marquee {
+      to { transform: translateX(-50%); }
+    }
+
+    .section {
+      padding: var(--space-8) 0;
+    }
+
+    .section.dark {
+      background: var(--ink);
+      color: var(--paper-raised);
+    }
+
+    .section.orange {
+      background: var(--orange);
+      color: #171d1a;
+    }
+
+    .section-heading {
+      display: grid;
+      gap: var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .section-heading h2 {
+      max-width: 850px;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(3rem, 7vw, 6.4rem);
+      font-weight: 400;
+      letter-spacing: -0.045em;
+      line-height: 0.9;
+    }
+
+    .section-heading p {
+      max-width: 38rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .dark .section-heading p {
+      color: #b7c1bb;
+    }
+
+    .dark .eyebrow {
+      color: var(--green-bright);
+    }
+
+    .starter-layout {
+      display: grid;
+      gap: var(--space-5);
+    }
+
+    .starter-note {
+      display: flex;
+      min-height: 20rem;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(1.3rem, 4vw, 2.2rem);
+      border: 1px solid var(--ink);
+      background: var(--green-bright);
+      color: #14201d;
+    }
+
+    .starter-note-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .starter-note h3 {
+      max-width: 12ch;
+      margin: 2rem 0 1rem;
+      font-family: var(--font-display);
+      font-size: clamp(2.8rem, 6vw, 4.7rem);
+      font-weight: 400;
+      line-height: 0.9;
+    }
+
+    .starter-note p {
+      max-width: 29rem;
+      margin: 0;
+    }
+
+    .key-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 1.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+    }
+
+    kbd {
+      min-width: 2rem;
+      padding: 0.32rem 0.45rem;
+      border: 1px solid #14201d;
+      border-bottom-width: 3px;
+      border-radius: 0.3rem;
+      background: #fffdf5;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .starter-steps {
+      margin: 0;
+      padding: 0;
+      border-top: 1px solid var(--line-strong);
+      list-style: none;
+    }
+
+    .starter-step {
+      display: grid;
+      gap: 0.65rem;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .starter-step-number {
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .starter-step h3 {
+      margin: 0;
+      font-size: 1.2rem;
+    }
+
+    .starter-step p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .starter-step code {
+      padding: 0.15rem 0.3rem;
+      background: color-mix(in srgb, var(--green-bright) 25%, transparent);
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 0.82em;
+    }
+
+    .first-asks {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 1rem;
+    }
+
+    .first-asks span {
+      padding: 0.65rem 0.75rem;
+      border-left: 3px solid var(--green);
+      background: var(--paper-raised);
+      color: var(--ink);
+      font-size: 0.85rem;
+    }
+
+    .task-ledger {
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .task-row {
+      display: grid;
+      gap: 0.75rem;
+      padding: 1.35rem 0;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .task-number {
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+
+    .task-row h3 {
+      margin: 0;
+      font-size: clamp(1.25rem, 3vw, 1.75rem);
+      line-height: 1.15;
+    }
+
+    .task-row p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .task-output {
+      justify-self: start;
+      padding: 0.38rem 0.55rem;
+      border: 1px solid var(--line-strong);
+      font-family: var(--font-mono);
+      font-size: 0.63rem;
+      white-space: nowrap;
+    }
+
+    .case-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .case {
+      display: flex;
+      min-height: 18rem;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(1.3rem, 4vw, 2.2rem);
+      border: 1px solid #58615d;
+      background: #1b2824;
+    }
+
+    .case:nth-child(2) {
+      background: var(--green-bright);
+      color: #14201d;
+    }
+
+    .case:nth-child(3) {
+      background: var(--yellow);
+      color: #14201d;
+    }
+
+    .case:nth-child(4) {
+      background: var(--orange);
+      color: #14201d;
+    }
+
+    .case-label {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .case h3 {
+      max-width: 14ch;
+      margin: 2rem 0 1rem;
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+      font-weight: 400;
+      line-height: 0.95;
+    }
+
+    .case p {
+      max-width: 32rem;
+      margin: 0;
+      color: inherit;
+      opacity: 0.82;
+    }
+
+    .case-files {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin-top: 2rem;
+    }
+
+    .case-files span {
+      padding: 0.35rem 0.48rem;
+      border: 1px solid currentColor;
+      font-family: var(--font-mono);
+      font-size: 0.61rem;
+    }
+
+    .harness-flow {
+      display: grid;
+      gap: 0;
+      border: 1px solid var(--ink);
+      background: var(--paper-raised);
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 11rem;
+      padding: 1.4rem;
+      border-bottom: 1px solid var(--ink);
+    }
+
+    .flow-step:last-child {
+      border-bottom: 0;
+    }
+
+    .flow-step small {
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .flow-step h3 {
+      margin: 2.1rem 0 0.45rem;
+      font-size: 1.25rem;
+    }
+
+    .flow-step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .flow-step.accent {
+      background: var(--green-bright);
+      color: #14201d;
+    }
+
+    .flow-step.accent p,
+    .flow-step.accent small {
+      color: #294537;
+    }
+
+    .specialist-board {
+      display: grid;
+      border-top: 1px solid #5a6761;
+    }
+
+    .specialist-group {
+      padding: 1.25rem 0;
+      border-bottom: 1px solid #5a6761;
+    }
+
+    .specialist-group h3 {
+      margin: 0 0 1rem;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.73rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .specialist-list {
+      display: grid;
+      gap: 0;
+    }
+
+    .specialist {
+      display: grid;
+      gap: 0.3rem;
+      padding: 0.85rem 0;
+      border-top: 1px solid #394740;
+    }
+
+    .specialist code {
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .specialist span {
+      color: #b7c1bb;
+      font-size: 0.9rem;
+    }
+
+    .install-panel {
+      display: grid;
+      gap: var(--space-5);
+      padding: clamp(1.3rem, 5vw, 3rem);
+      border: 1px solid #161d1a;
+      background: #f7f1df;
+    }
+
+    .install-panel > * {
+      min-width: 0;
+    }
+
+    .install-panel h2 {
+      max-width: 12ch;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(3.3rem, 8vw, 6.8rem);
+      font-weight: 400;
+      letter-spacing: -0.045em;
+      line-height: 0.88;
+    }
+
+    .install-panel p {
+      max-width: 37rem;
+      margin: 1rem 0 0;
+      font-size: 1.08rem;
+    }
+
+    .terminal {
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
+      border: 1px solid #101714;
+      background: var(--terminal);
+      color: var(--terminal-ink);
+    }
+
+    .terminal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.7rem 0.8rem;
+      border-bottom: 1px solid #415047;
+      color: #aebbb4;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+    }
+
+    .copy-button {
+      min-height: 38px;
+      padding: 0.4rem 0.65rem;
+      border: 1px solid #6f7d75;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--terminal-ink);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      border-color: var(--green-bright);
+      color: var(--green-bright);
+    }
+
+    .command {
+      display: block;
+      overflow-x: auto;
+      padding: 1.2rem;
+      color: var(--terminal-ink);
+      font-family: var(--font-mono);
+      font-size: clamp(0.68rem, 2vw, 0.85rem);
+      line-height: 1.65;
+      white-space: nowrap;
+    }
+
+    .command .prompt {
+      color: var(--green-bright);
+    }
+
+    .install-notes {
+      display: grid;
+      gap: 0;
+      border-top: 1px solid #8e948f;
+    }
+
+    .install-note {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.75rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid #8e948f;
+      font-size: 0.88rem;
+    }
+
+    .install-note strong {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+    }
+
+    .install-note span {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .compatibility {
+      display: grid;
+      gap: var(--space-5);
+      margin-top: var(--space-7);
+    }
+
+    .compatibility h3 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      font-weight: 400;
+      line-height: 0.95;
+    }
+
+    .format-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+    }
+
+    .format-list span {
+      padding: 0.55rem 0.7rem;
+      border: 1px solid #1a231f;
+      background: #fff8e8;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .truth-box {
+      padding: 1.2rem;
+      border: 1px solid #1a231f;
+      background: #171d1a;
+      color: #f7f1df;
+    }
+
+    .truth-box strong {
+      display: block;
+      margin-bottom: 0.45rem;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .truth-box p {
+      margin: 0;
+      color: #c9d0cc;
+      font-size: 0.92rem;
+    }
+
+    .faq-list {
+      border-top: 1px solid var(--line-strong);
+    }
+
+    details {
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    summary {
+      display: grid;
+      min-height: 4.7rem;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      content: "+";
+    }
+
+    details[open] summary::after {
+      content: "−";
+    }
+
+    details p {
+      max-width: 48rem;
+      margin: 0;
+      padding: 0 0 1.4rem;
+      color: var(--muted);
+    }
+
+    .closing {
+      padding: var(--space-8) 0;
+      border-top: 1px solid var(--ink);
+      text-align: left;
+    }
+
+    .closing h2 {
+      max-width: 1020px;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(3.7rem, 9vw, 8rem);
+      font-weight: 400;
+      letter-spacing: -0.05em;
+      line-height: 0.86;
+    }
+
+    .closing h2 em {
+      color: var(--green);
+      font-weight: 400;
+    }
+
+    .closing-row {
+      display: grid;
+      gap: var(--space-4);
+      margin-top: var(--space-6);
+    }
+
+    .closing-row p {
+      max-width: 37rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+    }
+
+    .site-footer {
+      padding: 2rem 0;
+      border-top: 1px solid var(--ink);
+      background: var(--ink);
+      color: var(--paper-raised);
+    }
+
+    .footer-grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    .footer-note {
+      max-width: 42rem;
+      margin: 0;
+      color: #aeb9b3;
+      font-size: 0.82rem;
+    }
+
+    .footer-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--green-bright);
+    }
+
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+
+    @media (min-width: 768px) {
+      .shell {
+        width: min(calc(100% - 3.5rem), var(--max-width));
+      }
+
+      .hero-lower {
+        grid-template-columns: minmax(0, 1.35fr) minmax(19rem, 0.65fr);
+        align-items: end;
+      }
+
+      .hero-facts {
+        grid-template-columns: repeat(2, minmax(8rem, 1fr));
+      }
+
+      .workbench-grid {
+        grid-template-columns: 12rem minmax(0, 1fr);
+      }
+
+      .route-rail {
+        display: block;
+      }
+
+      .document-body {
+        grid-template-columns: minmax(0, 0.9fr) minmax(14rem, 1.1fr);
+        align-items: center;
+      }
+
+      .output-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .section-heading {
+        grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+        align-items: end;
+      }
+
+      .starter-layout {
+        grid-template-columns: minmax(18rem, 0.75fr) minmax(0, 1.25fr);
+        align-items: stretch;
+      }
+
+      .starter-step {
+        grid-template-columns: 2.7rem minmax(9rem, 0.7fr) minmax(0, 1.3fr);
+        align-items: start;
+      }
+
+      .task-row {
+        grid-template-columns: 2.5rem minmax(12rem, 0.8fr) minmax(18rem, 1.2fr) auto;
+        align-items: center;
+      }
+
+      .case-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .case:first-child {
+        grid-row: span 2;
+        min-height: 37rem;
+      }
+
+      .case:nth-child(4) {
+        grid-column: 1 / -1;
+        min-height: 15rem;
+      }
+
+      .harness-flow {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .flow-step {
+        border-right: 1px solid var(--ink);
+        border-bottom: 0;
+      }
+
+      .flow-step:last-child {
+        border-right: 0;
+      }
+
+      .specialist-group {
+        display: grid;
+        grid-template-columns: 10rem 1fr;
+        gap: 2rem;
+      }
+
+      .specialist-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 2rem;
+      }
+
+      .install-panel {
+        grid-template-columns: minmax(0, 0.8fr) minmax(22rem, 1.2fr);
+        align-items: center;
+      }
+
+      .compatibility {
+        grid-template-columns: minmax(0, 0.7fr) minmax(20rem, 1.3fr);
+        align-items: start;
+      }
+
+      .closing-row,
+      .footer-grid {
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .nav-links {
+        display: flex;
+      }
+
+      .menu-button,
+      .mobile-menu {
+        display: none;
+      }
+
+      .hero-facts {
+        min-width: 25rem;
+      }
+
+      .fact {
+        padding: 1.2rem;
+      }
+
+      .case-grid {
+        grid-template-columns: 1.1fr 0.9fr 0.9fr;
+      }
+
+      .case:first-child {
+        grid-row: span 2;
+      }
+
+      .case:nth-child(2),
+      .case:nth-child(3) {
+        min-height: 18rem;
+      }
+
+      .case:nth-child(4) {
+        grid-column: 2 / -1;
+        min-height: 17rem;
+      }
+
+      .specialist-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1440px) {
+      :root {
+        --max-width: 1280px;
+      }
+
+      body {
+        font-size: 1.05rem;
+      }
+
+      .hero {
+        padding-top: 9.5rem;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .shell {
+        width: min(calc(100% - 1.25rem), var(--max-width));
+      }
+
+      .brand-version {
+        display: none;
+      }
+
+      .hero h1 {
+        font-size: 3.25rem;
+      }
+
+      .hero-actions .button {
+        width: 100%;
+      }
+
+      .fact {
+        min-height: 5.6rem;
+      }
+
+      .document-head {
+        display: block;
+      }
+
+      .validated-stamp {
+        display: inline-block;
+        margin-top: 1rem;
+      }
+
+      .command {
+        overflow-wrap: anywhere;
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --paper: #111815;
+        --paper-raised: #18221e;
+        --ink: #edf2ed;
+        --muted: #aeb9b3;
+        --line: #34413a;
+        --line-strong: #617067;
+        --green: #91d759;
+        --terminal: #090d0b;
+      }
+
+      .brand-mark,
+      .marquee,
+      .flow-step.accent {
+        color: #14201d;
+      }
+
+      .workbench::after {
+        opacity: 0.8;
+      }
+
+      .route-rail {
+        background: #263d31;
+      }
+
+      .route-item.active {
+        color: #edf2ed;
+      }
+
+      .install-panel,
+      .orange .install-panel {
+        color: #171d1a;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+
+      .marquee-track {
+        width: auto;
+        flex-wrap: wrap;
+      }
+
+      .marquee-group[aria-hidden="true"] {
+        display: none;
+      }
+
+    }
+  </style>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "WutPack",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "macOS",
+      "isAccessibleForFree": true,
+      "license": "https://opensource.org/license/mit",
+      "url": "https://sfungwinbond.github.io/Gstackwut/",
+      "downloadUrl": "https://github.com/sfungwinbond/Gstackwut",
+      "description": "A beginner-friendly, persistent AI office workbench that turns a new Mac into a tool for documents, spreadsheets, presentations, PDFs, research, publishing, and software workflows."
+    }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="WutPack home">
+        <span class="brand-mark" aria-hidden="true">W</span>
+        <span>WutPack</span>
+        <span class="brand-version">knowledge workbench</span>
+      </a>
+      <div class="nav-links">
+        <a href="#new-mac-start">Start here</a>
+        <a href="#work">What it does</a>
+        <a href="#specialists">12 specialists</a>
+        <a href="#questions">Questions</a>
+        <a class="button" href="#install">Install free</a>
+      </div>
+      <button class="menu-button" type="button" aria-expanded="false" aria-controls="mobile-menu" aria-label="Open navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16"/>
+        </svg>
+      </button>
+    </nav>
+    <div class="mobile-menu" id="mobile-menu" data-open="false" hidden>
+      <a href="#new-mac-start">Start here</a>
+      <a href="#work">What it does</a>
+      <a href="#specialists">12 specialists</a>
+      <a href="#questions">Questions</a>
+      <a href="#install">Install free</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="shell">
+        <p class="eyebrow">New Mac? Start here · no coding required</p>
+        <h1>New Mac. Now turn it into your <em>AI office.</em></h1>
+        <div class="hero-lower">
+          <div>
+            <p class="hero-copy"><strong>You bought the computer. WutPack makes it useful.</strong> One guided install sets up Codex or Claude Code with durable tools for documents, spreadsheets, presentations, PDFs, research, and the everyday back-office work of a small team.</p>
+            <div class="hero-actions">
+              <a class="button" href="#new-mac-start">
+                Show me the four steps
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+              </a>
+              <a class="button secondary" href="#install">I know Terminal · install</a>
+            </div>
+          </div>
+          <div class="hero-facts" aria-label="Project facts">
+            <div class="fact"><strong>12</strong><span>specialist workflows</span></div>
+            <div class="fact"><strong>$0</strong><span>WutPack license cost</span></div>
+            <div class="fact"><strong>1</strong><span>terminal install</span></div>
+            <div class="fact"><strong>2</strong><span>Mac architectures</span></div>
+          </div>
+        </div>
+
+        <div class="workbench reveal" aria-label="Illustrative WutPack output workspace">
+          <div class="window-bar">
+            <div class="window-title">
+              <span class="window-dots" aria-hidden="true"><span></span><span></span><span></span></span>
+              <span>WutPack / small-business planning</span>
+            </div>
+            <span class="window-state">validated</span>
+          </div>
+          <div class="workbench-grid">
+            <aside class="route-rail" aria-label="Example specialist routes">
+              <p class="route-label">Specialists</p>
+              <div class="route-item active"><span class="route-index">01</span> research-brief</div>
+              <div class="route-item"><span class="route-index">02</span> spreadsheet-lab</div>
+              <div class="route-item"><span class="route-index">03</span> technical-deck</div>
+              <div class="route-item"><span class="route-index">04</span> document-studio</div>
+              <div class="route-item"><span class="route-index">05</span> review-gate</div>
+            </aside>
+            <div class="deliverable">
+              <div class="file-tabs" aria-label="Example output files">
+                <span class="file-tab active">Growth plan.pptx</span>
+                <span class="file-tab">Pricing model.xlsx</span>
+                <span class="file-tab">Board memo.docx</span>
+              </div>
+              <article class="document-page">
+                <div class="document-head">
+                  <div>
+                    <p class="document-kicker">Northstar Studio · Q3 plan</p>
+                    <h2>Turn retention into the growth engine.</h2>
+                  </div>
+                  <span class="validated-stamp">editable<br>verified</span>
+                </div>
+                <div class="document-body">
+                  <p class="editable-copy" data-pretext contenteditable="true" role="textbox" aria-multiline="true" aria-label="Editable example recommendation">The base case points to one decision: fix the first 30 days before buying more demand. A focused onboarding sprint can lift retained revenue while protecting cash.</p>
+                  <div class="mini-chart" role="img" aria-label="Illustrative retained revenue index rises from 62 to 91 across four quarters">
+                    <div class="bar-wrap"><div class="bar" style="height: 48%"></div><span class="bar-label">Q1 · 62</span></div>
+                    <div class="bar-wrap"><div class="bar" style="height: 62%"></div><span class="bar-label">Q2 · 71</span></div>
+                    <div class="bar-wrap"><div class="bar orange" style="height: 78%"></div><span class="bar-label">Q3 · 82</span></div>
+                    <div class="bar-wrap"><div class="bar" style="height: 92%"></div><span class="bar-label">Q4 · 91</span></div>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div class="output-strip" aria-label="Validation results">
+            <div class="output-row"><span class="output-check">✓</span><span class="output-file">native shapes remain editable</span></div>
+            <div class="output-row"><span class="output-check">✓</span><span class="output-file">formulas and charts checked</span></div>
+            <div class="output-row"><span class="output-check">✓</span><span class="output-file">Office-safe file created</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="marquee" aria-label="Supported work types">
+      <div class="marquee-track">
+        <div class="marquee-group">
+          <span>Word-compatible documents</span><span>Excel-compatible models</span><span>PowerPoint-compatible decks</span><span>Searchable PDFs</span><span>Research briefs</span><span>Published docs</span>
+        </div>
+        <div class="marquee-group" aria-hidden="true">
+          <span>Word-compatible documents</span><span>Excel-compatible models</span><span>PowerPoint-compatible decks</span><span>Searchable PDFs</span><span>Research briefs</span><span>Published docs</span>
+        </div>
+      </div>
+    </div>
+
+    <section class="section" id="new-mac-start">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Your first hour with a new Mac</p>
+            <h2>If you can copy and paste, you can start.</h2>
+          </div>
+          <p>Terminal is an app already on your Mac. You do not need to know how to code. Follow these four steps once, then use normal language.</p>
+        </div>
+        <div class="starter-layout reveal">
+          <aside class="starter-note">
+            <span class="starter-note-label">Step zero · find Terminal</span>
+            <div>
+              <h3>Open the app that sets up the rest.</h3>
+              <p>Press Command-Space, type <strong>Terminal</strong>, then press Return. A small window with text appears. That is exactly where you should be.</p>
+              <div class="key-row" aria-label="Keyboard shortcut Command Space">
+                <kbd>⌘</kbd><span>+</span><kbd>Space</kbd><span>then type Terminal</span>
+              </div>
+            </div>
+          </aside>
+          <ol class="starter-steps">
+            <li class="starter-step">
+              <span class="starter-step-number">01</span>
+              <h3>Paste one command</h3>
+              <p>Use the copy button below, click the Terminal window, press <kbd>⌘</kbd> <strong>V</strong>, then press Return. The installer explains what it is doing.</p>
+            </li>
+            <li class="starter-step">
+              <span class="starter-step-number">02</span>
+              <h3>Let the first setup finish</h3>
+              <p>The full workbench downloads many tools, so keep the Mac awake. If macOS asks for your password, type it and press Return. Terminal shows no dots while you type; that is normal.</p>
+            </li>
+            <li class="starter-step">
+              <span class="starter-step-number">03</span>
+              <h3>Check that it worked</h3>
+              <p>Close Terminal, open it again, type <code>wut doctor</code>, and press Return. A healthy setup reports the tools and both specialist folders.</p>
+            </li>
+            <li class="starter-step">
+              <span class="starter-step-number">04</span>
+              <h3>Open your AI helper</h3>
+              <div>
+                <p>Type <code>codex</code> or <code>claude</code>, press Return, and follow its sign-in steps. Then try a real job:</p>
+                <div class="first-asks" aria-label="Example first requests">
+                  <span>“Make a simple monthly cash-flow workbook for my business.”</span>
+                  <span>“Turn these meeting notes into a one-page client proposal.”</span>
+                  <span>“Build a short presentation explaining this plan.”</span>
+                </div>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="work">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">One person, full back office</p>
+            <h2>Start with the job. End with the file.</h2>
+          </div>
+          <p>Ask in plain language. The host routes the work to a focused specialist, uses persistent tools, and checks the deliverable before handoff.</p>
+        </div>
+        <div class="task-ledger reveal">
+          <article class="task-row">
+            <span class="task-number">01</span>
+            <h3>Build the pricing model</h3>
+            <p>Clean the inputs, expose assumptions, add scenarios, chart the result, and reopen the workbook to catch compatibility problems.</p>
+            <span class="task-output">.xlsx</span>
+          </article>
+          <article class="task-row">
+            <span class="task-number">02</span>
+            <h3>Prepare the board update</h3>
+            <p>Turn the decision into a short narrative with editable diagrams, native charts, clear labels, and a rendered visual check.</p>
+            <span class="task-output">.pptx</span>
+          </article>
+          <article class="task-row">
+            <span class="task-number">03</span>
+            <h3>Write the client proposal</h3>
+            <p>Structure the document, create consistent styles, preserve tables, export a PDF, and verify both versions.</p>
+            <span class="task-output">.docx · .pdf</span>
+          </article>
+          <article class="task-row">
+            <span class="task-number">04</span>
+            <h3>Research the next market</h3>
+            <p>Gather current primary sources, separate facts from judgment, trace citations, and produce an executive-ready recommendation.</p>
+            <span class="task-output">.md · .pdf</span>
+          </article>
+          <article class="task-row">
+            <span class="task-number">05</span>
+            <h3>Recover the vendor packet</h3>
+            <p>Inspect a difficult PDF, repair it when possible, run OCR when needed, and report what was recovered or lost.</p>
+            <span class="task-output">searchable .pdf</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">A week of work, compressed</p>
+            <h2>Built for the moments small teams actually face.</h2>
+          </div>
+          <p>No fictional testimonials. These are concrete example workflows you can run and inspect in the repository today.</p>
+        </div>
+        <div class="case-grid reveal">
+          <article class="case">
+            <span class="case-label">Board meeting · 3:00 PM</span>
+            <div>
+              <h3>The numbers changed this morning.</h3>
+              <p>Refresh the operating model, rebuild the chart, update the decision slide, and run a visual validation before anyone opens the deck.</p>
+              <div class="case-files"><span>forecast.xlsx</span><span>board-update.pptx</span><span>QA report</span></div>
+            </div>
+          </article>
+          <article class="case">
+            <span class="case-label">New service launch</span>
+            <div>
+              <h3>Price it with evidence.</h3>
+              <p>Compare competitors, model unit economics, and publish a one-page recommendation.</p>
+              <div class="case-files"><span>sources</span><span>model.xlsx</span></div>
+            </div>
+          </article>
+          <article class="case">
+            <span class="case-label">Proposal due Friday</span>
+            <div>
+              <h3>One story, every format.</h3>
+              <p>Move from research to a structured proposal, a client deck, and a clean PDF handoff.</p>
+              <div class="case-files"><span>proposal.docx</span><span>pitch.pptx</span></div>
+            </div>
+          </article>
+          <article class="case">
+            <span class="case-label">Monthly operations</span>
+            <div>
+              <h3>Make the repeatable work actually repeatable.</h3>
+              <p>Keep the same tools, routes, and validation checks available next month, in the next terminal, and with either supported coding agent.</p>
+              <div class="case-files"><span>persistent tools</span><span>reusable skills</span><span>clear checks</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Why call it a harness?</p>
+            <h2>Your agent thinks. WutPack makes the work repeatable.</h2>
+          </div>
+          <p>Codex or Claude Code still owns the model, authentication, permissions, and core agent loop. WutPack supplies the durable business-tool layer around it.</p>
+        </div>
+        <div class="harness-flow reveal" role="img" aria-label="A request flows through Codex or Claude Code, a specialist workflow, persistent tools, and validation to produce an editable deliverable">
+          <article class="flow-step">
+            <small>01 · Request</small>
+            <h3>Say what the business needs</h3>
+            <p>“Build a pricing model and explain the decision.”</p>
+          </article>
+          <article class="flow-step">
+            <small>02 · Host</small>
+            <h3>Codex or Claude Code routes it</h3>
+            <p>The agent selects the right specialist and respects your permissions.</p>
+          </article>
+          <article class="flow-step accent">
+            <small>03 · Harness</small>
+            <h3>WutPack supplies the method</h3>
+            <p>Persistent apps, libraries, instructions, helpers, and file checks.</p>
+          </article>
+          <article class="flow-step">
+            <small>04 · Output</small>
+            <h3>You get the actual deliverable</h3>
+            <p>An editable business file plus evidence that it was checked.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark" id="specialists">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Twelve specialists, one install</p>
+            <h2>A route for every kind of work.</h2>
+          </div>
+          <p>Invoke a specialist by name or describe the job naturally. Each route carries its own workflow, tools, and quality gates.</p>
+        </div>
+        <div class="specialist-board reveal">
+          <section class="specialist-group" aria-labelledby="think-heading">
+            <h3 id="think-heading">Think</h3>
+            <div class="specialist-list">
+              <div class="specialist"><code>$research-brief</code><span>Current, cited decision research</span></div>
+              <div class="specialist"><code>$pdf-forensics</code><span>Inspect, repair, extract, and OCR</span></div>
+              <div class="specialist"><code>$data-lab</code><span>Analyze data and test assumptions</span></div>
+            </div>
+          </section>
+          <section class="specialist-group" aria-labelledby="make-heading">
+            <h3 id="make-heading">Make</h3>
+            <div class="specialist-list">
+              <div class="specialist"><code>$spreadsheet-lab</code><span>Models, formulas, and charts</span></div>
+              <div class="specialist"><code>$technical-deck</code><span>Editable executive presentations</span></div>
+              <div class="specialist"><code>$document-studio</code><span>Professional Word and ODF files</span></div>
+              <div class="specialist"><code>$system-diagram</code><span>Architecture and process diagrams</span></div>
+              <div class="specialist"><code>$publish-docs</code><span>HTML, PDF, books, and API docs</span></div>
+            </div>
+          </section>
+          <section class="specialist-group" aria-labelledby="ship-heading">
+            <h3 id="ship-heading">Ship</h3>
+            <div class="specialist-list">
+              <div class="specialist"><code>$code-build</code><span>Implement scoped code changes</span></div>
+              <div class="specialist"><code>$debug-lab</code><span>Find root causes and regressions</span></div>
+              <div class="specialist"><code>$review-gate</code><span>Catch issues before merge</span></div>
+              <div class="specialist"><code>$ship-check</code><span>Make the release decision</span></div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="section orange" id="install">
+      <div class="shell">
+        <div class="install-panel reveal">
+          <div>
+            <p class="eyebrow">Step one · copy and paste</p>
+            <h2>Put this into Terminal exactly as shown.</h2>
+            <p>Click <strong>Copy command</strong>, return to Terminal, paste, and press Return. You do not need to edit the command. When setup finishes, reopen Terminal and run <code>wut doctor</code>.</p>
+          </div>
+          <div>
+            <div class="terminal">
+              <div class="terminal-head"><span>Terminal · public installer</span><button class="copy-button" type="button" data-copy-command>Copy command</button></div>
+              <code class="command" id="install-command"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh | bash</code>
+            </div>
+            <div class="install-notes">
+              <div class="install-note"><strong>Persists</strong><span>Managed tools live under your user Library, not a disposable chat session.</span></div>
+              <div class="install-note"><strong>Private by default</strong><span>No credentials, API keys, or paid accounts are configured for you.</span></div>
+              <div class="install-note"><strong>Repairable</strong><span>Re-run setup safely to restore links, skills, or missing packages.</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="compatibility reveal">
+          <h3>Standard files. Your data. No mystery format.</h3>
+          <div>
+            <div class="format-list" aria-label="Supported output formats">
+              <span>.docx</span><span>.xlsx</span><span>.pptx</span><span>.pdf</span><span>.csv</span><span>.svg</span><span>.html</span><span>.md</span><span>.odt</span><span>.ods</span>
+            </div>
+            <div class="truth-box">
+              <strong>The honest boundary</strong>
+              <p>WutPack is an AI-first business workbench, not a pixel-for-pixel clone of Microsoft Office. It installs LibreOffice and specialist tools, produces standard editable formats, and validates common outputs. Advanced macros, tracked changes, and proprietary extensions may still require the original application.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="questions">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Straight answers</p>
+            <h2>Before you put it on a business Mac.</h2>
+          </div>
+          <p>WutPack is intentionally transparent: readable manifests, open skills, explicit updates, and no silent account setup.</p>
+        </div>
+        <div class="faq-list reveal">
+          <details>
+            <summary>Do I need to be a programmer?</summary>
+            <p>No. You need to be comfortable opening Terminal, copying one command, and following on-screen prompts. After setup, you can ask for business work in normal language. The source remains visible for anyone who wants to inspect it first.</p>
+          </details>
+          <details>
+            <summary>Why does Terminal ask for my Mac password?</summary>
+            <p>A new Mac may need Apple’s command-line tools or Homebrew before WutPack can install applications. macOS may request an administrator password. Nothing appears while you type the password in Terminal; press Return when finished. On a company-managed Mac, ask your administrator before installing software.</p>
+          </details>
+          <details>
+            <summary>What exactly is free?</summary>
+            <p>WutPack’s installer, skills, and code are MIT licensed at no charge. Many installed tools are open source. Codex, Claude Code, model subscriptions, APIs, and optional third-party services have their own terms and may cost money.</p>
+          </details>
+          <details>
+            <summary>Does it replace Microsoft Office?</summary>
+            <p>It covers a large share of everyday small-business creation and analysis through LibreOffice and specialist libraries, with standard Office-compatible outputs. It does not promise full fidelity for every macro, tracked-change workflow, or proprietary extension.</p>
+          </details>
+          <details>
+            <summary>Does it work on Apple silicon and Intel Macs?</summary>
+            <p>Yes. Setup detects both Homebrew locations, and the repository runs architecture-specific clean-install jobs for Apple silicon and Intel macOS runners.</p>
+          </details>
+          <details>
+            <summary>Does WutPack read or upload my business data?</summary>
+            <p>WutPack does not collect credentials or silently configure accounts. Your chosen AI host and any services you enable have their own data policies, so review those before using sensitive material.</p>
+          </details>
+          <details>
+            <summary>Why not install these tools ad hoc?</summary>
+            <p>Ad hoc installs drift and disappear between environments. WutPack keeps a known toolset, twelve routed workflows, deterministic helpers, and output validation available across terminals and agent sessions.</p>
+          </details>
+          <details>
+            <summary>What platforms are supported?</summary>
+            <p>The bootstrapper currently supports macOS. Both Apple silicon and Intel are covered. Windows packaging is intentionally out of scope for this release.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="closing">
+      <div class="shell reveal">
+        <h2>Your new Mac is ready. Keep the <em>judgment.</em></h2>
+        <div class="closing-row">
+          <p>Start with one useful request. The office, data, research, diagram, publishing, and software tools will still be there for the next one.</p>
+          <div class="hero-actions">
+            <a class="button" href="#install">Install WutPack</a>
+            <a class="button secondary" href="https://github.com/sfungwinbond/Gstackwut#twelve-specialist-consulting-walkthrough" rel="noreferrer">See all examples</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid shell">
+      <p class="footer-note">WutPack is an independent open-source project. Microsoft, Word, Excel, and PowerPoint are trademarks of Microsoft Corporation. Codex and Claude Code are provided by their respective owners.</p>
+      <div class="footer-links">
+        <a href="https://github.com/sfungwinbond/Gstackwut">GitHub</a>
+        <a href="https://github.com/sfungwinbond/Gstackwut/blob/main/LICENSE">MIT license</a>
+        <a href="https://github.com/sfungwinbond/Gstackwut/blob/main/docs/getting-started.md">Docs</a>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module">
+    const menuButton = document.querySelector('.menu-button');
+    const mobileMenu = document.querySelector('#mobile-menu');
+
+    menuButton?.addEventListener('click', () => {
+      const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
+      const nextOpen = !isOpen;
+      menuButton.setAttribute('aria-expanded', String(nextOpen));
+      menuButton.setAttribute('aria-label', isOpen ? 'Open navigation' : 'Close navigation');
+      mobileMenu.hidden = !nextOpen;
+      mobileMenu.dataset.open = String(nextOpen);
+    });
+
+    mobileMenu?.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        menuButton.setAttribute('aria-expanded', 'false');
+        menuButton.setAttribute('aria-label', 'Open navigation');
+        mobileMenu.dataset.open = 'false';
+        mobileMenu.hidden = true;
+      });
+    });
+
+    const installText = 'curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh | bash';
+    const copyButton = document.querySelector('[data-copy-command]');
+
+    copyButton?.addEventListener('click', async () => {
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(installText);
+        copied = true;
+      } catch {
+        const input = document.createElement('textarea');
+        input.value = installText;
+        input.setAttribute('readonly', '');
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.append(input);
+        input.select();
+        copied = document.execCommand('copy');
+        input.remove();
+      }
+      copyButton.textContent = copied ? 'Copied' : 'Select command';
+      window.setTimeout(() => { copyButton.textContent = 'Copy command'; }, 1800);
+    });
+
+    // FALLBACK: vendor/pretext.js is unavailable, so this optional enhancement uses the CDN.
+    const measured = new Map();
+    const measuredElements = [...document.querySelectorAll('[data-pretext]')];
+
+    const applyPretext = async () => {
+      try {
+        const { prepare, layout } = await import('https://esm.sh/@chenglou/pretext');
+        await document.fonts.ready;
+
+        const prepareElement = (element) => {
+          const style = getComputedStyle(element);
+          measured.set(element, {
+            handle: prepare(element.textContent, style.font),
+            lineHeight: Number.parseFloat(style.lineHeight)
+          });
+        };
+
+        const relayout = () => {
+          measured.forEach(({ handle, lineHeight }, element) => {
+            const result = layout(handle, element.clientWidth, lineHeight);
+            element.style.setProperty('--measured-height', `${Math.ceil(result.height)}px`);
+          });
+        };
+
+        measuredElements.forEach((element) => {
+          prepareElement(element);
+          new MutationObserver(() => {
+            prepareElement(element);
+            relayout();
+          }).observe(element, { characterData: true, subtree: true, childList: true });
+          new ResizeObserver(relayout).observe(element);
+        });
+        relayout();
+        document.documentElement.dataset.pretext = 'ready';
+      } catch {
+        document.documentElement.dataset.pretext = 'css-fallback';
+      }
+    };
+
+    applyPretext();
+  </script>
+</body>
+</html>
