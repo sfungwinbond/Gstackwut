@@ -11,32 +11,33 @@ decision criteria with the real task.
 3. Ask `spreadsheet-lab` to build the model and perform a compatibility pass.
 
 ```text
-$pdf-forensics Inspect inputs/*.pdf. Extract density, package organization,
-operation, typical/max timing, voltage, temperature, and page number. Flag OCR or
+$pdf-forensics Inspect inputs/*.pdf. Extract market size, growth, margins,
+customer segments, methodology, publication date, and page number. Flag OCR or
 table cells that require visual confirmation. Save structured CSV plus notes.
 
-$spreadsheet-lab Turn the extraction into comparison.xlsx. Put raw evidence,
-assumptions, calculations, and charts on separate tabs. Make uncertain estimates
-visually distinct, add source notes, validate relationships, recalculate with
-LibreOffice, and render every sheet for inspection.
+$spreadsheet-lab Turn the extraction into market_entry.xlsx. Put raw evidence,
+assumptions, calculations, scenarios, and charts on separate tabs. Make uncertain
+estimates visually distinct, add source notes, validate relationships, recalculate
+with LibreOffice, and render every sheet for inspection.
 ```
 
 Why split it: extraction confidence and workbook logic are different review
 problems. Keeping an evidence table prevents a polished chart from hiding a weak
 source.
 
-## Build an editable engineering deck
+## Build an editable executive deck
 
 ```text
-$technical-deck Read comparison.xlsx and the source PDFs. Create a five-slide
-engineering deck: decision summary, architecture, command timing, comparison
-chart, and assumptions. Use native PowerPoint objects, mark estimates, keep one
-time axis on the timing slide, validate the package, and render-check every slide.
+$technical-deck Read market_entry.xlsx and the source PDFs. Create a seven-slide
+executive deck: recommendation, market attractiveness, ability to win, scenario
+economics, value levers, implementation roadmap, and risks. Use native PowerPoint
+objects, mark estimates, validate the package, and render-check every slide.
 ```
 
-The starter script under `skills/technical-deck/scripts/` demonstrates layout,
-waveforms, connectors, notes, and native charts. The downloadable
-[example deck](../examples/technical-diagram-demo.pptx) is its output.
+The starter script under `skills/technical-deck/scripts/` demonstrates an
+answer-first matrix, roadmap, exact-value table, notes, and a native chart. The
+downloadable [fictional example deck](../examples/executive-consulting-demo.pptx)
+is its output.
 
 ## Research a tool or vendor decision
 

@@ -34,8 +34,8 @@ shows the specialist to use for each kind of work.
 ## 3. Create an editable PowerPoint artifact
 
 ```bash
-wut deck first-technical-diagram.pptx
-wut render first-technical-diagram.pptx ./rendered
+wut deck first-executive-roadmap.pptx
+wut render first-executive-roadmap.pptx ./rendered
 ```
 
 Open the deck in PowerPoint or LibreOffice Impress. Its components are native
@@ -47,15 +47,17 @@ PDF in `rendered/` is an independent layout check.
 In Codex:
 
 ```text
-$technical-deck Replace the example timing diagram with a four-device command
-sequence. Keep every element editable and render-check the result.
+$technical-deck Turn the fictional market-entry scorecard into an answer-first
+executive deck with a where-to-play matrix, value case, and 12-month roadmap.
+Keep every element editable and render-check the result.
 ```
 
 In Claude Code:
 
 ```text
-/technical-deck Replace the example timing diagram with a four-device command
-sequence. Keep every element editable and render-check the result.
+/technical-deck Turn the fictional market-entry scorecard into an answer-first
+executive deck with a where-to-play matrix, value case, and 12-month roadmap.
+Keep every element editable and render-check the result.
 ```
 
 Skills can also be selected automatically from natural-language requests. An
@@ -64,7 +66,7 @@ explicit name is useful when you want a particular workflow or quality gate.
 ## 5. Try the data environment
 
 ```bash
-wut python skills/data-lab/scripts/profile_table.py examples/erase-analysis.csv
+wut python skills/data-lab/scripts/profile_table.py examples/market-entry-scorecard.csv
 wut lab
 ```
 

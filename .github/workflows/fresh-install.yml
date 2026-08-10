@@ -1,0 +1,241 @@
+name: fresh-install
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/fresh-install.yml
+      - install.sh
+      - setup
+      - bin/wut
+      - manifests/**
+      - skills/**
+      - tests/**
+      - README.md
+      - examples/**
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fresh-install-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unsupported-linux:
+    name: Unsupported Linux exits cleanly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify platform guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ./setup --dry-run >setup.stdout 2>setup.stderr; then
+            echo "setup unexpectedly accepted Linux" >&2
+            exit 1
+          fi
+          grep -Fq 'macOS only' setup.stderr
+
+          if ./install.sh --skills-only >install.stdout 2>install.stderr; then
+            echo "install.sh unexpectedly accepted Linux" >&2
+            exit 1
+          fi
+          grep -Fq 'macOS only' install.stderr
+
+  full-headless-intel:
+    name: Full headless install on fresh Intel Mac
+    runs-on: macos-15-intel
+    timeout-minutes: 90
+    env:
+      WUTPACK_TEST_ROOT: ${{ runner.temp }}/wutpack-user
+      WUTPACK_INSTALL_ROOT: ${{ runner.temp }}/wutpack-source
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Capture clean-host baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          uname -a
+          sw_vers
+          arch
+          df -h /
+          test ! -e "$WUTPACK_TEST_ROOT"
+          test ! -e "$WUTPACK_INSTALL_ROOT"
+
+      - name: Run the public bootstrap at this exact commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          set -o pipefail
+          curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+            "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/${GITHUB_SHA}/install.sh" \
+          | env \
+              WUTPACK_REF="$GITHUB_SHA" \
+              WUTPACK_TEST_ROOT="$WUTPACK_TEST_ROOT" \
+              WUTPACK_INSTALL_ROOT="$WUTPACK_INSTALL_ROOT" \
+              /bin/bash -s -- \
+                --profile full \
+                --host both \
+                --skip-casks \
+                --skip-ai-clis \
+          2>&1 | tee "$RUNNER_TEMP/wutpack-install.log"
+
+      - name: Verify persistent environments and all twelve skills
+        shell: bash
+        run: |
+          set -euo pipefail
+          state_root="$WUTPACK_TEST_ROOT/Library/Application Support/WutPack"
+          cache_root="$WUTPACK_TEST_ROOT/Library/Caches/WutPack"
+          export PATH="$WUTPACK_TEST_ROOT/.local/bin:$state_root/npm-global/bin:$PATH"
+          export NODE_PATH="$state_root/npm-global/lib/node_modules"
+          export PLAYWRIGHT_BROWSERS_PATH="$cache_root/playwright"
+          export PUPPETEER_CACHE_DIR="$cache_root/puppeteer"
+          export UV_CACHE_DIR="$cache_root/uv"
+
+          wut doctor --headless
+          uv pip check --python "$state_root/knowledge/bin/python"
+          uv pip check --python "$state_root/agents/bin/python"
+
+          "$state_root/knowledge/bin/python" - <<'PY'
+          from importlib.metadata import version
+
+          packages = [
+              "openpyxl",
+              "python-pptx",
+              "CairoSVG",
+              "pandas",
+              "polars",
+              "duckdb",
+              "PyMuPDF",
+              "pdfplumber",
+              "scikit-learn",
+              "jupyterlab",
+              "playwright",
+          ]
+          for package in packages:
+              print(f"knowledge {package}={version(package)}")
+          PY
+
+          "$state_root/agents/bin/python" - <<'PY'
+          from importlib.metadata import version
+
+          packages = [
+              "langgraph",
+              "crewai",
+              "pydantic-ai",
+              "smolagents",
+              "llama-index",
+              "semantic-kernel",
+              "haystack-ai",
+              "openai-agents",
+              "google-adk",
+              "agno",
+              "dspy",
+              "litellm",
+              "mcp",
+              "fastmcp",
+              "browser-use",
+              "aider-chat",
+          ]
+          for package in packages:
+              print(f"agent {package}={version(package)}")
+          PY
+
+          node -e "require('pptxgenjs'); console.log('node pptxgenjs=ok')"
+          mmdc --version
+
+          codex_count="$(find "$WUTPACK_TEST_ROOT/.codex/skills" -name SKILL.md | wc -l | tr -d ' ')"
+          claude_count="$(find "$WUTPACK_TEST_ROOT/.claude/skills" -name SKILL.md | wc -l | tr -d ' ')"
+          test "$codex_count" = 12
+          test "$claude_count" = 12
+          diff \
+            <(find "$WUTPACK_TEST_ROOT/.codex/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -exec dirname {} \; | xargs -n1 basename | sort) \
+            <(find "$WUTPACK_TEST_ROOT/.claude/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -exec dirname {} \; | xargs -n1 basename | sort)
+          python3 tests/test-repository.py
+
+      - name: Build and validate real knowledge-work artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          state_root="$WUTPACK_TEST_ROOT/Library/Application Support/WutPack"
+          cache_root="$WUTPACK_TEST_ROOT/Library/Caches/WutPack"
+          export PATH="$WUTPACK_TEST_ROOT/.local/bin:$state_root/npm-global/bin:$PATH"
+          export NODE_PATH="$state_root/npm-global/lib/node_modules"
+          export PLAYWRIGHT_BROWSERS_PATH="$cache_root/playwright"
+          export PUPPETEER_CACHE_DIR="$cache_root/puppeteer"
+
+          deck="$RUNNER_TEMP/fresh-install-consulting-demo.pptx"
+          workbook="$RUNNER_TEMP/fresh-install-market-entry.xlsx"
+          diagram="$RUNNER_TEMP/fresh-install-engagement.svg"
+
+          wut deck "$deck"
+          python3 skills/technical-deck/scripts/validate_pptx.py "$deck"
+          wut diagram examples/consulting-engagement.mmd "$diagram"
+          test -s "$diagram"
+
+          "$state_root/knowledge/bin/python" - "$workbook" <<'PY'
+          import sys
+          from openpyxl import Workbook
+          from openpyxl.chart import BarChart, Reference
+          from openpyxl.styles import Font, PatternFill
+
+          output = sys.argv[1]
+          wb = Workbook()
+          ws = wb.active
+          ws.title = "Market Scorecard"
+          ws.append(["Market", "Weighted score", "Decision"])
+          rows = [
+              ("Coastal", 81, "Wave 1"),
+              ("North", 78, "Wave 1"),
+              ("Central", 72, "Pilot"),
+              ("West", 58, "Deprioritize"),
+          ]
+          for row in rows:
+              ws.append(row)
+          for cell in ws[1]:
+              cell.font = Font(bold=True, color="FFFFFF")
+              cell.fill = PatternFill("solid", fgColor="123B5D")
+          chart = BarChart()
+          chart.title = "Illustrative market score"
+          chart.y_axis.title = "Score"
+          chart.add_data(Reference(ws, min_col=2, min_row=1, max_row=5), titles_from_data=True)
+          chart.set_categories(Reference(ws, min_col=1, min_row=2, max_row=5))
+          ws.add_chart(chart, "E2")
+          assumptions = wb.create_sheet("Assumptions")
+          assumptions.append(["All entities and values are fictional."])
+          wb.save(output)
+          print(output)
+          PY
+          python3 skills/spreadsheet-lab/scripts/validate_xlsx.py "$workbook"
+
+      - name: Verify idempotent repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$WUTPACK_INSTALL_ROOT/setup" --skills-only --host both
+          test "$(grep -cF '# >>> WutPack persistent tools >>>' "$WUTPACK_TEST_ROOT/.zprofile")" = 1
+          test "$(grep -cF '# >>> WutPack persistent tools >>>' "$WUTPACK_TEST_ROOT/.zshrc")" = 1
+          /bin/zsh -n "$WUTPACK_TEST_ROOT/.zprofile"
+          /bin/zsh -n "$WUTPACK_TEST_ROOT/.zshrc"
+
+      - name: Report footprint
+        if: always()
+        shell: bash
+        run: |
+          du -sh "$WUTPACK_TEST_ROOT/Library/Application Support/WutPack" 2>/dev/null || true
+          du -sh "$WUTPACK_TEST_ROOT/Library/Caches/WutPack" 2>/dev/null || true
+          df -h /
+
+      - name: Upload install evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fresh-install-intel-evidence
+          if-no-files-found: warn
+          path: |
+            ${{ runner.temp }}/wutpack-install.log
+            ${{ runner.temp }}/fresh-install-consulting-demo.pptx
+            ${{ runner.temp }}/fresh-install-market-entry.xlsx
+            ${{ runner.temp }}/fresh-install-engagement.svg

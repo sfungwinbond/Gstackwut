@@ -26,7 +26,7 @@ WutPack control command
 
 Usage: wut <command> [arguments]
 
-  doctor             Check the persistent workbench and installed hosts
+  doctor [--headless] Check the persistent workbench and installed hosts
   paths              Show every persistent location
   skills             List scenario specialists
   routes             Show which specialist fits which job
@@ -52,8 +52,19 @@ find_soffice() {
 }
 
 doctor() {
+  local headless=0
   local missing=0
   local command_name
+  while [ "$#" -gt 0 ]; do
+    case "$1" in
+      --headless) headless=1; shift ;;
+      -h|--help)
+        printf 'Usage: wut doctor [--headless]\n'
+        return 0
+        ;;
+      *) printf 'Unknown doctor option: %s\nUsage: wut doctor [--headless]\n' "$1" >&2; return 2 ;;
+    esac
+  done
   printf 'WutPack doctor\n\n'
   for command_name in git rg jq uv node npm pandoc pdfinfo pdftotext qpdf mutool ocrmypdf tesseract magick dot duckdb; do
     if command -v "$command_name" >/dev/null 2>&1; then
@@ -65,6 +76,8 @@ doctor() {
   done
   if find_soffice >/dev/null 2>&1; then
     printf '  [ok]   %-16s %s\n' soffice "$(find_soffice)"
+  elif [ "$headless" -eq 1 ]; then
+    printf '  [skip] %-16s desktop applications omitted for headless verification\n' soffice
   else
     printf '  [miss] %-16s\n' soffice
     missing=$((missing + 1))
@@ -113,7 +126,7 @@ command_name="${1:-help}"
 case "$command_name" in
   help|-h|--help) usage ;;
   version) cat "$PROJECT_ROOT/VERSION" ;;
-  doctor) doctor ;;
+  doctor) doctor "$@" ;;
   paths)
     printf 'source=%s\nstate=%s\ncache=%s\nknowledge_python=%s\nagent_python=%s\nnode_prefix=%s\n' \
       "$PROJECT_ROOT" "$STATE_ROOT" "$CACHE_ROOT" "$KNOWLEDGE_ENV/bin/python" \
@@ -143,7 +156,7 @@ case "$command_name" in
     exec "$KNOWLEDGE_ENV/bin/jupyter-lab" "$@"
     ;;
   deck)
-    output="${1:-technical-diagram-demo.pptx}"
+    output="${1:-executive-consulting-demo.pptx}"
     exec node "$PROJECT_ROOT/skills/technical-deck/scripts/new_technical_deck.mjs" --output="$output"
     ;;
   diagram)

@@ -1,0 +1,36 @@
+flowchart LR
+    Q[CEO decision<br/>Where should we grow?]
+
+    subgraph E[Evidence base]
+      R[Primary research<br/>and public sources]
+      C[Customer and<br/>commercial data]
+      O[Operating and<br/>financial baseline]
+    end
+
+    subgraph A[Analysis engine]
+      S[Segment and<br/>market scoring]
+      M[Scenario economics<br/>base / upside / downside]
+      G[Execution gates<br/>owners and KPIs]
+    end
+
+    subgraph D[Executive deliverables]
+      B[Decision brief]
+      X[Editable model]
+      P[Executive deck<br/>and roadmap]
+    end
+
+    Q --> R
+    Q --> C
+    Q --> O
+    R --> S
+    C --> S
+    C --> M
+    O --> M
+    S --> G
+    M --> G
+    G --> B
+    G --> X
+    G --> P
+
+    N[All entities and values are fictional;<br/>replace with sourced engagement evidence]
+    N -.-> A

@@ -1,5 +1,27 @@
 # Technical Diagram Patterns
 
+## Answer-First Executive Slide
+
+- State the decision or implication in the title, not merely the topic.
+- Put the primary evidence in one visual and reserve a side panel for the action.
+- Keep model basis, source status, and scenario qualifiers visible.
+- Use a table for exact values and a native chart for relative magnitude.
+
+## Market Map or Two-by-Two
+
+- Name both axes and show which direction is favorable.
+- Explain bubble size, color, and score; avoid implied precision without a basis.
+- Put candidates into decision-oriented quadrants such as prioritize, test, build,
+  or deprioritize.
+- Pair the matrix with a ranked recommendation and explicit gating criteria.
+
+## Transformation Roadmap
+
+- Use columns for time horizons or phases and rows for accountable workstreams.
+- Put an owner and an observable deliverable on every initiative.
+- Show funding or scale gates as milestones with named evidence requirements.
+- Separate mobilize, prove, and scale so activity is not mistaken for realized value.
+
 ## System or SoC Architecture
 
 - Put the system boundary in a pale container.

@@ -1,18 +1,23 @@
 # WutPack
 
 [![validate](https://github.com/sfungwinbond/Gstackwut/actions/workflows/validate.yml/badge.svg)](https://github.com/sfungwinbond/Gstackwut/actions/workflows/validate.yml)
+[![fresh install](https://github.com/sfungwinbond/Gstackwut/actions/workflows/fresh-install.yml/badge.svg)](https://github.com/sfungwinbond/Gstackwut/actions/workflows/fresh-install.yml)
 
-**One install. Twelve specialists. A Mac workbench that is still there tomorrow.**
+**The persistent knowledge-work harness for Codex and Claude Code.**
+
+One install. Twelve specialists. A Mac workbench that is still there tomorrow.
 
 WutPack turns a fresh Codex or Claude Code setup into a practical knowledge-work
-station. It installs durable document, data, browser, diagram, publishing, and
-agent tools, then adds focused skills that know when and how to use them.
+station. It is the environment-and-workflow layer around the agent: durable
+document, data, browser, diagram, publishing, and agent tools; focused skills
+that know when and how to use them; and validation gates for the artifacts they
+produce.
 
 The point is not another folder of prompts. The point is a working toolchain:
-inspect a datasheet, recover a broken PDF, build a Windows-safe workbook, draw an
-editable PowerPoint timing diagram, analyze a dataset, publish code as HTML, or
-take a code change through review—with the same commands available in the next
-terminal and the next agent session.
+research a market, recover a broken PDF, build a Windows-safe decision model,
+draw an editable executive roadmap, analyze customer data, publish code as HTML,
+or take a code change through review—with the same commands available in the
+next terminal and the next agent session.
 
 ## Install
 
@@ -37,7 +42,7 @@ host. It does **not** collect credentials or configure API keys.
 Prefer to inspect code before running it? Clone the repository, read
 [`install.sh`](install.sh) and [`setup`](setup), then run `./setup`.
 
-## How it works
+## The knowledge-work harness
 
 ```mermaid
 flowchart LR
@@ -57,9 +62,12 @@ flowchart LR
     T --> A[Auditable artifacts<br/>with validation evidence]
 ```
 
-The agent routes the job to a specialist. The specialist supplies a workflow,
-quality gates, and deterministic helper scripts. The installed applications and
-libraries do the real file or code work.
+Codex or Claude Code still owns the model-facing agent loop, permissions, auth,
+and orchestration. WutPack supplies the portable layer around that loop: the host
+routes a job to a specialist; the specialist supplies a workflow, quality gates,
+and deterministic helpers; persistent applications and libraries do the real
+file or code work. This is a harness for repeatable knowledge work, not a new
+model runtime.
 
 ## Pick a specialist
 
@@ -68,7 +76,7 @@ libraries do the real file or code work.
 | Current, attributable research | `research-brief` | Decision brief with primary-source citations |
 | Excel models, formulas, and charts | `spreadsheet-lab` | Editable `.xlsx`, validated and render-checked |
 | Scanned, damaged, or difficult PDFs | `pdf-forensics` | Repaired/searchable PDF plus extraction report |
-| Engineering diagrams in PowerPoint | `technical-deck` | Native editable shapes, connectors, and charts |
+| Executive and technical diagrams in PowerPoint | `technical-deck` | Native editable shapes, connectors, and charts |
 | CSV, Parquet, SQL, statistics, or ML | `data-lab` | Reproducible notebook, figures, and findings |
 | HTML/PDF sites, books, and API docs | `publish-docs` | Quarto, MkDocs, Sphinx, pdoc, or TypeDoc output |
 | Architecture, sequence, and state diagrams | `system-diagram` | Mermaid/Graphviz/PlantUML source plus render |
@@ -82,10 +90,10 @@ Use natural language and let the host select a skill, or invoke one explicitly:
 
 ```text
 # Codex
-$spreadsheet-lab Build a comparison workbook from the three PDFs in this folder.
+$spreadsheet-lab Build a market-entry model from the evidence in this folder.
 
 # Claude Code
-/spreadsheet-lab Build a comparison workbook from the three PDFs in this folder.
+/spreadsheet-lab Build a market-entry model from the evidence in this folder.
 ```
 
 ## What gets installed
@@ -103,58 +111,192 @@ The manifests are the source of truth, and the maximal profile includes more
 libraries than this summary. Fast-moving agent frameworks live in their own
 Python environment so their upgrades do not destabilize Office and data work.
 
-## What this looks like in practice
+## Twelve-specialist consulting walkthrough
 
-### Datasheets to an Excel decision model
+This fictional case follows Atlas Services, a mid-sized field-services company
+choosing where to grow and how to fund the move. It is a classic
+strategy-consulting workflow: frame the decision, build an evidence base, model
+the economics, communicate an answer, then make implementation auditable. Every
+name, market, and value below is illustrative; no client or proprietary data is
+used.
 
-```text
-$pdf-forensics Inspect every flash datasheet in Downloads. Extract erase timing,
-capacity, die count, and test conditions with page-level provenance.
+```mermaid
+flowchart LR
+    A[Frame the decision] --> B[Build the evidence]
+    B --> C[Model and synthesize]
+    C --> D[Communicate the answer]
+    D --> E[Implement with controls]
 
-$spreadsheet-lab Build a 512 Mb / 1 Gb / 2 Gb comparison workbook. Keep sourced
-values separate from estimates, add uncertainty for multi-die variance, create a
-chart tab, recalculate, and verify it opens in Windows Excel.
+    A --- R[research-brief]
+    B --- P[pdf-forensics]
+    B --- DL[data-lab]
+    C --- X[spreadsheet-lab]
+    C --- SD[system-diagram]
+    D --- TD[technical-deck]
+    D --- DS[document-studio]
+    D --- PD[publish-docs]
+    E --- CB[code-build]
+    E --- DB[debug-lab]
+    E --- RG[review-gate]
+    E --- SC[ship-check]
 ```
 
-The first specialist diagnoses text layers and table geometry; the second works
-with native cells and charts, checks Open XML relationships, and uses LibreOffice
-as an independent compatibility pass.
+### 1. Frame the decision
 
-### Editable technical PowerPoint—not a flattened picture
+#### `research-brief` — market-entry recommendation
 
 ```text
-$technical-deck Draw the SPI command timing as aligned waveforms. Use native
-PowerPoint shapes and labels, preserve one time axis, then render-check the deck.
+$research-brief For fictional Atlas Services, compare Coastal, North, Central,
+and West as expansion markets. Use current primary sources for any real-world
+benchmarks, separate facts from assumptions, reconcile conflicts, and deliver a
+two-page recommendation with citations, risks, and evidence that would change it.
 ```
 
-[![Editable command-timing diagram](docs/images/editable-timing-diagram.png)](examples/technical-diagram-demo.pptx)
+**Produces:** an answer-first decision brief, source ledger, confidence notes,
+and explicit open questions.
 
-The image is a preview. The linked deck keeps the waveform segments, labels,
-callouts, and comparison chart editable in PowerPoint. Its numbers are explicitly
-illustrative, not product claims. Generate a fresh example with
-`wut deck my-diagram.pptx`.
+### 2. Build the evidence
 
-### A reproducible data answer
+#### `pdf-forensics` — evidence extraction from reports
 
 ```text
-$data-lab Profile survey.parquet, document missingness and exclusions, compare a
-simple baseline with two models, report uncertainty, and deliver a rerunnable
-notebook plus an executive chart.
+$pdf-forensics Inspect inputs/market-reports/*.pdf. Classify text versus scanned
+pages, make searchable derivatives where needed, extract market size and margin
+tables with page-level provenance, and flag every cell requiring visual review.
 ```
 
-The environment includes pandas, Polars, DuckDB, Arrow, SciPy, scikit-learn,
-statsmodels, Jupyter, Plotly, Altair, and common validation libraries. The raw
-input stays unchanged and assumptions travel with the result.
+**Produces:** searchable derivative PDFs, a structural report, cited extraction
+tables, and a human-verification queue.
 
-### Code to browsable documentation
+#### `data-lab` — customer and commercial analysis
 
 ```text
-$publish-docs Turn this Python package and its notebooks into a searchable HTML
-site, with API reference, one runnable tutorial, and a PDF handout.
+$data-lab Analyze anonymized_leads.parquet and customers.csv. Preserve raw files,
+define the observation grain, profile missingness, compare retention and CAC
+payback by segment, quantify uncertainty, and deliver a rerunnable notebook plus
+an executive chart.
 ```
 
-Quarto, Pandoc, MkDocs, Sphinx, pdoc, Doxygen, JSDoc, and TypeDoc are available,
-so the specialist can choose the smallest backend that fits the source and output.
+**Produces:** a reproducible notebook, exact result tables, figures, data-quality
+notes, and an environment record.
+
+### 3. Model and synthesize
+
+#### `spreadsheet-lab` — scenario economics
+
+```text
+$spreadsheet-lab Build Atlas_market_entry.xlsx with Inputs, Evidence, Market
+Sizing, Unit Economics, Scenarios, and Dashboard tabs. Add downside/base/upside
+cases, native formulas and charts, visible assumption styling, source notes, and
+a Windows Excel compatibility pass.
+```
+
+**Produces:** an editable `.xlsx` decision model with auditable formulas, native
+charts, validation output, and rendered sheet previews.
+
+#### `system-diagram` — future operating model
+
+```text
+$system-diagram Map the future lead-to-cash operating model across Marketing,
+Sales, Operations, Finance, and the data platform. Label handoffs, owners, system
+boundaries, synchronous versus batch flows, and failure paths; deliver Mermaid
+source plus an inspected SVG.
+```
+
+**Produces:** source-controlled diagram text and a clean vector render. The
+repository includes a fictional [engagement-flow example](examples/consulting-engagement.mmd).
+
+### 4. Communicate the answer
+
+#### `technical-deck` — executive recommendation deck
+
+```text
+$technical-deck Create a seven-slide executive recommendation for Atlas Services:
+answer first, market attractiveness, ability to win, scenario economics, value
+levers, 12-month roadmap, and risks. Use native PowerPoint shapes, tables, and
+charts; keep every key element editable and render-check every slide.
+```
+
+**Produces:** a Windows-safe `.pptx`, package-validation evidence, and rendered
+slide previews—not a deck flattened into screenshots.
+
+[![Editable fictional value-creation roadmap](docs/images/editable-executive-roadmap.png)](examples/executive-consulting-demo.pptx)
+
+The linked three-slide starter is fully fictional and uses 119 editable native
+shapes plus a native chart. Generate it with
+`wut deck executive-consulting-demo.pptx`.
+
+#### `document-studio` — investment committee memo
+
+```text
+$document-studio Turn the approved findings into Atlas_investment_memo.docx.
+Use named styles, an executive summary, recommendation, economics table, risks,
+source appendix, headers and footers, and Windows-safe fonts. Render to PDF and
+inspect every page without overwriting the source template.
+```
+
+**Produces:** a structured `.docx`, a review PDF, and compatibility notes for
+advanced Word features that require human checking.
+
+#### `publish-docs` — engagement evidence room
+
+```text
+$publish-docs Publish the brief, model methodology, notebook, diagrams, and API
+reference as a searchable static site with one runnable tutorial and a PDF
+appendix. Keep generated output separate, test links, and make the build one
+documented command.
+```
+
+**Produces:** maintainable source plus HTML/PDF artifacts built with the smallest
+appropriate combination of Quarto, Pandoc, MkDocs, Sphinx, pdoc, or TypeDoc.
+
+### 5. Implement with controls
+
+#### `code-build` — scenario automation
+
+```text
+$code-build Add a scenario runner that reads approved model inputs, validates the
+schema, calculates base/upside/downside summaries, and writes decision_summary.json.
+Follow repository conventions, add focused tests, and avoid unrelated cleanup.
+```
+
+**Produces:** the smallest complete implementation, tests, and a clear handoff
+without silently changing external systems.
+
+#### `debug-lab` — root-cause a model mismatch
+
+```text
+$debug-lab The downside case in decision_summary.json differs from the approved
+workbook by 3.2%. Reproduce the mismatch, trace inputs and rounding, identify the
+root cause, make the smallest requested fix, and add a regression test.
+```
+
+**Produces:** a minimal reproduction, evidence chain, root cause, verified fix,
+and residual-risk note.
+
+#### `review-gate` — independent pre-merge review
+
+```text
+$review-gate Review the scenario-runner diff against main. Check calculation
+correctness, unit and currency handling, compatibility, error paths, data leakage,
+and missing tests. Report only actionable findings with file, line, impact, and
+repair direction; do not edit the code.
+```
+
+**Produces:** severity-ordered findings—or a clean result that names the remaining
+untested risk.
+
+#### `ship-check` — final engagement package
+
+```text
+$ship-check Inspect the exact deck, workbook, memo, site build, and scenario-runner
+package intended for release. Verify tests, links, document integrity, versions,
+checksums, rollback, and release notes. Return READY, NOT READY, or READY WITH
+RISKS, and stop before publishing.
+```
+
+**Produces:** a release-readiness verdict tied to inspected artifacts and the
+exact next command, without crossing the external boundary automatically.
 
 ## Persistence by design
 
@@ -224,6 +366,8 @@ See the [getting-started tutorial](docs/getting-started.md), [workflow recipes](
 
 - macOS is the supported bootstrap target; both Apple Silicon and Intel Homebrew
   locations are detected.
+- WutPack does not replace the core agent loop, model provider, authentication,
+  sandbox, or permission system supplied by Codex or Claude Code.
 - First-time `full` setup is intentionally substantial and can take a while.
 - Agent logins, model-provider keys, and paid service choices remain under your
   control.

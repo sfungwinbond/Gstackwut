@@ -1,0 +1,5 @@
+market,market_size_usd_m,growth_pct,estimated_ebitda_margin_pct,competitive_intensity_1_5,execution_complexity_1_5,weighted_score,basis
+Coastal,860,14.0,20,2,4,81,fictional illustrative case
+North,790,9.2,19,3,2,78,fictional illustrative case
+Central,690,11.2,16,4,3,72,fictional illustrative case
+West,430,5.8,14,4,4,58,fictional illustrative case

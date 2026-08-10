@@ -8,5 +8,5 @@ validate-skills:
 	python3 ./tests/test-repository.py --skills-only
 
 demo:
-	node ./skills/technical-deck/scripts/new_technical_deck.mjs --output=examples/technical-diagram-demo.pptx
-	python3 ./skills/technical-deck/scripts/validate_pptx.py examples/technical-diagram-demo.pptx
+	node ./skills/technical-deck/scripts/new_technical_deck.mjs --output=examples/executive-consulting-demo.pptx
+	python3 ./skills/technical-deck/scripts/validate_pptx.py examples/executive-consulting-demo.pptx

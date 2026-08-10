@@ -97,6 +97,33 @@ def validate_manifests(errors: list[str]) -> None:
             fail(errors, f"{path.relative_to(ROOT)}: duplicates {duplicates}")
 
 
+def validate_readme_examples(errors: list[str]) -> None:
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    heading = "## Twelve-specialist consulting walkthrough"
+    if heading not in text:
+        fail(errors, "README.md: missing twelve-specialist consulting walkthrough")
+        return
+    section = text.split(heading, 1)[1].split("\n## ", 1)[0]
+    for name in sorted(EXPECTED_SKILLS):
+        if f"#### `{name}`" not in section:
+            fail(errors, f"README.md: missing example heading for {name}")
+        if f"${name}" not in section:
+            fail(errors, f"README.md: missing invocation example for {name}")
+    if "fictional" not in section.lower() or "no client or proprietary data" not in section.lower():
+        fail(errors, "README.md: consulting walkthrough must state its fictional, non-client basis")
+
+
+def validate_public_examples(errors: list[str]) -> None:
+    text_paths = [
+        ROOT / "examples/consulting-engagement.mmd",
+        ROOT / "examples/market-entry-scorecard.csv",
+        ROOT / "skills/technical-deck/scripts/new_technical_deck.mjs",
+    ]
+    for path in text_paths:
+        if "fictional" not in path.read_text(encoding="utf-8").lower():
+            fail(errors, f"{path.relative_to(ROOT)}: must state that the example is fictional")
+
+
 def validate_repository(errors: list[str]) -> None:
     required = [
         "README.md",
@@ -106,10 +133,11 @@ def validate_repository(errors: list[str]) -> None:
         "install.sh",
         "setup",
         "bin/wut",
-        "examples/flash-architecture.mmd",
+        "examples/consulting-engagement.mmd",
         "examples/agent-workflow.puml",
-        "examples/technical-diagram-demo.pptx",
-        "docs/images/editable-timing-diagram.png",
+        "examples/market-entry-scorecard.csv",
+        "examples/executive-consulting-demo.pptx",
+        "docs/images/editable-executive-roadmap.png",
     ]
     for relative in required:
         if not (ROOT / relative).exists():
@@ -133,6 +161,8 @@ def main() -> int:
         validate_links(errors)
         validate_manifests(errors)
         validate_repository(errors)
+        validate_readme_examples(errors)
+        validate_public_examples(errors)
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)

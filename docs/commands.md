@@ -8,6 +8,7 @@ same summary in a terminal.
 | Command | Behavior |
 |---|---|
 | `wut doctor` | Checks core binaries, LibreOffice, Python environments, and host skill directories |
+| `wut doctor --headless` | Runs the same check without requiring a desktop LibreOffice installation |
 | `wut paths` | Prints source, state, cache, Python, and Node locations |
 | `wut skills` | Lists installed specialists and their trigger descriptions |
 | `wut routes` | Maps common scenarios to specialist names |
@@ -20,7 +21,7 @@ same summary in a terminal.
 | `wut python ARGS...` | Runs managed knowledge-work Python |
 | `wut agent-python ARGS...` | Runs the separate agent-framework Python |
 | `wut lab ARGS...` | Starts managed JupyterLab |
-| `wut deck [OUTPUT.pptx]` | Generates an editable technical-deck example |
+| `wut deck [OUTPUT.pptx]` | Generates an editable fictional consulting-deck example |
 | `wut diagram INPUT.mmd OUTPUT.svg` | Renders Mermaid through the private Node prefix |
 | `wut render FILE [OUTPUT_DIR]` | Converts an Office document to PDF with headless LibreOffice |
 | `wut ocr INPUT.pdf OUTPUT.pdf` | Deskews, rotates, and OCRs a PDF with OCRmyPDF |
@@ -62,6 +63,7 @@ These are primarily useful for testing or managed deployments:
 | `WUTPACK_CACHE_ROOT` | `~/Library/Caches/WutPack` |
 | `WUTPACK_BIN_DIR` | `~/.local/bin` |
 | `WUTPACK_BRANCH` | `main` |
+| `WUTPACK_REF` | unset; exact Git ref used by clean-runner verification |
 
 `WUTPACK_TEST_ROOT` relocates all user-relative paths and exists for isolated
 verification. It is not needed for a normal install.

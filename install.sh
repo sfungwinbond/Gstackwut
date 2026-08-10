@@ -9,6 +9,7 @@ fi
 
 REPOSITORY="sfungwinbond/Gstackwut"
 BRANCH="${WUTPACK_BRANCH:-main}"
+REF="${WUTPACK_REF:-}"
 USER_HOME="${WUTPACK_TEST_ROOT:-$HOME}"
 INSTALL_ROOT="${WUTPACK_INSTALL_ROOT:-$USER_HOME/.local/share/wutpack}"
 TEMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/wutpack-bootstrap.XXXXXX")"
@@ -26,8 +27,13 @@ if [ -n "${WUTPACK_SOURCE_DIR:-}" ]; then
   SOURCE_ROOT="$WUTPACK_SOURCE_DIR"
 else
   ARCHIVE="$TEMP_ROOT/source.tar.gz"
+  if [ -n "$REF" ]; then
+    ARCHIVE_URL="https://github.com/$REPOSITORY/archive/$REF.tar.gz"
+  else
+    ARCHIVE_URL="https://github.com/$REPOSITORY/archive/refs/heads/$BRANCH.tar.gz"
+  fi
   curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
-    "https://github.com/$REPOSITORY/archive/refs/heads/$BRANCH.tar.gz" \
+    "$ARCHIVE_URL" \
     --output "$ARCHIVE"
   tar -xzf "$ARCHIVE" -C "$TEMP_ROOT"
   SOURCE_ROOT="$(find "$TEMP_ROOT" -mindepth 1 -maxdepth 1 -type d -name 'Gstackwut-*' -print -quit)"

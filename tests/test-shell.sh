@@ -18,7 +18,7 @@ while IFS= read -r script; do
 done < <(find "$REPO_ROOT" -type f \( -name '*.sh' -o -path "$REPO_ROOT/setup" -o -path "$REPO_ROOT/bin/wut" \))
 
 python3 "$REPO_ROOT/skills/technical-deck/scripts/validate_pptx.py" \
-  "$REPO_ROOT/examples/technical-diagram-demo.pptx" >/dev/null
+  "$REPO_ROOT/examples/executive-consulting-demo.pptx" >/dev/null
 
 if "$REPO_ROOT/setup" --host >/dev/null 2>&1; then
   printf 'setup accepted a missing --host value\n' >&2
@@ -51,6 +51,13 @@ test "$(grep -cF '# >>> WutPack persistent tools >>>' "$TEST_ROOT/.zshrc")" = "1
 WUTPACK_TEST_ROOT="$TEST_ROOT" WUTPACK_INSTALL_ROOT="$INSTALL_ROOT" \
   "$INSTALL_ROOT/bin/wut" routes | grep -Fq 'technical-deck'
 test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" WUTPACK_INSTALL_ROOT="$INSTALL_ROOT" "$INSTALL_ROOT/bin/wut" version)" = "0.1.0"
+WUTPACK_TEST_ROOT="$TEST_ROOT" WUTPACK_INSTALL_ROOT="$INSTALL_ROOT" \
+  "$INSTALL_ROOT/bin/wut" doctor --help | grep -Fq -- '--headless'
+if WUTPACK_TEST_ROOT="$TEST_ROOT" WUTPACK_INSTALL_ROOT="$INSTALL_ROOT" \
+  "$INSTALL_ROOT/bin/wut" doctor --not-a-real-option >/dev/null 2>&1; then
+  printf 'wut doctor accepted an unknown option\n' >&2
+  exit 1
+fi
 
 PIPE_USER_ROOT="$TEST_ROOT/piped-user"
 PIPE_INSTALL_ROOT="$TEST_ROOT/piped-source"
