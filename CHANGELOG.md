@@ -4,6 +4,14 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+## [0.1.1.1] - 2026-08-10
+
+### Fixed
+
+- Recovered from the Homebrew Git/macOS libcurl mismatch that reports
+  `_curl_global_trace` as missing, preventing cascading formula, cask, and
+  browser-fallback failures on affected Apple-silicon Macs.
+
 ## [0.1.1.0] - 2026-08-10
 
 ### Fixed

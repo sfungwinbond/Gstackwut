@@ -416,6 +416,53 @@ refresh_brew() {
   return 1
 }
 
+configure_brew_transports() {
+  # Homebrew normally uses the macOS-provided curl and Git. Preserve that
+  # stable path even when a broken brewed copy is already linked on PATH.
+  unset HOMEBREW_FORCE_BREWED_CURL
+  if [ -x /usr/bin/git ]; then
+    unset HOMEBREW_FORCE_BREWED_GIT
+    export HOMEBREW_GIT_PATH=/usr/bin/git
+  fi
+}
+
+homebrew_git_has_curl_linkage_error() {
+  local git_bin
+  local log="$TEMP_ROOT/homebrew-git-transport.log"
+  local prefix
+  local status
+
+  prefix="$(brew_prefix "$BREW_BIN")"
+  git_bin="$prefix/bin/git"
+  [ -x "$git_bin" ] || return 1
+
+  : > "$log"
+  "$git_bin" ls-remote https://github.com/Homebrew/brew.git HEAD \
+    >/dev/null 2>"$log"
+  status="$?"
+  [ "$status" -ne 0 ] && grep -Fq 'curl_global_trace' "$log"
+}
+
+repair_homebrew_git_transport() {
+  [ "$DRY_RUN" -eq 0 ] || return 0
+  homebrew_git_has_curl_linkage_error || return 0
+
+  warn "Homebrew Git is linked to an incompatible macOS libcurl; upgrading Git before continuing."
+  "$BREW_BIN" upgrade git || true
+  if ! homebrew_git_has_curl_linkage_error; then
+    note "Homebrew Git transport repaired"
+    return 0
+  fi
+
+  warn "Homebrew Git still cannot load libcurl; unlinking it and using /usr/bin/git."
+  if "$BREW_BIN" unlink git; then
+    hash -r
+    return 0
+  fi
+  record_failure "Could not disable the broken Homebrew Git transport"
+  return 1
+}
+
 run_brew_cask_install() {
   local item="$1"
   local log="$TEMP_ROOT/homebrew-cask-install.log"
@@ -471,6 +518,9 @@ install_brew_manifest() {
         note "$item already installed"
       else
         run_checked "Homebrew formula failed: $item" "$BREW_BIN" install "$item" || true
+      fi
+      if [ "$item" = "git" ]; then
+        repair_homebrew_git_transport || true
       fi
     else
       if [ "$DRY_RUN" -eq 0 ] && "$BREW_BIN" list --cask "$item" >/dev/null 2>&1; then
@@ -926,6 +976,7 @@ run_required "Could not create WutPack state directories" \
 
 if [ "$SKILLS_ONLY" -eq 0 ]; then
   if ensure_brew; then
+    configure_brew_transports
     refresh_brew || true
     say "Installing command-line workbench"
     install_brew_manifest "$PROJECT_ROOT/manifests/brew-formulae.txt" formula
