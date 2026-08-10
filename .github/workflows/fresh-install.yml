@@ -26,7 +26,7 @@ jobs:
     name: Unsupported Linux exits cleanly
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Verify platform guard
         shell: bash
         run: |
@@ -51,7 +51,7 @@ jobs:
       WUTPACK_TEST_ROOT: /tmp/wutpack-ci-user
       WUTPACK_INSTALL_ROOT: /tmp/wutpack-ci-source
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Capture clean-host baseline
         shell: bash
@@ -81,6 +81,25 @@ jobs:
                 --skip-casks \
                 --skip-ai-clis \
           2>&1 | tee "$RUNNER_TEMP/wutpack-install.log"
+
+      - name: Surface installer failure summary
+        if: failure()
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/wutpack-install.log"
+          test -f "$log"
+          {
+            echo '## Installer failure summary'
+            echo
+            echo '```text'
+            awk '/^Completed with [0-9]+ optional failure/{capture=1} capture' "$log" | tail -n 80
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          awk '/^Completed with [0-9]+ optional failure/{capture=1; next} capture && /^  - /{sub(/^  - /, ""); print}' "$log" \
+            | while IFS= read -r failure; do
+                printf '::error title=WutPack setup::%s\n' "$failure"
+              done
 
       - name: Verify persistent environments and all twelve skills
         shell: bash
@@ -230,7 +249,7 @@ jobs:
 
       - name: Upload install evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: fresh-install-intel-evidence
           if-no-files-found: warn
