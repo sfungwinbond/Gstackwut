@@ -1,4 +1,4 @@
 interface:
-  display_name: "Publish Docs"
+  display_name: "[wutlabs] Publish Docs"
   short_description: "Turn source material into polished documentation"
   default_prompt: "Use $publish-docs to publish this material as maintainable HTML and PDF documentation."

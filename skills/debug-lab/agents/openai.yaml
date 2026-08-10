@@ -1,4 +1,4 @@
 interface:
-  display_name: "Debug Lab"
+  display_name: "[wutlabs] Debug Lab"
   short_description: "Reproduce and fix bugs from root cause"
   default_prompt: "Use $debug-lab to diagnose this failure and verify the smallest complete fix."

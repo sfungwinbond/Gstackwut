@@ -1,4 +1,4 @@
 interface:
-  display_name: "Data Lab"
+  display_name: "[wutlabs] Data Lab"
   short_description: "Analyze data with reproducible notebooks"
   default_prompt: "Use $data-lab to profile this dataset and produce a reproducible analysis."

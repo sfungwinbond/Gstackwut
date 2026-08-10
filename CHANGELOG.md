@@ -6,6 +6,8 @@ All notable changes to WutPack are documented here.
 
 ### Changed
 
+- Prefixed every Codex skill display name with `[wutlabs]` so WutPack
+  specialists are clearly identified in skill lists and invocation chips.
 - Setup now exactly synchronizes managed Python environments, preventing retired
   packages from leaving incompatible dependencies behind.
 - Kept Hugging Face Hub on its compatible 0.x line while Pydantic AI still

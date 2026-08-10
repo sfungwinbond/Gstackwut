@@ -94,6 +94,17 @@ def validate_skills(errors: list[str]) -> None:
             fail(errors, f"missing {agent_file.relative_to(ROOT)}")
         else:
             prompt = agent_file.read_text(encoding="utf-8")
+            display_name = re.search(
+                r'^  display_name: "([^"]+)"$', prompt, re.MULTILINE
+            )
+            if not display_name:
+                fail(errors, f"{agent_file.relative_to(ROOT)}: missing display_name")
+            elif not display_name.group(1).startswith("[wutlabs] "):
+                fail(
+                    errors,
+                    f"{agent_file.relative_to(ROOT)}: display_name must start with "
+                    "'[wutlabs] '",
+                )
             if f"${name}" not in prompt:
                 fail(errors, f"{agent_file.relative_to(ROOT)}: default prompt must mention ${name}")
 

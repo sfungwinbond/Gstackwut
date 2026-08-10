@@ -1,4 +1,4 @@
 interface:
-  display_name: "Code Build"
+  display_name: "[wutlabs] Code Build"
   short_description: "Implement scoped changes with verification"
   default_prompt: "Use $code-build to implement this change and verify it safely."

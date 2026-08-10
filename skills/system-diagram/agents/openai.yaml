@@ -1,4 +1,4 @@
 interface:
-  display_name: "System Diagram"
+  display_name: "[wutlabs] System Diagram"
   short_description: "Create source-controlled technical diagrams"
   default_prompt: "Use $system-diagram to turn this system description into an editable technical diagram."
