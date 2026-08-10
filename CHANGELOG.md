@@ -4,6 +4,23 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+## [0.1.0.1] - 2026-08-10
+
+### Fixed
+
+- Made the installed `wut` shim resolve its real source through symlink chains,
+  restoring `deck`, `version`, `setup`, `paths`, and `skills` from normal PATH
+  invocation.
+- Expanded `wut doctor` to reject incomplete source, managed deck/diagram
+  dependencies, and partial host skill installations without loading modules
+  from the caller's working directory.
+- Made required setup failures fatal, repaired interrupted shell-profile blocks
+  atomically, and report optional package failures as an incomplete setup.
+- Staged and validated source updates under a per-install lock, rejected unsafe
+  or unowned targets, and restored the previous source if activation fails.
+- Replaced WutPack-owned host skill directories exactly so removed helpers do
+  not linger, while keeping a valid source available when setup needs repair.
+
 ### Changed
 
 - Prefixed every Codex skill display name with `[wutlabs]` so WutPack

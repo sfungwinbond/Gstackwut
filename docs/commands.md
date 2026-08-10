@@ -7,7 +7,7 @@ same summary in a terminal.
 
 | Command | Behavior |
 |---|---|
-| `wut doctor` | Checks core binaries, LibreOffice, Python environments, and host skill directories |
+| `wut doctor` | Checks core binaries, managed deck/diagram dependencies, installed source integrity, Python environments, and complete host skill sets |
 | `wut doctor --headless` | Runs the same check without requiring a desktop LibreOffice installation |
 | `wut paths` | Prints source, state, cache, Python, and Node locations |
 | `wut skills` | Lists installed specialists and their trigger descriptions |
@@ -37,8 +37,12 @@ Homebrew packages are skipped; managed Python and Node packages are upgraded.
 
 ### `wut update [options]`
 
-Downloads the current repository source and then re-runs setup. The same setup
-options are accepted.
+Downloads and validates the current repository source, stages it beside the
+installed tree, and swaps it into place under a per-install lock before
+re-running setup. A failed activation restores the previous source; once a
+valid source is active, it remains available for repair even if setup does not
+complete. The same setup options are accepted, and `--dry-run` does not activate
+the downloaded source.
 
 ### Setup options
 
