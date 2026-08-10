@@ -43,13 +43,26 @@ jobs:
           fi
           grep -Fq 'macOS only' install.stderr
 
-  full-headless-intel:
-    name: Full headless install on fresh Intel Mac
-    runs-on: macos-15-intel
+  full-headless-macos:
+    name: Full headless install on fresh ${{ matrix.machine }} Mac
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - machine: Apple-silicon
+            runner: macos-15
+            architecture: arm64
+            artifact_suffix: arm64
+          - machine: Intel
+            runner: macos-15-intel
+            architecture: x86_64
+            artifact_suffix: intel
     env:
       WUTPACK_TEST_ROOT: /tmp/wutpack-ci-user
       WUTPACK_INSTALL_ROOT: /tmp/wutpack-ci-source
+      EXPECTED_ARCHITECTURE: ${{ matrix.architecture }}
     steps:
       - uses: actions/checkout@v6
 
@@ -60,6 +73,7 @@ jobs:
           uname -a
           sw_vers
           arch
+          test "$(uname -m)" = "$EXPECTED_ARCHITECTURE"
           df -h /
           test ! -e "$WUTPACK_TEST_ROOT"
           test ! -e "$WUTPACK_INSTALL_ROOT"
@@ -251,7 +265,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: fresh-install-intel-evidence
+          name: fresh-install-${{ matrix.artifact_suffix }}-evidence
           if-no-files-found: warn
           path: |
             ${{ runner.temp }}/wutpack-install.log
