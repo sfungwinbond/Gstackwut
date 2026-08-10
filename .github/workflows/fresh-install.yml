@@ -170,7 +170,6 @@ jobs:
               "mcp",
               "fastmcp",
               "browser-use",
-              "aider-chat",
           ]
           for package in packages:
               print(f"agent {package}={version(package)}")

@@ -41,7 +41,7 @@ Usage: ./setup [options]
   --profile core|full            Core is lighter; full adds ML and agent stacks
   --skills-only                  Install the CLI and skills, no packages
   --skip-casks                   Skip desktop applications
-  --skip-ai-clis                 Skip extra coding-agent CLIs
+  --skip-ai-clis                 Skip Codex and Claude Code CLI installation
   --with-extras                  Add optional local-AI/container applications
   --dry-run                      Print package actions without running them
   -h, --help                     Show this help
@@ -312,39 +312,6 @@ install_node_layers() {
   export PATH="$NODE_PREFIX/bin:$PATH"
 }
 
-install_native_agents() {
-  [ "$SKIP_AI_CLIS" -eq 1 ] && return
-  say "Installing optional native agent CLIs"
-  if [ "$DRY_RUN" -eq 1 ]; then
-    note "Would install Hermes and Goose when they are not already present"
-    return
-  fi
-  if ! command -v hermes >/dev/null 2>&1; then
-    local hermes_installer="$TEMP_ROOT/hermes-install.sh"
-    if curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
-      https://hermes-agent.nousresearch.com/install.sh --output "$hermes_installer"; then
-      run_checked "Hermes installation failed" /bin/bash "$hermes_installer" \
-        --non-interactive --skip-setup || true
-    else
-      record_failure "Could not download the Hermes installer"
-    fi
-  else
-    note "Hermes already installed"
-  fi
-  if ! command -v goose >/dev/null 2>&1; then
-    local goose_installer="$TEMP_ROOT/goose-install.sh"
-    if curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
-      https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh \
-      --output "$goose_installer"; then
-      run_checked "Goose CLI installation failed" /bin/bash "$goose_installer" || true
-    else
-      record_failure "Could not download the Goose CLI installer"
-    fi
-  else
-    note "Goose already installed"
-  fi
-}
-
 install_skill_tree() {
   local target="$1"
   local skill_dir
@@ -402,7 +369,7 @@ install_shims() {
   for name in jupyter jupyter-lab ipython cairosvg mkdocs pdoc sphinx-build papermill; do
     link_command "$KNOWLEDGE_ENV/bin/$name" "$name"
   done
-  for name in aider crewai agno browser-use fastmcp litellm; do
+  for name in crewai agno browser-use fastmcp litellm; do
     link_command "$AGENT_ENV/bin/$name" "$name"
   done
 }
@@ -451,7 +418,6 @@ if [ "$SKILLS_ONLY" -eq 0 ]; then
   fi
   install_python_layers
   install_node_layers
-  [ "$PROFILE" = "full" ] && install_native_agents
 fi
 
 install_skills

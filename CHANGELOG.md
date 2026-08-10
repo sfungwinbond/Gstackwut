@@ -4,6 +4,11 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+### Removed
+
+- Hermes, Goose, Gemini CLI, OpenCode, Agent Canvas, and Aider from setup. Codex
+  and Claude Code are now the only AI coding CLIs installed by default.
+
 ## [0.1.0] - 2026-08-10
 
 ### Added

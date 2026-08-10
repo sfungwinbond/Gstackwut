@@ -68,10 +68,10 @@ provides a quick health check after an update.
 
 ## Security boundary
 
-The installer downloads package-manager artifacts and two optional native-agent
-installers, but it does not read browser profiles, harvest existing credentials,
-or write provider keys. Codex, Claude Code, GitHub, model providers, and other
-services keep their own normal sign-in flows.
+The installer downloads package-manager artifacts, but it does not run separate
+third-party agent bootstrap scripts, read browser profiles, harvest existing
+credentials, or write provider keys. Codex, Claude Code, GitHub, model providers,
+and other services keep their own normal sign-in flows.
 
 For a lower-trust evaluation, read the scripts first and run:
 

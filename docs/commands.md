@@ -48,7 +48,7 @@ options are accepted.
 | `--profile core|full` | Choose the lighter or maximal package layer |
 | `--skills-only` | Refresh skills and the `wut` shim without package-manager work |
 | `--skip-casks` | Omit LibreOffice, Chromium, Quarto, draw.io, and Inkscape |
-| `--skip-ai-clis` | Omit coding-agent CLIs plus Hermes and Goose installers |
+| `--skip-ai-clis` | Omit Codex and Claude Code CLI installation |
 | `--with-extras` | Add Ollama and Docker Desktop |
 | `--dry-run` | Print package and filesystem actions without applying them |
 

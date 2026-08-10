@@ -29,4 +29,3 @@ browser-use
 playwright
 prefect
 dagster
-aider-chat

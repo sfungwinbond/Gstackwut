@@ -106,7 +106,7 @@ $spreadsheet-lab Build a market-entry model from the evidence in this folder.
 | Layer | Selected tools |
 |---|---|
 | Desktop workbench | LibreOffice, Chromium, Quarto, draw.io, Inkscape |
-| AI coding and agent CLIs | Codex, Claude Code, Gemini CLI, OpenCode, Agent Canvas, Hermes, Goose, Aider |
+| AI coding CLIs | Codex, Claude Code |
 | Office, PDF, and media | openpyxl, XlsxWriter, python-docx, python-pptx, CairoSVG, Pandoc, Poppler, qpdf, MuPDF, OCRmyPDF, Tesseract, ImageMagick, FFmpeg |
 | Data and research | pandas, Polars, Arrow, DuckDB, SciPy, scikit-learn, statsmodels, JupyterLab, Playwright, Selenium, Scrapy |
 | Diagrams and documentation | PptxGenJS, Mermaid, Graphviz, PlantUML, Typst, MkDocs, Sphinx, pdoc, Doxygen, JSDoc, TypeDoc |

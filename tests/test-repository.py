@@ -124,6 +124,50 @@ def validate_manifests(errors: list[str]) -> None:
             fail(errors, f"{path.relative_to(ROOT)}: duplicates {duplicates}")
 
 
+def manifest_values(path: Path) -> list[str]:
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def validate_agent_cli_policy(errors: list[str]) -> None:
+    expected_node_agents = ["@openai/codex", "@anthropic-ai/claude-code"]
+    node_agents = manifest_values(ROOT / "manifests/node-agents.txt")
+    if node_agents != expected_node_agents:
+        fail(
+            errors,
+            "manifests/node-agents.txt: only Codex and Claude Code are allowed; "
+            f"got {node_agents}",
+        )
+
+    python_agents = manifest_values(ROOT / "manifests/python-agents.txt")
+    if "aider-chat" in python_agents:
+        fail(errors, "manifests/python-agents.txt: Aider must not be installed")
+
+    current_install_docs = [
+        ROOT / "setup",
+        ROOT / "README.md",
+        ROOT / "docs/commands.md",
+        ROOT / "docs/why-persistent.md",
+        ROOT / "site/index.html",
+    ]
+    retired_agents = (
+        "hermes",
+        "goose",
+        "gemini cli",
+        "opencode",
+        "agent canvas",
+        "aider",
+    )
+    for path in current_install_docs:
+        text = path.read_text(encoding="utf-8")
+        for agent in retired_agents:
+            if re.search(rf"\b{agent}\b", text, re.IGNORECASE):
+                fail(errors, f"{path.relative_to(ROOT)}: still references retired agent CLI {agent!r}")
+
+
 def validate_readme_examples(errors: list[str]) -> None:
     text = (ROOT / "README.md").read_text(encoding="utf-8")
     heading = "## Twelve-specialist consulting walkthrough"
@@ -264,6 +308,7 @@ def main() -> int:
     if not args.skills_only:
         validate_links(errors)
         validate_manifests(errors)
+        validate_agent_cli_policy(errors)
         validate_repository(errors)
         validate_readme_examples(errors)
         validate_public_examples(errors)
