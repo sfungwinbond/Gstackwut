@@ -4,6 +4,16 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+## [0.1.1.0] - 2026-08-10
+
+### Fixed
+
+- Selected native `/opt/homebrew` on Apple silicon, including Rosetta shells,
+  refreshed Homebrew before package work, and retried cask metadata/DSL errors
+  such as `undefined method command_wrapper` and `undefined method []` once.
+- Made clean-runner verification compare canonical macOS paths so `/tmp` and
+  `/private/tmp` do not produce a false fresh-install failure.
+
 ## [0.1.0.1] - 2026-08-10
 
 ### Fixed
