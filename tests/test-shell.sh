@@ -362,9 +362,19 @@ cat > "$CASK_REPAIR_BIN/brew" <<'EOF'
 printf '%s\n' "$*" >> "$WUTPACK_CASK_REPAIR_BREW_LOG"
 case "${1:-}" in
   --prefix)
-    printf '/opt/homebrew\n'
+    printf '%s\n' "${WUTPACK_GIT_CURL_PREFIX:-/opt/homebrew}"
     ;;
   update)
+    if [ -n "${WUTPACK_GIT_TRANSPORT_ENV_LOG:-}" ]; then
+      printf 'git_path=%s force_git=%s force_curl=%s\n' \
+        "${HOMEBREW_GIT_PATH:-}" "${HOMEBREW_FORCE_BREWED_GIT:-}" \
+        "${HOMEBREW_FORCE_BREWED_CURL:-}" >> "$WUTPACK_GIT_TRANSPORT_ENV_LOG"
+    fi
+    ;;
+  upgrade)
+    if [ "${2:-}" = "git" ] && [ -n "${WUTPACK_GIT_CURL_STATE:-}" ]; then
+      : > "$WUTPACK_GIT_CURL_STATE"
+    fi
     ;;
   list)
     if [ "${2:-}" = "--formula" ]; then
@@ -439,6 +449,45 @@ test "$(grep -c '^install --cask libreoffice$' "$CASK_PERSISTENT_BREW_LOG")" = "
 grep -Fq 'update-reset' "$CASK_PERSISTENT_OUTPUT"
 grep -Fq 'Homebrew cask failed: libreoffice' "$CASK_PERSISTENT_OUTPUT"
 grep -Fq 'WutPack setup incomplete' "$CASK_PERSISTENT_OUTPUT"
+
+GIT_CURL_ROOT="$TEST_ROOT/setup-git-curl-repair"
+GIT_CURL_PREFIX="$TEST_ROOT/setup-git-curl-prefix"
+GIT_CURL_STATE="$TEST_ROOT/setup-git-curl-repaired"
+GIT_CURL_BREW_LOG="$TEST_ROOT/setup-git-curl-brew.log"
+GIT_CURL_ENV_LOG="$TEST_ROOT/setup-git-curl-env.log"
+GIT_CURL_OUTPUT="$TEST_ROOT/setup-git-curl.log"
+mkdir -p "$GIT_CURL_PREFIX/bin"
+cat > "$GIT_CURL_PREFIX/bin/git" <<'EOF'
+#!/usr/bin/env bash
+if [ "${1:-}" = "--version" ]; then
+  printf 'git version 2.54.0\n'
+  exit 0
+fi
+if [ "${1:-}" = "ls-remote" ]; then
+  if [ -f "$WUTPACK_GIT_CURL_STATE" ]; then
+    printf 'repaired\tHEAD\n'
+    exit 0
+  fi
+  printf 'dyld: Symbol not found: _curl_global_trace\n' >&2
+  exit 134
+fi
+exit 0
+EOF
+chmod +x "$GIT_CURL_PREFIX/bin/git"
+env PATH="$CASK_REPAIR_BIN:/usr/bin:/bin" \
+  HOMEBREW_FORCE_BREWED_CURL=1 HOMEBREW_FORCE_BREWED_GIT=1 \
+  WUTPACK_CASK_REPAIR_BREW_LOG="$GIT_CURL_BREW_LOG" \
+  WUTPACK_GIT_CURL_PREFIX="$GIT_CURL_PREFIX" \
+  WUTPACK_GIT_CURL_STATE="$GIT_CURL_STATE" \
+  WUTPACK_GIT_TRANSPORT_ENV_LOG="$GIT_CURL_ENV_LOG" \
+  WUTPACK_TEST_HARDWARE_ARCH=arm64 WUTPACK_TEST_ROOT="$GIT_CURL_ROOT" \
+  /bin/bash "$REPO_ROOT/setup" --profile core --host codex --skip-casks \
+  --skip-ai-clis >"$GIT_CURL_OUTPUT" 2>&1
+test "$(grep -c '^upgrade git$' "$GIT_CURL_BREW_LOG")" = "1"
+grep -Fxq 'git_path=/usr/bin/git force_git= force_curl=' "$GIT_CURL_ENV_LOG"
+grep -Fq 'linked to an incompatible macOS libcurl' "$GIT_CURL_OUTPUT"
+grep -Fq 'Homebrew Git transport repaired' "$GIT_CURL_OUTPUT"
+grep -Fq 'WutPack setup complete' "$GIT_CURL_OUTPUT"
 
 WRONG_ARCH_ROOT="$TEST_ROOT/setup-wrong-arch-brew"
 WRONG_ARCH_BIN="$TEST_ROOT/setup-wrong-arch-brew-stub"
