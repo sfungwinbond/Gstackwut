@@ -13,6 +13,10 @@ curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install
 The installer may ask for normal Homebrew authorization. It does not ask for API
 keys or copy credentials. Open a new terminal when it finishes.
 
+On Apple silicon, setup uses native Homebrew under `/opt/homebrew`, even when an
+older Intel installation is earlier on `PATH`. It refreshes Homebrew before
+installing packages and retries cask-definition compatibility failures once.
+
 For a smaller first pass:
 
 ```bash

@@ -319,6 +319,14 @@ OPTIONAL_FAILURE_LOG="$TEST_ROOT/setup-optional-failure.log"
 mkdir -p "$OPTIONAL_STUB_BIN"
 cat > "$OPTIONAL_STUB_BIN/brew" <<'EOF'
 #!/usr/bin/env bash
+if [ "${1:-}" = "--prefix" ]; then
+  if [ "$(uname -m)" = "arm64" ]; then
+    printf '/opt/homebrew\n'
+  else
+    printf '/usr/local\n'
+  fi
+  exit 0
+fi
 if [ "${1:-}" = "list" ]; then
   [ "${3:-}" != "git" ]
   exit
@@ -341,6 +349,119 @@ grep -Fq 'WutPack setup incomplete' "$OPTIONAL_FAILURE_LOG"
 grep -Fq 'Completed with ' "$OPTIONAL_FAILURE_LOG"
 if grep -Fq 'WutPack setup complete' "$OPTIONAL_FAILURE_LOG"; then
   printf 'setup printed a success message after optional package failures\n' >&2
+  exit 1
+fi
+
+CASK_REPAIR_ROOT="$TEST_ROOT/setup-cask-repair"
+CASK_REPAIR_BIN="$TEST_ROOT/setup-cask-repair-stubs"
+CASK_REPAIR_BREW_LOG="$TEST_ROOT/setup-cask-repair-brew.log"
+CASK_REPAIR_OUTPUT="$TEST_ROOT/setup-cask-repair.log"
+mkdir -p "$CASK_REPAIR_BIN"
+cat > "$CASK_REPAIR_BIN/brew" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$WUTPACK_CASK_REPAIR_BREW_LOG"
+case "${1:-}" in
+  --prefix)
+    printf '/opt/homebrew\n'
+    ;;
+  update)
+    ;;
+  list)
+    if [ "${2:-}" = "--formula" ]; then
+      exit 0
+    fi
+    exit 1
+    ;;
+  install)
+    if [ "${2:-}" != "--cask" ]; then
+      exit 0
+    fi
+    if [ "${WUTPACK_CASK_PERSISTENT:-0}" = "1" ] && [ "${3:-}" = "libreoffice" ]; then
+      printf "Error: undefined method \`command_wrapper' for Cask libreoffice\n"
+      exit 1
+    fi
+    attempts="$(grep -c "^install --cask ${3:-}$" "$WUTPACK_CASK_REPAIR_BREW_LOG" || true)"
+    if [ "${3:-}" = "libreoffice" ] && [ "$attempts" -eq 1 ]; then
+      printf "Error: undefined method \`command_wrapper' for Cask libreoffice\n"
+      exit 1
+    fi
+    if [ "${3:-}" = "chromium" ] && [ "$attempts" -eq 1 ]; then
+      printf "Error: undefined method '[]' for nil:NilClass\n"
+      exit 1
+    fi
+    ;;
+esac
+exit 0
+EOF
+cat > "$CASK_REPAIR_BIN/uv" <<'EOF'
+#!/usr/bin/env bash
+if [ "${1:-}" = "venv" ]; then
+  env_dir=""
+  for env_dir in "$@"; do :; done
+  /bin/mkdir -p "$env_dir/bin"
+  /bin/cp /usr/bin/true "$env_dir/bin/python"
+fi
+exit 0
+EOF
+cat > "$CASK_REPAIR_BIN/npm" <<'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+chmod +x "$CASK_REPAIR_BIN/brew" "$CASK_REPAIR_BIN/uv" "$CASK_REPAIR_BIN/npm"
+env PATH="$CASK_REPAIR_BIN:/usr/bin:/bin" \
+  WUTPACK_CASK_REPAIR_BREW_LOG="$CASK_REPAIR_BREW_LOG" \
+  WUTPACK_TEST_HARDWARE_ARCH=arm64 WUTPACK_TEST_ROOT="$CASK_REPAIR_ROOT" \
+  /bin/bash "$REPO_ROOT/setup" --profile core --host codex --skip-ai-clis \
+  >"$CASK_REPAIR_OUTPUT" 2>&1
+test "$(grep -c '^update$' "$CASK_REPAIR_BREW_LOG")" = "3"
+test "$(grep -c '^install --cask libreoffice$' "$CASK_REPAIR_BREW_LOG")" = "2"
+test "$(grep -c '^install --cask chromium$' "$CASK_REPAIR_BREW_LOG")" = "2"
+first_update_line="$(grep -n '^update$' "$CASK_REPAIR_BREW_LOG" | head -n 1 | cut -d: -f1)"
+first_install_line="$(grep -n '^install --cask ' "$CASK_REPAIR_BREW_LOG" | head -n 1 | cut -d: -f1)"
+test "$first_update_line" -lt "$first_install_line"
+grep -Fq 'could not read the current libreoffice cask' "$CASK_REPAIR_OUTPUT"
+grep -Fq 'could not read the current chromium cask' "$CASK_REPAIR_OUTPUT"
+grep -Fq 'WutPack setup complete' "$CASK_REPAIR_OUTPUT"
+
+CASK_PERSISTENT_ROOT="$TEST_ROOT/setup-cask-persistent"
+CASK_PERSISTENT_BREW_LOG="$TEST_ROOT/setup-cask-persistent-brew.log"
+CASK_PERSISTENT_OUTPUT="$TEST_ROOT/setup-cask-persistent.log"
+if env PATH="$CASK_REPAIR_BIN:/usr/bin:/bin" \
+  WUTPACK_CASK_PERSISTENT=1 \
+  WUTPACK_CASK_REPAIR_BREW_LOG="$CASK_PERSISTENT_BREW_LOG" \
+  WUTPACK_TEST_HARDWARE_ARCH=arm64 WUTPACK_TEST_ROOT="$CASK_PERSISTENT_ROOT" \
+  /bin/bash "$REPO_ROOT/setup" --profile core --host codex --skip-ai-clis \
+  >"$CASK_PERSISTENT_OUTPUT" 2>&1; then
+  printf 'setup reported success after a persistent cask metadata failure\n' >&2
+  exit 1
+fi
+test "$(grep -c '^install --cask libreoffice$' "$CASK_PERSISTENT_BREW_LOG")" = "2"
+grep -Fq 'update-reset' "$CASK_PERSISTENT_OUTPUT"
+grep -Fq 'Homebrew cask failed: libreoffice' "$CASK_PERSISTENT_OUTPUT"
+grep -Fq 'WutPack setup incomplete' "$CASK_PERSISTENT_OUTPUT"
+
+WRONG_ARCH_ROOT="$TEST_ROOT/setup-wrong-arch-brew"
+WRONG_ARCH_BIN="$TEST_ROOT/setup-wrong-arch-brew-stub"
+WRONG_ARCH_BREW_LOG="$TEST_ROOT/setup-wrong-arch-brew.log"
+WRONG_ARCH_OUTPUT="$TEST_ROOT/setup-wrong-arch.log"
+mkdir -p "$WRONG_ARCH_BIN"
+cat > "$WRONG_ARCH_BIN/brew" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >> "$WUTPACK_WRONG_ARCH_BREW_LOG"
+if [ "${1:-}" = "--prefix" ]; then
+  printf '/usr/local\n'
+fi
+exit 0
+EOF
+chmod +x "$WRONG_ARCH_BIN/brew"
+env PATH="$WRONG_ARCH_BIN:/usr/bin:/bin" \
+  WUTPACK_WRONG_ARCH_BREW_LOG="$WRONG_ARCH_BREW_LOG" \
+  WUTPACK_TEST_HARDWARE_ARCH=arm64 WUTPACK_TEST_ROOT="$WRONG_ARCH_ROOT" \
+  /bin/bash "$REPO_ROOT/setup" --profile core --host codex --skip-casks \
+  --skip-ai-clis --dry-run >"$WRONG_ARCH_OUTPUT" 2>&1
+grep -Fq 'Ignoring Intel Homebrew' "$WRONG_ARCH_OUTPUT"
+if grep -Eq '^(update|install)( |$)' "$WRONG_ARCH_BREW_LOG"; then
+  printf 'setup used Intel Homebrew on simulated Apple silicon\n' >&2
   exit 1
 fi
 

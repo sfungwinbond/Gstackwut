@@ -292,20 +292,86 @@ run_checked() {
 }
 
 find_brew() {
-  if command -v brew >/dev/null 2>&1; then
-    command -v brew
-    return
+  local candidate
+  local default_bin
+
+  candidate="$(command -v brew 2>/dev/null || true)"
+  if [ -n "$candidate" ] && brew_matches_hardware "$candidate"; then
+    printf '%s\n' "$candidate"
+    return 0
   fi
-  for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
-    if [ -x "$candidate" ]; then
-      printf '%s\n' "$candidate"
-      return
-    fi
-  done
+
+  if [ "$(homebrew_hardware_arch)" = "arm64" ]; then
+    default_bin="/opt/homebrew/bin/brew"
+  else
+    default_bin="/usr/local/bin/brew"
+  fi
+  if [ -x "$default_bin" ]; then
+    printf '%s\n' "$default_bin"
+    return 0
+  fi
   return 1
 }
 
+homebrew_hardware_arch() {
+  local machine
+
+  if [ -n "${WUTPACK_TEST_ROOT:-}" ] && \
+    [ -n "${WUTPACK_TEST_HARDWARE_ARCH:-}" ]; then
+    machine="$WUTPACK_TEST_HARDWARE_ARCH"
+  else
+    machine="$(uname -m)"
+    if [ "$machine" = "x86_64" ] && \
+      [ "$(/usr/sbin/sysctl -in hw.optional.arm64 2>/dev/null || true)" = "1" ]; then
+      machine="arm64"
+    fi
+  fi
+
+  case "$machine" in
+    arm64) printf 'arm64\n' ;;
+    *) printf 'x86_64\n' ;;
+  esac
+}
+
+brew_prefix() {
+  "$1" --prefix 2>/dev/null || true
+}
+
+brew_matches_hardware() {
+  local candidate="$1"
+  local prefix
+  prefix="$(brew_prefix "$candidate")"
+  [ -n "$prefix" ] || return 1
+
+  if [ "$(homebrew_hardware_arch)" = "arm64" ]; then
+    [ "$prefix" != "/usr/local" ]
+  else
+    [ "$prefix" != "/opt/homebrew" ]
+  fi
+}
+
+warn_about_incompatible_brew() {
+  local candidate
+  local prefix
+
+  candidate="$(command -v brew 2>/dev/null || true)"
+  [ -n "$candidate" ] || return 0
+  brew_matches_hardware "$candidate" && return 0
+  prefix="$(brew_prefix "$candidate")"
+
+  if [ "$(homebrew_hardware_arch)" = "arm64" ] && \
+    [ "$prefix" = "/usr/local" ]; then
+    warn "Ignoring Intel Homebrew at $candidate on Apple silicon; using native /opt/homebrew."
+  else
+    warn "Ignoring Homebrew at $candidate because it does not match this Mac's architecture."
+  fi
+}
+
 ensure_brew() {
+  local install_status
+  local installer
+
+  warn_about_incompatible_brew
   BREW_BIN="$(find_brew 2>/dev/null || true)"
   if [ -n "$BREW_BIN" ]; then
     export PATH="$(dirname "$BREW_BIN"):$PATH"
@@ -317,13 +383,19 @@ ensure_brew() {
     BREW_BIN="brew"
     return 0
   fi
-  local installer="$TEMP_ROOT/homebrew-install.sh"
+  installer="$TEMP_ROOT/homebrew-install.sh"
   if ! curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
     https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh --output "$installer"; then
     record_failure "Could not download the Homebrew installer"
     return 1
   fi
-  if ! /bin/bash "$installer"; then
+  if [ "$(homebrew_hardware_arch)" = "arm64" ]; then
+    /usr/bin/arch -arm64 /bin/bash "$installer"
+  else
+    /bin/bash "$installer"
+  fi
+  install_status="$?"
+  if [ "$install_status" -ne 0 ]; then
     record_failure "Homebrew installation failed"
     return 1
   fi
@@ -333,6 +405,50 @@ ensure_brew() {
     return 1
   fi
   export PATH="$(dirname "$BREW_BIN"):$PATH"
+}
+
+refresh_brew() {
+  say "Refreshing Homebrew"
+  if run "$BREW_BIN" update; then
+    return 0
+  fi
+  warn "Homebrew update failed; continuing so already-current packages can still be checked."
+  return 1
+}
+
+run_brew_cask_install() {
+  local item="$1"
+  local log="$TEMP_ROOT/homebrew-cask-install.log"
+  local status
+
+  if [ "$DRY_RUN" -eq 1 ]; then
+    run "$BREW_BIN" install --cask "$item"
+    return 0
+  fi
+
+  : > "$log"
+  "$BREW_BIN" install --cask "$item" 2>&1 | tee "$log"
+  status="${PIPESTATUS[0]}"
+  return "$status"
+}
+
+install_brew_cask() {
+  local item="$1"
+  local log="$TEMP_ROOT/homebrew-cask-install.log"
+
+  if run_brew_cask_install "$item"; then
+    return 0
+  fi
+  if ! grep -Fq 'undefined method' "$log"; then
+    return 1
+  fi
+
+  warn "Homebrew could not read the current $item cask; refreshing and retrying once."
+  if "$BREW_BIN" update && run_brew_cask_install "$item"; then
+    return 0
+  fi
+  warn "Homebrew still cannot read current cask metadata. Review local tap changes, then run '$BREW_BIN update-reset' before retrying WutPack."
+  return 1
 }
 
 install_brew_manifest() {
@@ -359,10 +475,13 @@ install_brew_manifest() {
     else
       if [ "$DRY_RUN" -eq 0 ] && "$BREW_BIN" list --cask "$item" >/dev/null 2>&1; then
         note "$item already installed"
-      elif ! run_checked "Homebrew cask failed: $item" "$BREW_BIN" install --cask "$item"; then
+      elif ! install_brew_cask "$item"; then
+        record_failure "Homebrew cask failed: $item"
         if [ "$item" = "chromium" ]; then
           warn "Chromium failed; trying Google Chrome as a compatible browser fallback"
-          run_checked "Browser fallback failed: google-chrome" "$BREW_BIN" install --cask google-chrome || true
+          if ! install_brew_cask google-chrome; then
+            record_failure "Browser fallback failed: google-chrome"
+          fi
         fi
       fi
     fi
@@ -807,6 +926,7 @@ run_required "Could not create WutPack state directories" \
 
 if [ "$SKILLS_ONLY" -eq 0 ]; then
   if ensure_brew; then
+    refresh_brew || true
     say "Installing command-line workbench"
     install_brew_manifest "$PROJECT_ROOT/manifests/brew-formulae.txt" formula
     if [ "$SKIP_CASKS" -eq 0 ]; then

@@ -1985,7 +1985,7 @@
           </details>
           <details>
             <summary>Does it work on Apple silicon and Intel Macs?</summary>
-            <p>Yes. Setup detects both Homebrew locations, and the repository runs architecture-specific clean-install jobs for Apple silicon and Intel macOS runners.</p>
+            <p>Yes. Setup selects native <code>/opt/homebrew</code> on Apple silicon and <code>/usr/local</code> on Intel, refreshes Homebrew before package installation, and runs architecture-specific clean-install jobs for both macOS runners.</p>
           </details>
           <details>
             <summary>Does WutPack read or upload my business data?</summary>

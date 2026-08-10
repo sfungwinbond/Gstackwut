@@ -369,8 +369,9 @@ See the [getting-started tutorial](docs/getting-started.md), [workflow recipes](
 
 ## Boundaries
 
-- macOS is the supported bootstrap target; both Apple Silicon and Intel Homebrew
-  locations are detected.
+- macOS is the supported bootstrap target. Setup selects native
+  `/opt/homebrew` on Apple Silicon (even from a Rosetta shell) and
+  `/usr/local` on Intel, then refreshes Homebrew before package installation.
 - WutPack does not replace the core agent loop, model provider, authentication,
   sandbox, or permission system supplied by Codex or Claude Code.
 - First-time `full` setup is intentionally substantial and can take a while.
