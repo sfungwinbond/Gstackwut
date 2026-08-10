@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spreadsheet Lab"
+  short_description: "Build and audit reliable Excel workbooks"
+  default_prompt: "Use $spreadsheet-lab to analyze or update this workbook and verify Excel compatibility."

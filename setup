@@ -1,0 +1,428 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+if [ "$(uname -s)" != "Darwin" ]; then
+  printf 'WutPack setup currently supports macOS only.\n' >&2
+  exit 1
+fi
+
+PROJECT_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+USER_HOME="${WUTPACK_TEST_ROOT:-$HOME}"
+STATE_ROOT="${WUTPACK_STATE_ROOT:-$USER_HOME/Library/Application Support/WutPack}"
+CACHE_ROOT="${WUTPACK_CACHE_ROOT:-$USER_HOME/Library/Caches/WutPack}"
+LOCAL_BIN="${WUTPACK_BIN_DIR:-$USER_HOME/.local/bin}"
+KNOWLEDGE_ENV="$STATE_ROOT/knowledge"
+AGENT_ENV="$STATE_ROOT/agents"
+NODE_PREFIX="$STATE_ROOT/npm-global"
+TEMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/wutpack-setup.XXXXXX")"
+
+PROFILE="full"
+HOST="auto"
+DRY_RUN=0
+SKILLS_ONLY=0
+SKIP_CASKS=0
+SKIP_AI_CLIS=0
+WITH_EXTRAS=0
+FAILURES=()
+
+cleanup() {
+  case "$TEMP_ROOT" in
+    "${TMPDIR:-/tmp}"/wutpack-setup.*) rm -rf -- "$TEMP_ROOT" ;;
+  esac
+}
+trap cleanup EXIT INT TERM
+
+usage() {
+  cat <<'EOF'
+Usage: ./setup [options]
+
+  --host auto|codex|claude|both  Install scenario skills for detected host(s)
+  --profile core|full            Core is lighter; full adds ML and agent stacks
+  --skills-only                  Install the CLI and skills, no packages
+  --skip-casks                   Skip desktop applications
+  --skip-ai-clis                 Skip extra coding-agent CLIs
+  --with-extras                  Add optional local-AI/container applications
+  --dry-run                      Print package actions without running them
+  -h, --help                     Show this help
+EOF
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --host)
+      [ "$#" -ge 2 ] || { printf 'Missing value for --host\n' >&2; exit 2; }
+      HOST="$2"
+      shift 2
+      ;;
+    --host=*) HOST="${1#*=}"; shift ;;
+    --profile)
+      [ "$#" -ge 2 ] || { printf 'Missing value for --profile\n' >&2; exit 2; }
+      PROFILE="$2"
+      shift 2
+      ;;
+    --profile=*) PROFILE="${1#*=}"; shift ;;
+    --skills-only) SKILLS_ONLY=1; shift ;;
+    --skip-casks) SKIP_CASKS=1; shift ;;
+    --skip-ai-clis) SKIP_AI_CLIS=1; shift ;;
+    --with-extras) WITH_EXTRAS=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) printf 'Unknown option: %s\n' "$1" >&2; usage >&2; exit 2 ;;
+  esac
+done
+
+case "$HOST" in auto|codex|claude|both) ;; *) printf 'Invalid host: %s\n' "$HOST" >&2; exit 2 ;; esac
+case "$PROFILE" in core|full) ;; *) printf 'Invalid profile: %s\n' "$PROFILE" >&2; exit 2 ;; esac
+
+say() { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
+note() { printf '    %s\n' "$*"; }
+warn() { printf '\033[1;33mWARN:\033[0m %s\n' "$*" >&2; }
+
+record_failure() {
+  FAILURES+=("$1")
+  warn "$1"
+}
+
+run() {
+  if [ "$DRY_RUN" -eq 1 ]; then
+    printf 'DRY RUN:'
+    printf ' %q' "$@"
+    printf '\n'
+    return 0
+  fi
+  "$@"
+}
+
+run_checked() {
+  local label="$1"
+  shift
+  if ! run "$@"; then
+    record_failure "$label"
+    return 1
+  fi
+}
+
+find_brew() {
+  if command -v brew >/dev/null 2>&1; then
+    command -v brew
+    return
+  fi
+  for candidate in /opt/homebrew/bin/brew /usr/local/bin/brew; do
+    if [ -x "$candidate" ]; then
+      printf '%s\n' "$candidate"
+      return
+    fi
+  done
+  return 1
+}
+
+ensure_brew() {
+  BREW_BIN="$(find_brew 2>/dev/null || true)"
+  if [ -n "$BREW_BIN" ]; then
+    export PATH="$(dirname "$BREW_BIN"):$PATH"
+    return 0
+  fi
+  say "Installing Homebrew"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    note "Would run the official Homebrew installer."
+    BREW_BIN="brew"
+    return 0
+  fi
+  local installer="$TEMP_ROOT/homebrew-install.sh"
+  if ! curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+    https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh --output "$installer"; then
+    record_failure "Could not download the Homebrew installer"
+    return 1
+  fi
+  if ! /bin/bash "$installer"; then
+    record_failure "Homebrew installation failed"
+    return 1
+  fi
+  BREW_BIN="$(find_brew 2>/dev/null || true)"
+  if [ -z "$BREW_BIN" ]; then
+    record_failure "Homebrew installed but brew is not discoverable"
+    return 1
+  fi
+  export PATH="$(dirname "$BREW_BIN"):$PATH"
+}
+
+install_brew_manifest() {
+  local manifest="$1"
+  local kind="$2"
+  local item
+  while IFS= read -r item || [ -n "$item" ]; do
+    case "$item" in ''|'#'*) continue ;; esac
+    if [ "$kind" = "formula" ]; then
+      if [ "$DRY_RUN" -eq 0 ] && "$BREW_BIN" list --formula "$item" >/dev/null 2>&1; then
+        note "$item already installed"
+      else
+        run_checked "Homebrew formula failed: $item" "$BREW_BIN" install "$item" || true
+      fi
+    else
+      if [ "$DRY_RUN" -eq 0 ] && "$BREW_BIN" list --cask "$item" >/dev/null 2>&1; then
+        note "$item already installed"
+      elif ! run_checked "Homebrew cask failed: $item" "$BREW_BIN" install --cask "$item"; then
+        if [ "$item" = "chromium" ]; then
+          warn "Chromium failed; trying Google Chrome as a compatible browser fallback"
+          run_checked "Browser fallback failed: google-chrome" "$BREW_BIN" install --cask google-chrome || true
+        fi
+      fi
+    fi
+  done < "$manifest"
+}
+
+find_uv() {
+  if command -v uv >/dev/null 2>&1; then command -v uv; return; fi
+  for candidate in "$LOCAL_BIN/uv" /opt/homebrew/bin/uv /usr/local/bin/uv; do
+    [ -x "$candidate" ] && { printf '%s\n' "$candidate"; return; }
+  done
+  return 1
+}
+
+install_requirements() {
+  local python_bin="$1"
+  local manifest="$2"
+  local label="$3"
+  local spec
+  if run "$UV_BIN" pip install --python "$python_bin" --upgrade -r "$manifest"; then
+    return 0
+  fi
+  warn "$label did not resolve as one set; retrying packages individually"
+  while IFS= read -r spec || [ -n "$spec" ]; do
+    case "$spec" in ''|'#'*) continue ;; esac
+    run_checked "$label package failed: $spec" "$UV_BIN" pip install --python "$python_bin" --upgrade "$spec" || true
+  done < "$manifest"
+}
+
+ensure_python_env() {
+  local env_dir="$1"
+  if [ ! -x "$env_dir/bin/python" ]; then
+    run_checked "Could not create Python environment: $env_dir" \
+      "$UV_BIN" venv --python 3.12 --seed "$env_dir" || return 1
+  fi
+}
+
+install_python_layers() {
+  say "Building persistent Python environments"
+  UV_BIN="$(find_uv 2>/dev/null || true)"
+  if [ -z "$UV_BIN" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then
+      UV_BIN="uv"
+      note "Would use uv installed by Homebrew"
+    else
+      record_failure "uv is unavailable; Python environments were skipped"
+      return
+    fi
+  fi
+  export UV_CACHE_DIR="$CACHE_ROOT/uv"
+  export PLAYWRIGHT_BROWSERS_PATH="$CACHE_ROOT/playwright"
+  run_checked "Could not install managed Python 3.12" "$UV_BIN" python install 3.12 || true
+  ensure_python_env "$KNOWLEDGE_ENV" || return
+  install_requirements "$KNOWLEDGE_ENV/bin/python" "$PROJECT_ROOT/manifests/python-core.txt" "Core Python"
+  if [ "$PROFILE" = "full" ]; then
+    install_requirements "$KNOWLEDGE_ENV/bin/python" "$PROJECT_ROOT/manifests/python-ml.txt" "ML Python"
+    ensure_python_env "$AGENT_ENV" || return
+    install_requirements "$AGENT_ENV/bin/python" "$PROJECT_ROOT/manifests/python-agents.txt" "Agent Python"
+  fi
+  run_checked "Knowledge Python dependency check failed" \
+    "$UV_BIN" pip check --python "$KNOWLEDGE_ENV/bin/python" || true
+  if [ "$PROFILE" = "full" ] && [ -x "$AGENT_ENV/bin/python" ]; then
+    run_checked "Agent Python dependency check failed" \
+      "$UV_BIN" pip check --python "$AGENT_ENV/bin/python" || true
+  fi
+  if [ -x "$KNOWLEDGE_ENV/bin/playwright" ]; then
+    run_checked "Playwright Chromium installation failed" "$KNOWLEDGE_ENV/bin/playwright" install chromium || true
+  fi
+}
+
+install_node_manifest() {
+  local npm_bin="$1"
+  local manifest="$2"
+  local package
+  while IFS= read -r package || [ -n "$package" ]; do
+    case "$package" in ''|'#'*) continue ;; esac
+    run_checked "Node package failed: $package" "$npm_bin" install --global \
+      --prefix "$NODE_PREFIX" --cache "$CACHE_ROOT/npm" "$package" || true
+  done < "$manifest"
+}
+
+install_node_layers() {
+  say "Installing persistent Node tools"
+  local npm_bin
+  npm_bin="$(command -v npm 2>/dev/null || true)"
+  if [ -z "$npm_bin" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then
+      npm_bin="npm"
+      note "Would use npm installed with Node by Homebrew"
+    else
+      record_failure "npm is unavailable; Node tools were skipped"
+      return
+    fi
+  fi
+  export PUPPETEER_CACHE_DIR="$CACHE_ROOT/puppeteer"
+  run mkdir -p "$NODE_PREFIX" "$CACHE_ROOT/npm"
+  install_node_manifest "$npm_bin" "$PROJECT_ROOT/manifests/node-tools.txt"
+  if [ "$SKIP_AI_CLIS" -eq 0 ]; then
+    install_node_manifest "$npm_bin" "$PROJECT_ROOT/manifests/node-agents.txt"
+  fi
+  export PATH="$NODE_PREFIX/bin:$PATH"
+}
+
+install_native_agents() {
+  [ "$SKIP_AI_CLIS" -eq 1 ] && return
+  say "Installing optional native agent CLIs"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    note "Would install Hermes and Goose when they are not already present"
+    return
+  fi
+  if ! command -v hermes >/dev/null 2>&1; then
+    local hermes_installer="$TEMP_ROOT/hermes-install.sh"
+    if curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+      https://hermes-agent.nousresearch.com/install.sh --output "$hermes_installer"; then
+      run_checked "Hermes installation failed" /bin/bash "$hermes_installer" \
+        --non-interactive --skip-setup || true
+    else
+      record_failure "Could not download the Hermes installer"
+    fi
+  else
+    note "Hermes already installed"
+  fi
+  if ! command -v goose >/dev/null 2>&1; then
+    local goose_installer="$TEMP_ROOT/goose-install.sh"
+    if curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+      https://github.com/aaif-goose/goose/releases/download/stable/download_cli.sh \
+      --output "$goose_installer"; then
+      run_checked "Goose CLI installation failed" /bin/bash "$goose_installer" || true
+    else
+      record_failure "Could not download the Goose CLI installer"
+    fi
+  else
+    note "Goose already installed"
+  fi
+}
+
+install_skill_tree() {
+  local target="$1"
+  local skill_dir
+  run mkdir -p "$target"
+  for skill_dir in "$PROJECT_ROOT"/skills/*; do
+    [ -f "$skill_dir/SKILL.md" ] || continue
+    if [ "$DRY_RUN" -eq 1 ]; then
+      note "Would install $(basename "$skill_dir") -> $target"
+    else
+      ditto "$skill_dir" "$target/$(basename "$skill_dir")"
+    fi
+  done
+}
+
+install_skills() {
+  say "Installing scenario specialists"
+  local install_codex=0
+  local install_claude=0
+  case "$HOST" in
+    codex) install_codex=1 ;;
+    claude) install_claude=1 ;;
+    both) install_codex=1; install_claude=1 ;;
+    auto)
+      { command -v codex >/dev/null 2>&1 || [ -d "$USER_HOME/.codex" ]; } && install_codex=1
+      { command -v claude >/dev/null 2>&1 || [ -d "$USER_HOME/.claude" ]; } && install_claude=1
+      if [ "$install_codex" -eq 0 ] && [ "$install_claude" -eq 0 ]; then
+        install_codex=1
+        install_claude=1
+      fi
+      ;;
+  esac
+  [ "$install_codex" -eq 1 ] && install_skill_tree "$USER_HOME/.codex/skills"
+  [ "$install_claude" -eq 1 ] && install_skill_tree "$USER_HOME/.claude/skills"
+}
+
+link_command() {
+  local source="$1"
+  local name="$2"
+  local target="$LOCAL_BIN/$name"
+  [ -e "$source" ] || return 0
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    warn "Leaving existing command untouched: $target"
+    return 0
+  fi
+  run ln -sfn "$source" "$target"
+}
+
+install_shims() {
+  say "Linking stable commands"
+  run mkdir -p "$LOCAL_BIN"
+  link_command "$PROJECT_ROOT/bin/wut" wut
+  link_command "$KNOWLEDGE_ENV/bin/python" knowledge-python
+  link_command "$AGENT_ENV/bin/python" agent-python
+  local name
+  for name in jupyter jupyter-lab ipython cairosvg mkdocs pdoc sphinx-build papermill; do
+    link_command "$KNOWLEDGE_ENV/bin/$name" "$name"
+  done
+  for name in aider crewai agno browser-use fastmcp litellm; do
+    link_command "$AGENT_ENV/bin/$name" "$name"
+  done
+}
+
+ensure_profile_block() {
+  local profile_file="$1"
+  local marker='# >>> WutPack persistent tools >>>'
+  touch "$profile_file"
+  if grep -Fq "$marker" "$profile_file"; then return; fi
+  {
+    printf '\n%s\n' "$marker"
+    printf '%s\n' 'export WUTPACK_HOME="$HOME/Library/Application Support/WutPack"'
+    printf '%s\n' 'export UV_CACHE_DIR="$HOME/Library/Caches/WutPack/uv"'
+    printf '%s\n' 'export PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/WutPack/playwright"'
+    printf '%s\n' 'export PUPPETEER_CACHE_DIR="$HOME/Library/Caches/WutPack/puppeteer"'
+    printf '%s\n' 'case ":${NODE_PATH:-}:" in *":$WUTPACK_HOME/npm-global/lib/node_modules:"*) ;; *) export NODE_PATH="$WUTPACK_HOME/npm-global/lib/node_modules${NODE_PATH:+:$NODE_PATH}" ;; esac'
+    printf '%s\n' 'case ":$PATH:" in *":$WUTPACK_HOME/npm-global/bin:"*) ;; *) export PATH="$WUTPACK_HOME/npm-global/bin:$PATH" ;; esac'
+    printf '%s\n' 'case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac'
+    printf '%s\n' '# <<< WutPack persistent tools <<<'
+  } >> "$profile_file"
+}
+
+install_shell_profile() {
+  say "Making the tools visible in future terminals"
+  if [ "$DRY_RUN" -eq 1 ]; then
+    note "Would update $USER_HOME/.zprofile and $USER_HOME/.zshrc"
+    return
+  fi
+  ensure_profile_block "$USER_HOME/.zprofile"
+  ensure_profile_block "$USER_HOME/.zshrc"
+}
+
+run mkdir -p "$STATE_ROOT" "$CACHE_ROOT" "$LOCAL_BIN"
+
+if [ "$SKILLS_ONLY" -eq 0 ]; then
+  if ensure_brew; then
+    say "Installing command-line workbench"
+    install_brew_manifest "$PROJECT_ROOT/manifests/brew-formulae.txt" formula
+    if [ "$SKIP_CASKS" -eq 0 ]; then
+      say "Installing desktop workbench"
+      install_brew_manifest "$PROJECT_ROOT/manifests/brew-casks.txt" cask
+      if [ "$WITH_EXTRAS" -eq 1 ]; then
+        install_brew_manifest "$PROJECT_ROOT/manifests/brew-extras.txt" cask
+      fi
+    fi
+  fi
+  install_python_layers
+  install_node_layers
+  [ "$PROFILE" = "full" ] && install_native_agents
+fi
+
+install_skills
+install_shims
+install_shell_profile
+
+say "WutPack setup complete"
+note "Persistent state: $STATE_ROOT"
+note "Skills installed for: $HOST"
+note "Open a new terminal, then run: wut doctor"
+note "Agent sign-in and API keys are intentionally left to you."
+
+if [ "${#FAILURES[@]}" -gt 0 ]; then
+  printf '\nCompleted with %s optional failure(s):\n' "${#FAILURES[@]}" >&2
+  for failure in "${FAILURES[@]}"; do printf '  - %s\n' "$failure" >&2; done
+  exit 2
+fi

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Document Studio"
+  short_description: "Create and edit professional Word documents"
+  default_prompt: "Use $document-studio to create or revise this professional Word document."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "PDF Forensics"
+  short_description: "Extract, OCR, repair, and compare PDFs"
+  default_prompt: "Use $pdf-forensics to inspect this PDF and produce a verified usable result."

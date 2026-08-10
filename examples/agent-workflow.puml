@@ -1,0 +1,14 @@
+@startuml
+skinparam monochrome true
+actor User
+participant "Codex / Claude" as Host
+participant "Scenario specialist" as Skill
+participant "Persistent tools" as Tools
+
+User -> Host: Describe the outcome
+Host -> Skill: Route by scenario
+Skill -> Tools: Run deterministic helpers
+Tools --> Skill: Artifact + validation evidence
+Skill --> Host: Verified result
+Host --> User: Deliver and explain
+@enduml

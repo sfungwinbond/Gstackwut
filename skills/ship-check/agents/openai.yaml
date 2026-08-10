@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ship Check"
+  short_description: "Prepare a change for a safe release"
+  default_prompt: "Use $ship-check to verify this change is ready to release without publishing it yet."

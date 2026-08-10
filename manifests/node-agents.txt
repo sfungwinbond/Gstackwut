@@ -1,0 +1,5 @@
+@openai/codex
+@anthropic-ai/claude-code
+@google/gemini-cli
+opencode-ai
+@openhands/agent-canvas

@@ -1,0 +1,17 @@
+flowchart LR
+    HOST[Host controller] -->|SPI commands| PKG[Flash package]
+
+    subgraph PKG[Multi-die flash package]
+      D0[Die 0]
+      D1[Die 1]
+      D2[Die 2]
+      D3[Die 3]
+    end
+
+    HOST -. chip select / address .-> D0
+    HOST -. chip select / address .-> D1
+    HOST -. chip select / address .-> D2
+    HOST -. chip select / address .-> D3
+
+    NOTE[Confirm from the datasheet whether erase work is<br/>broadcast, parallel, or serialized across dies]
+    PKG --- NOTE

@@ -1,0 +1,173 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+SELF_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)"
+PROJECT_ROOT="${WUTPACK_INSTALL_ROOT:-$(CDPATH= cd -- "$SELF_DIR/.." && pwd -P)}"
+USER_HOME="${WUTPACK_TEST_ROOT:-$HOME}"
+STATE_ROOT="${WUTPACK_STATE_ROOT:-$USER_HOME/Library/Application Support/WutPack}"
+CACHE_ROOT="${WUTPACK_CACHE_ROOT:-$USER_HOME/Library/Caches/WutPack}"
+KNOWLEDGE_ENV="$STATE_ROOT/knowledge"
+AGENT_ENV="$STATE_ROOT/agents"
+NODE_PREFIX="$STATE_ROOT/npm-global"
+
+export PATH="$NODE_PREFIX/bin:$PATH"
+export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$CACHE_ROOT/playwright}"
+export PUPPETEER_CACHE_DIR="${PUPPETEER_CACHE_DIR:-$CACHE_ROOT/puppeteer}"
+if [ -n "${NODE_PATH:-}" ]; then
+  export NODE_PATH="$NODE_PREFIX/lib/node_modules:$NODE_PATH"
+else
+  export NODE_PATH="$NODE_PREFIX/lib/node_modules"
+fi
+
+usage() {
+  cat <<'EOF'
+WutPack control command
+
+Usage: wut <command> [arguments]
+
+  doctor             Check the persistent workbench and installed hosts
+  paths              Show every persistent location
+  skills             List scenario specialists
+  routes             Show which specialist fits which job
+  setup [options]    Re-run setup from the installed source
+  update [options]   Fetch the latest source and re-run setup
+  python [args]      Run the knowledge-work Python
+  agent-python       Run the agent-framework Python
+  lab [args]         Start JupyterLab
+  deck [output]      Generate an editable technical PPTX example
+  diagram IN OUT     Render Mermaid source to SVG/PNG/PDF
+  render FILE [DIR]  Convert an Office document to PDF with LibreOffice
+  ocr IN OUT         OCR a scanned PDF
+  version            Print the installed version
+  help               Show this help
+EOF
+}
+
+find_soffice() {
+  if command -v soffice >/dev/null 2>&1; then command -v soffice; return; fi
+  local app="/Applications/LibreOffice.app/Contents/MacOS/soffice"
+  [ -x "$app" ] && { printf '%s\n' "$app"; return; }
+  return 1
+}
+
+doctor() {
+  local missing=0
+  local command_name
+  printf 'WutPack doctor\n\n'
+  for command_name in git rg jq uv node npm pandoc pdfinfo pdftotext qpdf mutool ocrmypdf tesseract magick dot duckdb; do
+    if command -v "$command_name" >/dev/null 2>&1; then
+      printf '  [ok]   %-16s %s\n' "$command_name" "$(command -v "$command_name")"
+    else
+      printf '  [miss] %-16s\n' "$command_name"
+      missing=$((missing + 1))
+    fi
+  done
+  if find_soffice >/dev/null 2>&1; then
+    printf '  [ok]   %-16s %s\n' soffice "$(find_soffice)"
+  else
+    printf '  [miss] %-16s\n' soffice
+    missing=$((missing + 1))
+  fi
+  [ -x "$KNOWLEDGE_ENV/bin/python" ] && printf '  [ok]   knowledge env\n' || { printf '  [miss] knowledge env\n'; missing=$((missing + 1)); }
+  [ -x "$AGENT_ENV/bin/python" ] && printf '  [ok]   agent env\n' || printf '  [note] agent env not installed (core profile is valid)\n'
+  [ -d "$USER_HOME/.codex/skills" ] && printf '  [ok]   Codex skills\n'
+  [ -d "$USER_HOME/.claude/skills" ] && printf '  [ok]   Claude Code skills\n'
+  printf '\nMissing required checks: %s\n' "$missing"
+  [ "$missing" -eq 0 ]
+}
+
+list_skills() {
+  local skill_file
+  for skill_file in "$PROJECT_ROOT"/skills/*/SKILL.md; do
+    [ -f "$skill_file" ] || continue
+    local name description
+    name="$(awk '/^name:/{sub(/^name:[[:space:]]*/,""); print; exit}' "$skill_file")"
+    description="$(awk '/^description:/{sub(/^description:[[:space:]]*/,""); print; exit}' "$skill_file")"
+    printf '  %-20s %s\n' "$name" "$description"
+  done
+}
+
+routes() {
+  cat <<'EOF'
+Scenario                  Specialist
+------------------------  ----------------
+Evidence-backed research  research-brief
+Excel models and charts   spreadsheet-lab
+Scanned or broken PDFs    pdf-forensics
+Editable PowerPoint       technical-deck
+Data exploration          data-lab
+HTML/PDF documentation    publish-docs
+Architecture diagrams     system-diagram
+Professional Word docs    document-studio
+Implement a change        code-build
+Diagnose a failure        debug-lab
+Review a diff             review-gate
+Release readiness         ship-check
+EOF
+}
+
+command_name="${1:-help}"
+[ "$#" -gt 0 ] && shift
+
+case "$command_name" in
+  help|-h|--help) usage ;;
+  version) cat "$PROJECT_ROOT/VERSION" ;;
+  doctor) doctor ;;
+  paths)
+    printf 'source=%s\nstate=%s\ncache=%s\nknowledge_python=%s\nagent_python=%s\nnode_prefix=%s\n' \
+      "$PROJECT_ROOT" "$STATE_ROOT" "$CACHE_ROOT" "$KNOWLEDGE_ENV/bin/python" \
+      "$AGENT_ENV/bin/python" "$NODE_PREFIX"
+    ;;
+  skills) list_skills ;;
+  routes) routes ;;
+  setup) exec "$PROJECT_ROOT/setup" "$@" ;;
+  update)
+    installer="$(mktemp "${TMPDIR:-/tmp}/wutpack-update.XXXXXX")"
+    trap 'rm -f -- "$installer"' EXIT INT TERM
+    curl --proto '=https' --tlsv1.2 --fail --silent --show-error --location \
+      https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh \
+      --output "$installer"
+    /bin/bash "$installer" "$@"
+    ;;
+  python)
+    [ -x "$KNOWLEDGE_ENV/bin/python" ] || { printf 'Knowledge Python is not installed. Run: wut setup\n' >&2; exit 1; }
+    exec "$KNOWLEDGE_ENV/bin/python" "$@"
+    ;;
+  agent-python)
+    [ -x "$AGENT_ENV/bin/python" ] || { printf 'Agent Python is not installed. Run: wut setup --profile full\n' >&2; exit 1; }
+    exec "$AGENT_ENV/bin/python" "$@"
+    ;;
+  lab)
+    [ -x "$KNOWLEDGE_ENV/bin/jupyter-lab" ] || { printf 'JupyterLab is not installed. Run: wut setup\n' >&2; exit 1; }
+    exec "$KNOWLEDGE_ENV/bin/jupyter-lab" "$@"
+    ;;
+  deck)
+    output="${1:-technical-diagram-demo.pptx}"
+    exec node "$PROJECT_ROOT/skills/technical-deck/scripts/new_technical_deck.mjs" --output="$output"
+    ;;
+  diagram)
+    [ "$#" -eq 2 ] || { printf 'Usage: wut diagram INPUT.mmd OUTPUT.svg\n' >&2; exit 2; }
+    exec "$NODE_PREFIX/bin/mmdc" -i "$1" -o "$2"
+    ;;
+  render)
+    [ "$#" -ge 1 ] || { printf 'Usage: wut render FILE [OUTPUT_DIR]\n' >&2; exit 2; }
+    soffice_bin="$(find_soffice 2>/dev/null || true)"
+    [ -n "$soffice_bin" ] || { printf 'LibreOffice is not installed. Run: wut setup\n' >&2; exit 1; }
+    output_dir="${2:-$(pwd)}"
+    mkdir -p "$output_dir"
+    render_profile="$(mktemp -d "${TMPDIR:-/tmp}/wutpack-libreoffice.XXXXXX")"
+    "$soffice_bin" "-env:UserInstallation=file://$render_profile/profile" \
+      --headless --convert-to pdf --outdir "$output_dir" "$1"
+    render_status=$?
+    case "$render_profile" in
+      "${TMPDIR:-/tmp}"/wutpack-libreoffice.*) rm -rf -- "$render_profile" ;;
+    esac
+    exit "$render_status"
+    ;;
+  ocr)
+    [ "$#" -eq 2 ] || { printf 'Usage: wut ocr INPUT.pdf OUTPUT.pdf\n' >&2; exit 2; }
+    exec ocrmypdf --deskew --rotate-pages "$1" "$2"
+    ;;
+  *) printf 'Unknown command: %s\n\n' "$command_name" >&2; usage >&2; exit 2 ;;
+esac

@@ -1,0 +1,5 @@
+libreoffice
+chromium
+quarto
+drawio
+inkscape

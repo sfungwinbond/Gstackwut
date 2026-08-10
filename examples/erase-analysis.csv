@@ -1,0 +1,4 @@
+density_mbit,stack_dies,operation,normalized_base_time,illustrative_upper_time,basis
+512,1,chip erase,1.00,1.00,single-die normalized example
+1024,2,chip erase,2.00,2.10,two-die example plus 5 percent uncertainty
+2048,4,chip erase,4.00,4.40,four-die example plus 10 percent uncertainty

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Research Brief"
+  short_description: "Build sourced research briefs and evidence maps"
+  default_prompt: "Use $research-brief to research this question and produce a sourced decision brief."

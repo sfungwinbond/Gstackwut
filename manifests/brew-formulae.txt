@@ -1,0 +1,44 @@
+# Search, shell, and source control
+git
+gh
+ripgrep
+fd
+fzf
+bat
+tree
+jq
+yq
+wget
+coreutils
+shellcheck
+shfmt
+git-delta
+hyperfine
+just
+
+# Language and publishing runtimes
+uv
+node
+bun
+pandoc
+doxygen
+typst
+
+# PDF, OCR, image, and media work
+poppler
+qpdf
+mupdf-tools
+ocrmypdf
+exiftool
+imagemagick
+ghostscript
+tesseract
+ffmpeg
+
+# Diagrams, data, and databases
+cairo
+pango
+graphviz
+plantuml
+duckdb
+sqlite

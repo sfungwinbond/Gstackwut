@@ -1,0 +1,4 @@
+interface:
+  display_name: "Technical Deck"
+  short_description: "Draw editable engineering PowerPoint diagrams"
+  default_prompt: "Use $technical-deck to create an editable technical PowerPoint diagram."
