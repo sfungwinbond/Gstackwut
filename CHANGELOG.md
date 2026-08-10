@@ -4,6 +4,8 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+## [0.1.0.1] - 2026-08-10
+
 ### Fixed
 
 - Made the installed `wut` shim resolve its real source through symlink chains,
