@@ -3,6 +3,7 @@
 [![validate](https://github.com/sfungwinbond/Gstackwut/actions/workflows/validate.yml/badge.svg)](https://github.com/sfungwinbond/Gstackwut/actions/workflows/validate.yml)
 [![fresh install](https://github.com/sfungwinbond/Gstackwut/actions/workflows/fresh-install.yml/badge.svg)](https://github.com/sfungwinbond/Gstackwut/actions/workflows/fresh-install.yml)
 [![website](https://img.shields.io/badge/website-live-176b4d)](https://sfungwinbond.github.io/Gstackwut/)
+[![release](https://img.shields.io/github/v/release/sfungwinbond/Gstackwut?display_name=tag&amp;sort=semver)](https://github.com/sfungwinbond/Gstackwut/releases/latest)
 
 **The persistent knowledge-work harness for Codex and Claude Code.**
 
@@ -10,9 +11,10 @@ One install. Twelve specialists. A Mac workbench that is still there tomorrow.
 
 [See the small-business landing page →](https://sfungwinbond.github.io/Gstackwut/)
 
-WutPack turns a fresh Codex or Claude Code setup into a practical knowledge-work
-station. It is the environment-and-workflow layer around the agent: durable
-document, data, browser, diagram, publishing, and agent tools; focused skills
+WutPack turns a fresh Mac into a practical Codex and Claude Code knowledge-work
+station. It installs both CLIs by default, then provides the
+environment-and-workflow layer around them: durable document, data, browser,
+diagram, publishing, and agent tools; focused skills
 that know when and how to use them; and validation gates for the artifacts they
 produce.
 

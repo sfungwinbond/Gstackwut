@@ -48,3 +48,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Notify participating search engines with IndexNow
+        env:
+          INDEXNOW_KEY: f2816059f4e9897a617c4f65de3dee83
+          SITE_URL: https://sfungwinbond.github.io/Gstackwut
+        run: |
+          set -euo pipefail
+          key_url="$SITE_URL/$INDEXNOW_KEY.txt"
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 "$key_url" >/dev/null
+          curl --fail --silent --show-error --get https://api.indexnow.org/indexnow \
+            --data-urlencode "url=$SITE_URL/" \
+            --data-urlencode "key=$INDEXNOW_KEY" \
+            --data-urlencode "keyLocation=$key_url"

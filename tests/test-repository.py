@@ -180,9 +180,12 @@ def validate_landing_page(errors: list[str]) -> None:
     required_fragments = [
         "MIT licensed",
         "install.sh | bash",
+        "summary_large_image",
+        "social-card.png",
         "The honest boundary",
         "Apple silicon and Intel",
         "Codex or Claude Code",
+        "Does it install Codex and Claude Code?",
         "Command-Space",
         "Terminal shows no dots",
         "wut doctor",
@@ -198,6 +201,24 @@ def validate_landing_page(errors: list[str]) -> None:
     for fragment in forbidden_fragments:
         if fragment.lower() in lowered:
             fail(errors, f"site/index.html: contains forbidden product-specific content {fragment!r}")
+
+    social_card = ROOT / "site/social-card.png"
+    if social_card.is_file():
+        data = social_card.read_bytes()
+        if len(data) < 24 or data[:8] != b"\x89PNG\r\n\x1a\n":
+            fail(errors, "site/social-card.png: must be a valid PNG")
+        else:
+            width = int.from_bytes(data[16:20], "big")
+            height = int.from_bytes(data[20:24], "big")
+            if (width, height) != (1280, 640):
+                fail(errors, f"site/social-card.png: expected 1280x640, got {width}x{height}")
+            if len(data) > 1_000_000:
+                fail(errors, "site/social-card.png: must remain under 1 MB")
+
+    indexnow_key = "f2816059f4e9897a617c4f65de3dee83"
+    key_path = ROOT / f"site/{indexnow_key}.txt"
+    if key_path.is_file() and key_path.read_text(encoding="utf-8").strip() != indexnow_key:
+        fail(errors, f"{key_path.relative_to(ROOT)}: key contents must match its filename")
 
 
 def validate_repository(errors: list[str]) -> None:
@@ -216,6 +237,8 @@ def validate_repository(errors: list[str]) -> None:
         "docs/images/editable-executive-roadmap.png",
         "site/index.html",
         "site/favicon.svg",
+        "site/social-card.png",
+        "site/f2816059f4e9897a617c4f65de3dee83.txt",
         "site/robots.txt",
         "site/sitemap.xml",
         ".github/workflows/pages.yml",
