@@ -80,5 +80,11 @@ grep -Eq 'python-core\.txt .*python-ml\.txt' "$FRESH_DRY_LOG"
 grep -Fq 'brew install node' "$FRESH_DRY_LOG"
 grep -Fq 'brew install pandoc' "$FRESH_DRY_LOG"
 grep -Fq 'brew install sqlite' "$FRESH_DRY_LOG"
+grep -Eq 'uv pip install .*--upgrade --exact --strict' "$FRESH_DRY_LOG"
+grep -Fq 'npm uninstall --global' "$FRESH_DRY_LOG"
+grep -Fq '@modelcontextprotocol/server-filesystem' "$FRESH_DRY_LOG"
+test "$(tail -n 2 "$FRESH_DRY_LOG" | head -n 1)" = \
+  'IMPORTANT: Open a new terminal before using WutPack, then run: wut doctor'
+test "$(tail -n 1 "$FRESH_DRY_LOG")" = 'Author: WUTLABS SUNNYVALE CA'
 
 printf 'Shell and isolated-install checks passed.\n'

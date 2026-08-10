@@ -146,6 +146,42 @@ def validate_agent_cli_policy(errors: list[str]) -> None:
     if "aider-chat" in python_agents:
         fail(errors, "manifests/python-agents.txt: Aider must not be installed")
 
+    if "huggingface-hub<1" not in python_agents:
+        fail(
+            errors,
+            "manifests/python-agents.txt: huggingface-hub must stay below 1.x "
+            "while Pydantic AI requests its retired inference extra",
+        )
+
+    node_tools = manifest_values(ROOT / "manifests/node-tools.txt")
+    deprecated_node_tools = {
+        "@modelcontextprotocol/inspector",
+        "@modelcontextprotocol/inspector@^2",
+        "@modelcontextprotocol/server-filesystem",
+    }
+    found_deprecated_node_tools = sorted(deprecated_node_tools.intersection(node_tools))
+    if found_deprecated_node_tools:
+        fail(
+            errors,
+            "manifests/node-tools.txt: warning-producing MCP tools must stay retired; "
+            f"got {found_deprecated_node_tools}",
+        )
+
+    expected_retired_node = [
+        "@google/gemini-cli",
+        "opencode-ai",
+        "@openhands/agent-canvas",
+        "@modelcontextprotocol/inspector",
+        "@modelcontextprotocol/server-filesystem",
+    ]
+    retired_node = manifest_values(ROOT / "manifests/node-retired.txt")
+    if retired_node != expected_retired_node:
+        fail(
+            errors,
+            "manifests/node-retired.txt: stale Node packages must be removed; "
+            f"got {retired_node}",
+        )
+
     current_install_docs = [
         ROOT / "setup",
         ROOT / "README.md",

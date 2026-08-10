@@ -196,19 +196,12 @@ install_requirements() {
   local python_bin="$1"
   local manifest="$2"
   local label="$3"
-  local spec
-  if run "$UV_BIN" pip install --python "$python_bin" --upgrade -r "$manifest"; then
+  if run "$UV_BIN" pip install --python "$python_bin" --upgrade --exact --strict \
+    -r "$manifest"; then
     return 0
   fi
-  warn "$label did not resolve as one set; retrying packages individually"
-  local specs=()
-  while IFS= read -r spec || [ -n "$spec" ]; do
-    case "$spec" in ''|'#'*) continue ;; esac
-    specs+=("$spec")
-  done < "$manifest"
-  for spec in "${specs[@]}"; do
-    run_checked "$label package failed: $spec" "$UV_BIN" pip install --python "$python_bin" --upgrade "$spec" || true
-  done
+  record_failure "$label dependency resolution failed"
+  return 1
 }
 
 install_full_knowledge_requirements() {
@@ -219,7 +212,7 @@ install_full_knowledge_requirements() {
   # Resolve both layers together because they share transitive dependencies.
   # Installing the ML layer separately can upgrade packages beyond constraints
   # imposed by the core layer even though each manifest resolves on its own.
-  if run "$UV_BIN" pip install --python "$python_bin" --upgrade \
+  if run "$UV_BIN" pip install --python "$python_bin" --upgrade --exact --strict \
     -r "$core_manifest" -r "$ml_manifest"; then
     return 0
   fi
@@ -290,6 +283,26 @@ install_node_manifest() {
   done
 }
 
+uninstall_node_manifest() {
+  local npm_bin="$1"
+  local manifest="$2"
+  local package
+  local packages=()
+  while IFS= read -r package || [ -n "$package" ]; do
+    case "$package" in ''|'#'*) continue ;; esac
+    packages+=("$package")
+  done < "$manifest"
+  for package in "${packages[@]}"; do
+    if [ "$DRY_RUN" -eq 0 ] && ! "$npm_bin" list --global --prefix "$NODE_PREFIX" \
+      --depth=0 "$package" >/dev/null 2>&1; then
+      continue
+    fi
+    run_checked "Could not remove retired Node package: $package" \
+      "$npm_bin" uninstall --global --prefix "$NODE_PREFIX" \
+      --cache "$CACHE_ROOT/npm" "$package" || true
+  done
+}
+
 install_node_layers() {
   say "Installing persistent Node tools"
   local npm_bin
@@ -305,6 +318,7 @@ install_node_layers() {
   fi
   export PUPPETEER_CACHE_DIR="$CACHE_ROOT/puppeteer"
   run mkdir -p "$NODE_PREFIX" "$CACHE_ROOT/npm"
+  uninstall_node_manifest "$npm_bin" "$PROJECT_ROOT/manifests/node-retired.txt"
   install_node_manifest "$npm_bin" "$PROJECT_ROOT/manifests/node-tools.txt"
   if [ "$SKIP_AI_CLIS" -eq 0 ]; then
     install_node_manifest "$npm_bin" "$PROJECT_ROOT/manifests/node-agents.txt"
@@ -427,11 +441,15 @@ install_shell_profile
 say "WutPack setup complete"
 note "Persistent state: $STATE_ROOT"
 note "Skills installed for: $HOST"
-note "Open a new terminal, then run: wut doctor"
 note "Agent sign-in and API keys are intentionally left to you."
 
+setup_status=0
 if [ "${#FAILURES[@]}" -gt 0 ]; then
   printf '\nCompleted with %s optional failure(s):\n' "${#FAILURES[@]}" >&2
   for failure in "${FAILURES[@]}"; do printf '  - %s\n' "$failure" >&2; done
-  exit 2
+  setup_status=2
 fi
+
+printf '\nIMPORTANT: Open a new terminal before using WutPack, then run: wut doctor\n'
+printf 'Author: WUTLABS SUNNYVALE CA\n'
+exit "$setup_status"

@@ -4,10 +4,22 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+### Changed
+
+- Setup now exactly synchronizes managed Python environments, preventing retired
+  packages from leaving incompatible dependencies behind.
+- Kept Hugging Face Hub on its compatible 0.x line while Pydantic AI still
+  requests the removed `inference` extra.
+- Added a final reminder to open a new terminal and an
+  `Author: WUTLABS SUNNYVALE CA` footer to installer output.
+
 ### Removed
 
 - Hermes, Goose, Gemini CLI, OpenCode, Agent Canvas, and Aider from setup. Codex
   and Claude Code are now the only AI coding CLIs installed by default.
+- MCP Inspector and the filesystem MCP server from setup because their current
+  dependency trees emit upstream deprecation warnings. Existing stale copies are
+  removed during setup.
 
 ## [0.1.0] - 2026-08-10
 

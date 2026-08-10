@@ -1,0 +1,6 @@
+# Removed from WutPack defaults. Setup uninstalls stale copies from its prefix.
+@google/gemini-cli
+opencode-ai
+@openhands/agent-canvas
+@modelcontextprotocol/inspector
+@modelcontextprotocol/server-filesystem

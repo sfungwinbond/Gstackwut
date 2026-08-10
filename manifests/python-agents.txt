@@ -7,6 +7,8 @@ autogen-agentchat
 autogen-ext[openai]
 crewai[tools]
 pydantic-ai
+# Pydantic AI still requests the inference extra removed in huggingface-hub 1.x.
+huggingface-hub<1
 smolagents[toolkit]
 llama-index
 semantic-kernel
