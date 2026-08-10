@@ -154,8 +154,17 @@ install_brew_manifest() {
   local manifest="$1"
   local kind="$2"
   local item
+  local items=()
+
+  # Read the complete manifest before launching package managers. Commands such
+  # as `brew install node` may read standard input and would otherwise consume
+  # the remaining manifest lines from the loop.
   while IFS= read -r item || [ -n "$item" ]; do
     case "$item" in ''|'#'*) continue ;; esac
+    items+=("$item")
+  done < "$manifest"
+
+  for item in "${items[@]}"; do
     if [ "$kind" = "formula" ]; then
       if [ "$DRY_RUN" -eq 0 ] && "$BREW_BIN" list --formula "$item" >/dev/null 2>&1; then
         note "$item already installed"
@@ -172,7 +181,7 @@ install_brew_manifest() {
         fi
       fi
     fi
-  done < "$manifest"
+  done
 }
 
 find_uv() {
@@ -192,10 +201,14 @@ install_requirements() {
     return 0
   fi
   warn "$label did not resolve as one set; retrying packages individually"
+  local specs=()
   while IFS= read -r spec || [ -n "$spec" ]; do
     case "$spec" in ''|'#'*) continue ;; esac
-    run_checked "$label package failed: $spec" "$UV_BIN" pip install --python "$python_bin" --upgrade "$spec" || true
+    specs+=("$spec")
   done < "$manifest"
+  for spec in "${specs[@]}"; do
+    run_checked "$label package failed: $spec" "$UV_BIN" pip install --python "$python_bin" --upgrade "$spec" || true
+  done
 }
 
 install_full_knowledge_requirements() {
@@ -266,11 +279,15 @@ install_node_manifest() {
   local npm_bin="$1"
   local manifest="$2"
   local package
+  local packages=()
   while IFS= read -r package || [ -n "$package" ]; do
     case "$package" in ''|'#'*) continue ;; esac
+    packages+=("$package")
+  done < "$manifest"
+  for package in "${packages[@]}"; do
     run_checked "Node package failed: $package" "$npm_bin" install --global \
       --prefix "$NODE_PREFIX" --cache "$CACHE_ROOT/npm" "$package" || true
-  done < "$manifest"
+  done
 }
 
 install_node_layers() {

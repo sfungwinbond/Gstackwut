@@ -77,5 +77,8 @@ env PATH=/usr/bin:/bin:/usr/sbin:/sbin WUTPACK_TEST_ROOT="$FRESH_DRY_ROOT" \
 test ! -e "$FRESH_DRY_ROOT"
 test "$(grep -c 'python-ml\.txt' "$FRESH_DRY_LOG")" = "1"
 grep -Eq 'python-core\.txt .*python-ml\.txt' "$FRESH_DRY_LOG"
+grep -Fq 'brew install node' "$FRESH_DRY_LOG"
+grep -Fq 'brew install pandoc' "$FRESH_DRY_LOG"
+grep -Fq 'brew install sqlite' "$FRESH_DRY_LOG"
 
 printf 'Shell and isolated-install checks passed.\n'
