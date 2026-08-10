@@ -25,13 +25,35 @@ SKIP_CASKS=0
 SKIP_AI_CLIS=0
 WITH_EXTRAS=0
 FAILURES=()
+SETUP_LOCK_ROOT=""
+HAVE_SETUP_LOCK=0
+EXPECTED_SKILLS=(
+  code-build
+  data-lab
+  debug-lab
+  document-studio
+  pdf-forensics
+  publish-docs
+  research-brief
+  review-gate
+  ship-check
+  spreadsheet-lab
+  system-diagram
+  technical-deck
+)
 
 cleanup() {
+  if [ "$HAVE_SETUP_LOCK" -eq 1 ]; then
+    rm -f -- "$SETUP_LOCK_ROOT/pid" "$SETUP_LOCK_ROOT/start"
+    rmdir "$SETUP_LOCK_ROOT" 2>/dev/null || true
+  fi
   case "$TEMP_ROOT" in
     "${TMPDIR:-/tmp}"/wutpack-setup.*) rm -rf -- "$TEMP_ROOT" ;;
   esac
 }
-trap cleanup EXIT INT TERM
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 usage() {
   cat <<'EOF'
@@ -79,12 +101,169 @@ say() { printf '\n\033[1;36m==> %s\033[0m\n' "$*"; }
 note() { printf '    %s\n' "$*"; }
 warn() { printf '\033[1;33mWARN:\033[0m %s\n' "$*" >&2; }
 
+fatal() {
+  printf '\033[1;31mERROR:\033[0m %s\n' "$*" >&2
+  exit 1
+}
+
 record_failure() {
   FAILURES+=("$1")
   warn "$1"
   if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
     printf '::error title=WutPack setup::%s\n' "$1"
   fi
+}
+
+validate_source_tree() {
+  local required_file
+  local skill_name
+  local skill_dir
+  local skill_count=0
+
+  for required_file in \
+    VERSION install.sh setup bin/wut \
+    manifests/brew-formulae.txt manifests/brew-casks.txt \
+    manifests/brew-extras.txt manifests/node-tools.txt \
+    manifests/node-agents.txt manifests/node-retired.txt \
+    manifests/python-core.txt manifests/python-ml.txt \
+    manifests/python-agents.txt \
+    skills/technical-deck/scripts/new_technical_deck.mjs; do
+    [ -f "$PROJECT_ROOT/$required_file" ] || \
+      fatal "WutPack source is incomplete: missing $required_file"
+  done
+
+  for skill_name in "${EXPECTED_SKILLS[@]}"; do
+    [ -f "$PROJECT_ROOT/skills/$skill_name/SKILL.md" ] || \
+      fatal "WutPack source is incomplete: missing skill $skill_name"
+  done
+
+  for skill_dir in "$PROJECT_ROOT"/skills/*; do
+    [ -d "$skill_dir" ] || continue
+    case "$(basename "$skill_dir")" in
+      code-build|data-lab|debug-lab|document-studio|pdf-forensics|publish-docs|research-brief|review-gate|ship-check|spreadsheet-lab|system-diagram|technical-deck)
+        skill_count=$((skill_count + 1))
+        ;;
+      *) fatal "WutPack source contains an unexpected skill: $(basename "$skill_dir")" ;;
+    esac
+  done
+  [ "$skill_count" -eq "${#EXPECTED_SKILLS[@]}" ] || \
+    fatal "WutPack source is incomplete: found $skill_count/${#EXPECTED_SKILLS[@]} required skills"
+}
+
+preflight_command_target() {
+  local target="$LOCAL_BIN/wut"
+  if [ -e "$target" ] && [ ! -L "$target" ]; then
+    fatal "Cannot install wut because a non-symlink already exists: $target"
+  fi
+}
+
+setup_process_start_time() {
+  ps -p "$1" -o lstart= 2>/dev/null | \
+    sed 's/^[[:space:]]*//;s/[[:space:]]*$//'
+}
+
+write_setup_lock_owner() {
+  local lock_dir="$1"
+  local start_time
+  start_time="$(setup_process_start_time "$$" || true)"
+  [ -n "$start_time" ] || start_time="unavailable"
+  printf '%s\n' "$$" > "$lock_dir/pid" || return 1
+  printf '%s\n' "$start_time" > "$lock_dir/start" || return 1
+}
+
+setup_lock_owner_status() {
+  local lock_dir="$1"
+  local owner_pid
+  local owner_start
+  local current_start
+
+  [ -f "$lock_dir/pid" ] && [ -f "$lock_dir/start" ] || return 2
+  IFS= read -r owner_pid < "$lock_dir/pid" || return 2
+  case "$owner_pid" in ''|*[!0-9]*) return 2 ;; esac
+  IFS= read -r owner_start < "$lock_dir/start" || return 2
+  [ -n "$owner_start" ] || return 2
+  kill -0 "$owner_pid" 2>/dev/null || return 1
+  current_start="$(setup_process_start_time "$owner_pid" || true)"
+  if [ "$owner_start" = "unavailable" ] || [ -z "$current_start" ]; then
+    return 0
+  fi
+  [ "$current_start" = "$owner_start" ]
+}
+
+is_safe_setup_lock_dir() {
+  local lock_dir="$1"
+  local owner_uid
+  local lock_mode
+
+  [ -d "$lock_dir" ] && [ ! -L "$lock_dir" ] || return 1
+  owner_uid="$(stat -f '%u' "$lock_dir" 2>/dev/null)" || return 1
+  lock_mode="$(stat -f '%Lp' "$lock_dir" 2>/dev/null)" || return 1
+  [ "$owner_uid" = "$(id -u)" ] && [ "$lock_mode" = "700" ]
+}
+
+acquire_setup_lock() {
+  local project_parent
+  local project_name
+  local owner_state=0
+  local recovery_state=0
+  local recovery_dir
+
+  [ "$DRY_RUN" -eq 0 ] || return 0
+  project_parent="$(CDPATH= cd -- "$PROJECT_ROOT/.." && pwd -P)" || \
+    fatal "Could not resolve WutPack source parent: $PROJECT_ROOT"
+  project_name="$(basename -- "$PROJECT_ROOT")"
+  SETUP_LOCK_ROOT="$project_parent/.$project_name.install-lock"
+
+  if [ "${WUTPACK_INSTALL_LOCK_HELD:-}" = "$SETUP_LOCK_ROOT" ] && \
+    [ -d "$SETUP_LOCK_ROOT" ]; then
+    return 0
+  fi
+  if mkdir -m 700 "$SETUP_LOCK_ROOT" 2>/dev/null; then
+    HAVE_SETUP_LOCK=1
+    write_setup_lock_owner "$SETUP_LOCK_ROOT" || \
+      fatal "Could not initialize the WutPack setup lock: $SETUP_LOCK_ROOT"
+    return 0
+  fi
+  is_safe_setup_lock_dir "$SETUP_LOCK_ROOT" || \
+    fatal "Unsafe WutPack setup lock at $SETUP_LOCK_ROOT; refusing recovery"
+
+  setup_lock_owner_status "$SETUP_LOCK_ROOT" || owner_state=$?
+  case "$owner_state" in
+    0) fatal "Another WutPack install or setup is active (lock: $SETUP_LOCK_ROOT)" ;;
+    2) fatal "Unreadable WutPack setup lock at $SETUP_LOCK_ROOT; verify no setup is running, then remove it" ;;
+  esac
+  if [ -f "$SETUP_LOCK_ROOT/stage" ] || \
+    [ -f "$SETUP_LOCK_ROOT/backup" ] || \
+    [ -f "$SETUP_LOCK_ROOT/had-previous" ]; then
+    fatal "An interrupted WutPack source update needs recovery; re-run wut update"
+  fi
+
+  recovery_dir="$SETUP_LOCK_ROOT/recovery"
+  if [ -d "$recovery_dir" ]; then
+    is_safe_setup_lock_dir "$recovery_dir" || \
+      fatal "Unsafe WutPack setup recovery lock at $recovery_dir"
+    setup_lock_owner_status "$recovery_dir" || recovery_state=$?
+    case "$recovery_state" in
+      0) fatal "Another WutPack process is recovering the setup lock" ;;
+      1)
+        rm -f -- "$recovery_dir/pid" "$recovery_dir/start"
+        rmdir "$recovery_dir" 2>/dev/null || \
+          fatal "Could not reclaim stale setup recovery lock: $recovery_dir"
+        ;;
+      *) fatal "Unreadable WutPack setup recovery lock at $recovery_dir" ;;
+    esac
+  fi
+
+  mkdir -m 700 "$recovery_dir" 2>/dev/null || \
+    fatal "Another WutPack process claimed setup recovery"
+  write_setup_lock_owner "$recovery_dir" || \
+    fatal "Could not initialize WutPack setup recovery"
+  rm -f -- "$SETUP_LOCK_ROOT/pid" "$SETUP_LOCK_ROOT/start"
+  rm -f -- "$recovery_dir/pid" "$recovery_dir/start"
+  rmdir "$recovery_dir" || fatal "Could not finish WutPack setup lock recovery"
+  HAVE_SETUP_LOCK=1
+  write_setup_lock_owner "$SETUP_LOCK_ROOT" || \
+    fatal "Could not initialize the WutPack setup lock: $SETUP_LOCK_ROOT"
 }
 
 run() {
@@ -95,6 +274,12 @@ run() {
     return 0
   fi
   "$@"
+}
+
+run_required() {
+  local label="$1"
+  shift
+  run "$@" || fatal "$label"
 }
 
 run_checked() {
@@ -326,16 +511,126 @@ install_node_layers() {
   export PATH="$NODE_PREFIX/bin:$PATH"
 }
 
+is_wutpack_skill_tree() {
+  local target="$1"
+  local skill_name="$2"
+  local source="$PROJECT_ROOT/skills/$skill_name"
+
+  if [ -f "$target/.wutpack-skill" ] && \
+    grep -Fxq "WutPack managed skill v1: $skill_name" \
+      "$target/.wutpack-skill"; then
+    return 0
+  fi
+
+  [ -f "$target/SKILL.md" ] && [ -f "$target/agents/openai.yaml" ] || \
+    return 1
+
+  if cmp -s "$target/SKILL.md" "$source/SKILL.md" && \
+    cmp -s "$target/agents/openai.yaml" "$source/agents/openai.yaml"; then
+    return 0
+  fi
+
+  if grep -Eq "^name:[[:space:]]*${skill_name}[[:space:]]*$" \
+      "$target/SKILL.md" && \
+    grep -Fq 'display_name: "[wutlabs] ' "$target/agents/openai.yaml" && \
+    grep -Fq "\$$skill_name" "$target/agents/openai.yaml"; then
+    return 0
+  fi
+
+  cmp -s "$target/SKILL.md" "$source/SKILL.md" && \
+    sed 's/^  display_name: "/  display_name: "[wutlabs] /' \
+      "$target/agents/openai.yaml" | \
+      cmp -s - "$source/agents/openai.yaml"
+}
+
+sync_skill_dir() (
+  local target_parent="$1"
+  local skill_name="$2"
+  local target="$target_parent/$skill_name"
+  local stage_root=""
+  local backup_root=""
+  local had_previous=0
+  local swap_active=0
+  local keep_backup=0
+
+  cleanup_skill_sync() {
+    local status=$?
+    trap - EXIT
+
+    if [ "$swap_active" -eq 1 ] && [ "$had_previous" -eq 1 ] && \
+      [ -e "$backup_root/previous" ]; then
+      if [ -e "$target" ] || [ -L "$target" ]; then
+        if ! mv "$target" "$backup_root/failed"; then
+          printf '\033[1;31mERROR:\033[0m Could not roll back skill %s. Backup preserved at %s\n' \
+            "$skill_name" "$backup_root" >&2
+          keep_backup=1
+        fi
+      fi
+      if [ "$keep_backup" -eq 0 ] && \
+        ! mv "$backup_root/previous" "$target"; then
+        printf '\033[1;31mERROR:\033[0m Could not restore skill %s. Backup preserved at %s\n' \
+          "$skill_name" "$backup_root" >&2
+        keep_backup=1
+      fi
+    fi
+
+    case "$stage_root" in
+      "$target_parent"/.wutpack-"$skill_name"-stage.*) rm -rf -- "$stage_root" ;;
+    esac
+    if [ "$keep_backup" -eq 0 ]; then
+      case "$backup_root" in
+        "$target_parent"/.wutpack-"$skill_name"-backup.*) rm -rf -- "$backup_root" ;;
+      esac
+    fi
+    exit "$status"
+  }
+  trap cleanup_skill_sync EXIT
+  trap 'exit 130' INT
+  trap 'exit 143' TERM
+
+  stage_root="$(mktemp -d "$target_parent/.wutpack-$skill_name-stage.XXXXXX")" || \
+    fatal "Could not stage skill: $skill_name"
+  ditto "$PROJECT_ROOT/skills/$skill_name" "$stage_root" || \
+    fatal "Could not stage skill: $skill_name"
+  printf '%s\n' "WutPack managed skill v1: $skill_name" > \
+    "$stage_root/.wutpack-skill" || fatal "Could not mark skill: $skill_name"
+
+  if [ -e "$target" ] || [ -L "$target" ]; then
+    [ -d "$target" ] && [ ! -L "$target" ] || \
+      fatal "Cannot replace non-directory skill target: $target"
+    is_wutpack_skill_tree "$target" "$skill_name" || \
+      fatal "Refusing to replace a skill not owned by WutPack: $target"
+    had_previous=1
+  fi
+
+  backup_root="$(mktemp -d "$target_parent/.wutpack-$skill_name-backup.XXXXXX")" || \
+    fatal "Could not create skill backup: $skill_name"
+  swap_active=1
+  if [ "$had_previous" -eq 1 ]; then
+    mv "$target" "$backup_root/previous" || \
+      fatal "Could not back up skill: $skill_name"
+  fi
+  mv "$stage_root" "$target" || fatal "Could not activate skill: $skill_name"
+  stage_root=""
+  swap_active=0
+
+  rm -rf -- "$backup_root" || fatal "Could not remove skill backup: $skill_name"
+  backup_root=""
+  trap - EXIT INT TERM
+)
+
 install_skill_tree() {
   local target="$1"
-  local skill_dir
-  run mkdir -p "$target"
-  for skill_dir in "$PROJECT_ROOT"/skills/*; do
-    [ -f "$skill_dir/SKILL.md" ] || continue
+  local skill_name
+  run_required "Could not create skill directory: $target" mkdir -p "$target"
+  for skill_name in "${EXPECTED_SKILLS[@]}"; do
     if [ "$DRY_RUN" -eq 1 ]; then
-      note "Would install $(basename "$skill_dir") -> $target"
+      note "Would install $skill_name -> $target"
     else
-      ditto "$skill_dir" "$target/$(basename "$skill_dir")"
+      [ -f "$PROJECT_ROOT/skills/$skill_name/SKILL.md" ] || \
+        fatal "Required skill disappeared during setup: $skill_name"
+      sync_skill_dir "$target" "$skill_name" || \
+        fatal "Could not install $skill_name into $target"
     fi
   done
 }
@@ -364,19 +659,26 @@ install_skills() {
 link_command() {
   local source="$1"
   local name="$2"
+  local required="${3:-0}"
   local target="$LOCAL_BIN/$name"
-  [ -e "$source" ] || return 0
+  if [ ! -e "$source" ]; then
+    [ "$required" -eq 0 ] && return 0
+    fatal "Required command source is missing: $source"
+  fi
   if [ -e "$target" ] && [ ! -L "$target" ]; then
+    if [ "$required" -eq 1 ]; then
+      fatal "Cannot install $name because a non-symlink already exists: $target"
+    fi
     warn "Leaving existing command untouched: $target"
     return 0
   fi
-  run ln -sfn "$source" "$target"
+  run_required "Could not link command: $target" ln -sfn "$source" "$target"
 }
 
 install_shims() {
   say "Linking stable commands"
-  run mkdir -p "$LOCAL_BIN"
-  link_command "$PROJECT_ROOT/bin/wut" wut
+  run_required "Could not create command directory: $LOCAL_BIN" mkdir -p "$LOCAL_BIN"
+  link_command "$PROJECT_ROOT/bin/wut" wut 1
   link_command "$KNOWLEDGE_ENV/bin/python" knowledge-python
   link_command "$AGENT_ENV/bin/python" agent-python
   local name
@@ -388,13 +690,82 @@ install_shims() {
   done
 }
 
+resolve_profile_file() {
+  local source="$1"
+  local directory
+  local target
+
+  while [ -L "$source" ]; do
+    directory="$(CDPATH= cd -- "$(dirname -- "$source")" && pwd -P)" || return 1
+    target="$(readlink "$source")" || return 1
+    case "$target" in
+      /*) source="$target" ;;
+      *) source="$directory/$target" ;;
+    esac
+  done
+
+  directory="$(CDPATH= cd -- "$(dirname -- "$source")" && pwd -P)" || return 1
+  printf '%s/%s\n' "$directory" "$(basename -- "$source")"
+}
+
 ensure_profile_block() {
   local profile_file="$1"
-  local marker='# >>> WutPack persistent tools >>>'
-  touch "$profile_file"
-  if grep -Fq "$marker" "$profile_file"; then return; fi
+  local marker_start='# >>> WutPack persistent tools >>>'
+  local marker_end='# <<< WutPack persistent tools <<<'
+  local profile_dir
+  local profile_name
+  local profile_mode
+  local profile_temp
+  local line
+  local in_block=0
+
+  touch "$profile_file" || fatal "Could not create shell profile: $profile_file"
+  profile_file="$(resolve_profile_file "$profile_file")" || \
+    fatal "Could not resolve shell profile: $profile_file"
+  [ -f "$profile_file" ] || fatal "Could not update shell profile: $profile_file"
+  profile_dir="$(CDPATH= cd -- "$(dirname -- "$profile_file")" && pwd -P)" || \
+    fatal "Could not resolve shell profile directory: $profile_file"
+  profile_name="$(basename -- "$profile_file")"
+  profile_mode="$(stat -f '%Lp' "$profile_file")" || \
+    fatal "Could not inspect shell profile: $profile_file"
+  profile_temp="$(mktemp "$profile_dir/.$profile_name.wutpack.XXXXXX")" || \
+    fatal "Could not stage shell profile update: $profile_file"
+
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [ "$line" = "$marker_start" ]; then
+      in_block=1
+      continue
+    fi
+    if [ "$line" = "$marker_end" ]; then
+      in_block=0
+      continue
+    fi
+    if [ "$in_block" -eq 1 ]; then
+      case "$line" in
+        ''|\
+        'export WUTPACK_HOME="$HOME/Library/Application Support/WutPack"'|\
+        'export UV_CACHE_DIR="$HOME/Library/Caches/WutPack/uv"'|\
+        'export PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/WutPack/playwright"'|\
+        'export PUPPETEER_CACHE_DIR="$HOME/Library/Caches/WutPack/puppeteer"'|\
+        'case ":${NODE_PATH:-}:" in *":$WUTPACK_HOME/npm-global/lib/node_modules:"*) ;; *) export NODE_PATH="$WUTPACK_HOME/npm-global/lib/node_modules${NODE_PATH:+:$NODE_PATH}" ;; esac'|\
+        'case ":$PATH:" in *":$WUTPACK_HOME/npm-global/bin:"*) ;; *) export PATH="$WUTPACK_HOME/npm-global/bin:$PATH" ;; esac'|\
+        'case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac')
+          continue
+          ;;
+        *) in_block=0 ;;
+      esac
+    fi
+    printf '%s\n' "$line" >> "$profile_temp" || {
+      rm -f -- "$profile_temp"
+      fatal "Could not stage shell profile update: $profile_file"
+    }
+  done < "$profile_file" || {
+    rm -f -- "$profile_temp"
+    fatal "Could not read shell profile: $profile_file"
+  }
+
   {
-    printf '\n%s\n' "$marker"
+    printf '%s\n' "$marker_start"
     printf '%s\n' 'export WUTPACK_HOME="$HOME/Library/Application Support/WutPack"'
     printf '%s\n' 'export UV_CACHE_DIR="$HOME/Library/Caches/WutPack/uv"'
     printf '%s\n' 'export PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/WutPack/playwright"'
@@ -402,8 +773,19 @@ ensure_profile_block() {
     printf '%s\n' 'case ":${NODE_PATH:-}:" in *":$WUTPACK_HOME/npm-global/lib/node_modules:"*) ;; *) export NODE_PATH="$WUTPACK_HOME/npm-global/lib/node_modules${NODE_PATH:+:$NODE_PATH}" ;; esac'
     printf '%s\n' 'case ":$PATH:" in *":$WUTPACK_HOME/npm-global/bin:"*) ;; *) export PATH="$WUTPACK_HOME/npm-global/bin:$PATH" ;; esac'
     printf '%s\n' 'case ":$PATH:" in *":$HOME/.local/bin:"*) ;; *) export PATH="$HOME/.local/bin:$PATH" ;; esac'
-    printf '%s\n' '# <<< WutPack persistent tools <<<'
-  } >> "$profile_file"
+    printf '%s\n' "$marker_end"
+  } >> "$profile_temp" || {
+    rm -f -- "$profile_temp"
+    fatal "Could not stage shell profile update: $profile_file"
+  }
+  chmod "$profile_mode" "$profile_temp" || {
+    rm -f -- "$profile_temp"
+    fatal "Could not preserve shell profile permissions: $profile_file"
+  }
+  mv -f "$profile_temp" "$profile_file" || {
+    rm -f -- "$profile_temp"
+    fatal "Could not update shell profile: $profile_file"
+  }
 }
 
 install_shell_profile() {
@@ -416,7 +798,12 @@ install_shell_profile() {
   ensure_profile_block "$USER_HOME/.zshrc"
 }
 
-run mkdir -p "$STATE_ROOT" "$CACHE_ROOT" "$LOCAL_BIN"
+validate_source_tree
+preflight_command_target
+acquire_setup_lock
+
+run_required "Could not create WutPack state directories" \
+  mkdir -p "$STATE_ROOT" "$CACHE_ROOT" "$LOCAL_BIN"
 
 if [ "$SKILLS_ONLY" -eq 0 ]; then
   if ensure_brew; then
@@ -438,17 +825,19 @@ install_skills
 install_shims
 install_shell_profile
 
-say "WutPack setup complete"
-note "Persistent state: $STATE_ROOT"
-note "Skills installed for: $HOST"
-note "Agent sign-in and API keys are intentionally left to you."
-
 setup_status=0
 if [ "${#FAILURES[@]}" -gt 0 ]; then
+  say "WutPack setup incomplete"
   printf '\nCompleted with %s optional failure(s):\n' "${#FAILURES[@]}" >&2
   for failure in "${FAILURES[@]}"; do printf '  - %s\n' "$failure" >&2; done
   setup_status=2
+else
+  say "WutPack setup complete"
 fi
+
+note "Persistent state: $STATE_ROOT"
+note "Skills installed for: $HOST"
+note "Agent sign-in and API keys are intentionally left to you."
 
 printf '\nIMPORTANT: Open a new terminal before using WutPack, then run: wut doctor\n'
 printf 'Author: WUTLABS SUNNYVALE CA\n'

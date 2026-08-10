@@ -127,7 +127,9 @@ jobs:
           export PUPPETEER_CACHE_DIR="$cache_root/puppeteer"
           export UV_CACHE_DIR="$cache_root/uv"
 
-          wut doctor --headless
+          env -u WUTPACK_INSTALL_ROOT wut doctor --headless
+          env -u WUTPACK_INSTALL_ROOT wut paths | grep -Fq "source=$WUTPACK_INSTALL_ROOT"
+          test "$(env -u WUTPACK_INSTALL_ROOT wut version)" = "$(cat VERSION)"
           uv pip check --python "$state_root/knowledge/bin/python"
           uv pip check --python "$state_root/agents/bin/python"
 
@@ -202,7 +204,7 @@ jobs:
           workbook="$RUNNER_TEMP/fresh-install-market-entry.xlsx"
           diagram="$RUNNER_TEMP/fresh-install-engagement.svg"
 
-          wut deck "$deck"
+          env -u WUTPACK_INSTALL_ROOT wut deck "$deck"
           python3 skills/technical-deck/scripts/validate_pptx.py "$deck"
           wut diagram examples/consulting-engagement.mmd "$diagram"
           test -s "$diagram"
