@@ -4,6 +4,18 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+## [0.2.0] - 2026-08-11
+
+### Added
+
+- Added 30 career toolpacks: ten from the BLS high-pay table, ten finance roles,
+  and ten engineering roles, with explicit geographic, privacy, financial,
+  clinical, and engineering-safety boundaries.
+- Added `wut packs` and `wut pack NAME [show|tools|prompt|codex]` for toolpack
+  discovery, copy-ready prompts, and explicit interactive Codex launch.
+- Added a generated, searchable public catalog for all 30 packs, linked from the
+  landing page and backed by responsive browser checks.
+
 ## [0.1.1.1] - 2026-08-10
 
 ### Fixed

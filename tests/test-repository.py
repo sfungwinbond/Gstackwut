@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
 import re
+import subprocess
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
@@ -25,6 +27,46 @@ EXPECTED_SKILLS = {
     "review-gate",
     "ship-check",
 }
+
+EXPECTED_TOOLPACKS = {
+    "profession": {
+        "psychiatry": (1, "Psychiatrists", "At least USD 239,200 median annual pay (2024)"),
+        "surgery": (2, "Surgeons, all other", "At least USD 239,200 median annual pay (2024)"),
+        "dermatology": (3, "Dermatologists", "At least USD 239,200 median annual pay (2024)"),
+        "pediatric-surgery": (4, "Pediatric surgeons", "At least USD 239,200 median annual pay (2024)"),
+        "prosthodontics": (5, "Prosthodontists", "At least USD 239,200 median annual pay (2024)"),
+        "anesthesiology": (6, "Anesthesiologists", "At least USD 239,200 median annual pay (2024)"),
+        "emergency-medicine": (7, "Emergency medicine physicians", "At least USD 239,200 median annual pay (2024)"),
+        "radiology": (8, "Radiologists", "At least USD 239,200 median annual pay (2024)"),
+        "ophthalmology": (9, "Ophthalmologists, except pediatric", "At least USD 239,200 median annual pay (2024)"),
+        "pathology": (10, "Physicians, pathologists", "At least USD 239,200 median annual pay (2024)"),
+    },
+    "finance": {
+        "finance-management": (1, "Financial managers", "USD 186,910 annual mean wage (May 2025)"),
+        "finance-advisory": (2, "Personal financial advisors", "USD 156,670 annual mean wage (May 2025)"),
+        "finance-risk": (3, "Financial risk specialists", "USD 124,420 annual mean wage (May 2025)"),
+        "finance-investment-analysis": (4, "Financial and investment analysts", "USD 116,800 annual mean wage (May 2025)"),
+        "finance-examination": (5, "Financial examiners", "USD 106,240 annual mean wage (May 2025)"),
+        "finance-credit": (6, "Credit analysts", "USD 100,850 annual mean wage (May 2025)"),
+        "finance-budget": (7, "Budget analysts", "USD 96,370 annual mean wage (May 2025)"),
+        "finance-accounting": (8, "Accountants and auditors", "USD 94,750 annual mean wage (May 2025)"),
+        "finance-underwriting": (9, "Insurance underwriters", "USD 93,700 annual mean wage (May 2025)"),
+        "finance-lending": (10, "Loan officers", "USD 87,790 annual mean wage (May 2025)"),
+    },
+    "engineering": {
+        "engineering-hardware": (1, "Computer hardware engineers", "USD 155,020 median annual pay (2024)"),
+        "engineering-petroleum": (2, "Petroleum engineers", "USD 141,280 median annual pay (2024)"),
+        "engineering-aerospace": (3, "Aerospace engineers", "USD 134,830 median annual pay (2024)"),
+        "engineering-nuclear": (4, "Nuclear engineers", "USD 127,520 median annual pay (2024)"),
+        "engineering-chemical": (5, "Chemical engineers", "USD 121,860 median annual pay (2024)"),
+        "engineering-electrical": (6, "Electrical and electronics engineers", "USD 118,780 median annual pay (2024)"),
+        "engineering-safety": (7, "Health and safety engineers", "USD 109,660 median annual pay (2024)"),
+        "engineering-materials": (8, "Materials engineers", "USD 108,310 median annual pay (2024)"),
+        "engineering-biomedical": (9, "Bioengineers and biomedical engineers", "USD 106,950 median annual pay (2024)"),
+        "engineering-marine": (10, "Marine engineers and naval architects", "USD 105,670 median annual pay (2024)"),
+    },
+}
+TOOLPACK_DIRECTORIES = {"profession": "professions", "finance": "finance", "engineering": "engineering"}
 
 EXPECTED_TOOL_EXAMPLES = {
     "libreoffice",
@@ -107,6 +149,25 @@ class LandingPageParser(HTMLParser):
     def handle_data(self, data: str) -> None:
         if self.title_depth:
             self.title_text.append(data)
+
+
+class ToolpackCatalogParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.pack_ids: list[str] = []
+        self.pack_categories: list[str] = []
+        self.links: list[str] = []
+        self.ids: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if attributes.get("id"):
+            self.ids.append(attributes["id"] or "")
+        if tag == "a" and attributes.get("href"):
+            self.links.append(attributes["href"] or "")
+        if tag == "article" and "data-pack" in attributes:
+            self.pack_ids.append(attributes.get("id") or "")
+            self.pack_categories.append(attributes.get("data-category") or "")
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -299,6 +360,95 @@ def validate_public_examples(errors: list[str]) -> None:
             fail(errors, f"{path.relative_to(ROOT)}: must state that the example is fictional")
 
 
+def validate_toolpacks(errors: list[str]) -> None:
+    required_fields = {
+        "slug",
+        "category",
+        "rank",
+        "profession",
+        "pay",
+        "description",
+        "specialists",
+        "tools",
+    }
+    for category, expected_packs in EXPECTED_TOOLPACKS.items():
+        pack_dir = ROOT / "packs" / TOOLPACK_DIRECTORIES[category]
+        actual = {path.stem for path in pack_dir.glob("*.md")}
+        expected = set(expected_packs)
+        if actual != expected:
+            fail(errors, f"{category} toolpack set differs: expected={sorted(expected)} actual={sorted(actual)}")
+            continue
+
+        ranks: set[int] = set()
+        for slug, (expected_rank, expected_profession, expected_pay) in expected_packs.items():
+            path = pack_dir / f"{slug}.md"
+            text = path.read_text(encoding="utf-8")
+            match = re.match(r"\A---\n(.*?)\n---\n", text, re.DOTALL)
+            if not match:
+                fail(errors, f"{path.relative_to(ROOT)}: missing YAML frontmatter")
+                continue
+            fields: dict[str, str] = {}
+            for line in match.group(1).splitlines():
+                if ":" not in line:
+                    fail(errors, f"{path.relative_to(ROOT)}: malformed frontmatter line {line!r}")
+                    continue
+                key, value = line.split(":", 1)
+                fields[key.strip()] = value.strip()
+            if set(fields) != required_fields:
+                fail(errors, f"{path.relative_to(ROOT)}: toolpack fields differ")
+            if fields.get("slug") != slug:
+                fail(errors, f"{path.relative_to(ROOT)}: slug does not match filename")
+            if fields.get("category") != category:
+                fail(errors, f"{path.relative_to(ROOT)}: category does not match directory")
+            if fields.get("profession") != expected_profession:
+                fail(errors, f"{path.relative_to(ROOT)}: profession differs from salary snapshot")
+            if fields.get("pay") != expected_pay:
+                fail(errors, f"{path.relative_to(ROOT)}: pay differs from salary snapshot")
+            try:
+                rank = int(fields.get("rank", ""))
+            except ValueError:
+                fail(errors, f"{path.relative_to(ROOT)}: rank must be an integer")
+            else:
+                ranks.add(rank)
+                if rank != expected_rank:
+                    fail(errors, f"{path.relative_to(ROOT)}: rank differs from source order")
+
+            specialists = {value.strip() for value in fields.get("specialists", "").split(",")}
+            if len(specialists) < 4 or not specialists.issubset(EXPECTED_SKILLS):
+                fail(errors, f"{path.relative_to(ROOT)}: specialists must name at least four WutPack skills")
+            tools = [value.strip() for value in fields.get("tools", "").split(",") if value.strip()]
+            if len(tools) < 6:
+                fail(errors, f"{path.relative_to(ROOT)}: must name at least six deterministic tools")
+
+            for heading in ("## Workflow", "## Deliverables", "## Safety boundary", "## Starter prompt"):
+                if heading not in text:
+                    fail(errors, f"{path.relative_to(ROOT)}: missing {heading}")
+            lowered = text.lower()
+            for fragment in ("does not", "review"):
+                if fragment not in lowered:
+                    fail(errors, f"{path.relative_to(ROOT)}: missing safety language {fragment!r}")
+            if category == "profession" and "de-identified" not in lowered:
+                fail(errors, f"{path.relative_to(ROOT)}: clinical pack must require de-identification")
+            if category == "finance" and "not " not in lowered:
+                fail(errors, f"{path.relative_to(ROOT)}: finance pack must disclaim advice")
+            if category == "engineering" and "safety" not in lowered:
+                fail(errors, f"{path.relative_to(ROOT)}: engineering pack must address safety")
+
+        if ranks != set(range(1, 11)):
+            fail(errors, f"{category} toolpack ranks must be exactly 1-10; got {sorted(ranks)}")
+
+    methodology = (ROOT / "docs/profession-packs.md").read_text(encoding="utf-8")
+    for fragment in (
+        "https://www.bls.gov/ooh/highest-paying.htm",
+        "https://www.bls.gov/news.release/ocwage.t01.htm",
+        "https://www.bls.gov/ooh/architecture-and-engineering/",
+        "https://www.ilo.org/sites/default/files/2024-11/GWR-2024_Layout_E_RGB_Web.pdf",
+        "not mislabeled global facts",
+    ):
+        if fragment not in methodology:
+            fail(errors, f"docs/profession-packs.md: missing methodology detail {fragment!r}")
+
+
 def validate_tool_gallery(errors: list[str]) -> None:
     gallery = ROOT / "site/tool-examples"
     pages = {path.stem for path in gallery.glob("*.html")}
@@ -374,6 +524,66 @@ def validate_tool_gallery(errors: list[str]) -> None:
         fail(errors, f"site/tool-examples: generated gallery exceeds 8 MB ({generated_size} bytes)")
 
 
+def validate_toolpack_catalog(errors: list[str]) -> None:
+    path = ROOT / "site/toolpacks.html"
+    if not path.is_file():
+        fail(errors, "missing site/toolpacks.html")
+        return
+
+    text = path.read_text(encoding="utf-8")
+    parser = ToolpackCatalogParser()
+    parser.feed(text)
+    expected_slugs = {
+        slug for category in EXPECTED_TOOLPACKS.values() for slug in category
+    }
+    if set(parser.pack_ids) != expected_slugs or len(parser.pack_ids) != 30:
+        fail(errors, "site/toolpacks.html: must render each of the 30 packs exactly once")
+    for category in EXPECTED_TOOLPACKS:
+        if parser.pack_categories.count(category) != 10:
+            fail(errors, f"site/toolpacks.html: expected 10 {category} catalog rows")
+
+    duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
+    if duplicate_ids:
+        fail(errors, f"site/toolpacks.html: duplicate ids {duplicate_ids}")
+
+    expected_sources = {
+        f"https://github.com/sfungwinbond/Gstackwut/blob/main/packs/{TOOLPACK_DIRECTORIES[category]}/{slug}.md"
+        for category, packs in EXPECTED_TOOLPACKS.items()
+        for slug in packs
+    }
+    if not expected_sources.issubset(set(parser.links)):
+        fail(errors, "site/toolpacks.html: every pack must link to its Markdown source")
+
+    for category, packs in EXPECTED_TOOLPACKS.items():
+        for slug, (_, profession, pay) in packs.items():
+            for fragment in (f'id="{slug}"', html.escape(profession), html.escape(pay)):
+                if fragment not in text:
+                    fail(errors, f"site/toolpacks.html: {slug} is missing {fragment!r}")
+
+    for fragment in (
+        'href="assets/toolpacks.css"',
+        'src="assets/toolpacks.js"',
+        "A transparent U.S. proxy, not a fake world ranking.",
+        "No Claude call is made.",
+        "https://www.bls.gov/ooh/highest-paying.htm",
+        "https://www.bls.gov/news.release/ocwage.t01.htm",
+        "https://www.bls.gov/ooh/architecture-and-engineering/",
+        "https://www.ilo.org/sites/default/files/2024-11/GWR-2024_Layout_E_RGB_Web.pdf",
+    ):
+        if fragment not in text:
+            fail(errors, f"site/toolpacks.html: missing required content {fragment!r}")
+
+    check = subprocess.run(
+        [sys.executable, str(ROOT / "tools/build_toolpack_catalog.py"), "--check"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if check.returncode:
+        fail(errors, check.stderr.strip() or check.stdout.strip())
+
+
 def validate_landing_page(errors: list[str]) -> None:
     path = ROOT / "site/index.html"
     if not path.is_file():
@@ -389,7 +599,7 @@ def validate_landing_page(errors: list[str]) -> None:
         fail(errors, f"site/index.html: duplicate ids {duplicate_ids}")
 
     id_set = set(parser.ids)
-    for required_id in {"main", "new-mac-start", "work", "tool-gallery", "specialists", "install", "questions"}:
+    for required_id in {"main", "new-mac-start", "work", "career-packs", "tool-gallery", "specialists", "install", "questions"}:
         if required_id not in id_set:
             fail(errors, f"site/index.html: missing required section id {required_id!r}")
     for target in parser.links:
@@ -403,6 +613,11 @@ def validate_landing_page(errors: list[str]) -> None:
     }
     if gallery_links != EXPECTED_TOOL_EXAMPLES:
         fail(errors, "site/index.html: every tool example must be linked directly from the homepage")
+    if parser.links.count("toolpacks.html") < 2:
+        fail(errors, "site/index.html: career toolpack catalog must be linked from navigation and content")
+    for target in ("toolpacks.html#profession", "toolpacks.html#finance", "toolpacks.html#engineering"):
+        if target not in parser.links:
+            fail(errors, f"site/index.html: missing toolpack collection link {target}")
 
     normalized_title = " ".join("".join(parser.title_text).split())
     if "WutPack" not in normalized_title or "small business" not in normalized_title.lower():
@@ -472,13 +687,19 @@ def validate_repository(errors: list[str]) -> None:
         "examples/market-entry-scorecard.csv",
         "examples/executive-consulting-demo.pptx",
         "docs/images/editable-executive-roadmap.png",
+        "docs/profession-packs.md",
+        "docs/release-v0.2.0.md",
         "site/index.html",
+        "site/toolpacks.html",
+        "site/assets/toolpacks.css",
+        "site/assets/toolpacks.js",
         "site/favicon.svg",
         "site/social-card.png",
         "site/tool-examples/evidence.json",
         "site/tool-examples/assets/gallery.css",
         "site/tool-examples/assets/gallery.js",
         "tools/build_tool_gallery.py",
+        "tools/build_toolpack_catalog.py",
         "tools/tool_gallery_decision.schema.json",
         "site/f2816059f4e9897a617c4f65de3dee83.txt",
         "site/robots.txt",
@@ -510,7 +731,9 @@ def main() -> int:
         validate_repository(errors)
         validate_readme_examples(errors)
         validate_public_examples(errors)
+        validate_toolpacks(errors)
         validate_tool_gallery(errors)
+        validate_toolpack_catalog(errors)
         validate_landing_page(errors)
     if errors:
         for error in errors:

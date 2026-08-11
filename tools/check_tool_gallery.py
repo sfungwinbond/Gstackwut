@@ -61,8 +61,10 @@ def main() -> int:
             ]:
                 page = browser.new_page(viewport={"width": width, "height": height})
                 page.on("pageerror", lambda error: errors.append(str(error)))
-                page.goto(f"{base}/index.html", wait_until="networkidle")
+                page.goto(f"{base}/index.html", wait_until="load")
                 assert page.locator(".tool-example-link").count() == 53
+                page.locator("#career-packs").scroll_into_view_if_needed()
+                page.screenshot(path=str(output / f"homepage-packs-{name}.png"))
                 page.locator("#tool-gallery").scroll_into_view_if_needed()
                 page.screenshot(path=str(output / f"gallery-{name}.png"))
                 overflow = page.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth")
@@ -77,16 +79,55 @@ def main() -> int:
                 page.close()
 
             search_page = browser.new_page(viewport={"width": 1200, "height": 820})
-            search_page.goto(f"{base}/index.html#tool-gallery", wait_until="networkidle")
+            search_page.goto(f"{base}/index.html#tool-gallery", wait_until="load")
             search_page.locator("[data-tool-search]").fill("OCR")
             assert search_page.locator(".tool-example-link:visible").count() == 1
             assert search_page.locator("[data-tool-count]").inner_text() == "1 tool"
             search_page.screenshot(path=str(output / "gallery-search.png"))
             search_page.close()
 
+            for name, width, height in [
+                ("desktop", 1440, 960),
+                ("compact-desktop", 1024, 820),
+                ("tablet", 768, 900),
+                ("mobile", 375, 812),
+            ]:
+                page = browser.new_page(viewport={"width": width, "height": height})
+                page.on("pageerror", lambda error: errors.append(str(error)))
+                page.goto(f"{base}/toolpacks.html", wait_until="load")
+                assert page.locator("[data-pack]").count() == 30
+                assert page.locator("[data-pack]:visible").count() == 30
+                page.locator("#catalog").scroll_into_view_if_needed()
+                page.screenshot(path=str(output / f"toolpacks-{name}.png"), full_page=True)
+                overflow = page.evaluate(
+                    "document.documentElement.scrollWidth > document.documentElement.clientWidth"
+                )
+                if overflow:
+                    offenders = page.evaluate(
+                        """[...document.querySelectorAll('body *')]
+                          .map(element => ({tag: element.tagName, cls: element.className, right: element.getBoundingClientRect().right, width: element.getBoundingClientRect().width}))
+                          .filter(item => item.right > document.documentElement.clientWidth + 1 || item.width > document.documentElement.clientWidth + 1)
+                          .slice(0, 8)"""
+                    )
+                    raise AssertionError(f"toolpacks horizontal overflow at {width}px: {offenders}")
+                page.close()
+
+            pack_search = browser.new_page(viewport={"width": 1200, "height": 860})
+            pack_search.goto(f"{base}/toolpacks.html#catalog", wait_until="load")
+            pack_search.locator("[data-pack-search]").fill("finance-risk")
+            assert pack_search.locator("[data-pack]:visible").count() == 1
+            assert pack_search.locator("[data-pack-count]").inner_text() == "1 pack"
+            pack_search.locator("[data-pack-search]").fill("")
+            pack_search.locator('[data-pack-filter="engineering"]').click()
+            assert pack_search.locator("[data-pack]:visible").count() == 10
+            assert pack_search.locator("[data-pack-count]").inner_text() == "10 packs"
+            assert pack_search.locator('#engineering [data-pack]:visible').count() == 10
+            pack_search.screenshot(path=str(output / "toolpacks-filter.png"))
+            pack_search.close()
+
             for slug, width, height in [("codex", 1440, 960), ("tesseract", 375, 812), ("ffmpeg", 1200, 820)]:
                 page = browser.new_page(viewport={"width": width, "height": height})
-                page.goto(f"{base}/tool-examples/{slug}.html", wait_until="networkidle")
+                page.goto(f"{base}/tool-examples/{slug}.html", wait_until="load")
                 assert page.locator("h1").inner_text().strip()
                 broken_images = page.locator("img").evaluate_all(
                     "images => images.filter(image => !image.complete || image.naturalWidth === 0).length"
@@ -104,7 +145,7 @@ def main() -> int:
 
     if errors:
         raise SystemExit("browser page errors:\n" + "\n".join(errors))
-    print(f"Tool gallery browser checks passed. Screenshots: {output}")
+    print(f"Tool gallery and career catalog browser checks passed. Screenshots: {output}")
     return 0
 
 

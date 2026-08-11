@@ -4,10 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f3f0e8">
-  <meta name="description" content="Turn a new Mac into a free AI office for small business. WutPack sets up Codex or Claude Code with durable tools for documents, spreadsheets, presentations, research, PDFs, and more.">
+  <meta name="description" content="Turn a new Mac into an AI office with the Wut CLI: 53 verified tool workflows, 12 specialists, and 30 career toolpacks for high-pay professions, finance, and engineering.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="WutPack | Turn a new Mac into a free AI office">
-  <meta property="og:description" content="Open Terminal, paste one command, and give your new Mac twelve specialists for everyday small-business work.">
+  <meta property="og:description" content="One guided install adds 53 verified tool workflows, 12 specialists, and 30 career toolpacks to a new Mac.">
   <meta property="og:url" content="https://sfungwinbond.github.io/Gstackwut/">
   <meta property="og:image" content="https://sfungwinbond.github.io/Gstackwut/social-card.png">
   <meta property="og:image:width" content="1280">
@@ -15,7 +15,7 @@
   <meta property="og:image:alt" content="WutPack: turn a new Mac into your AI office">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="WutPack | Turn a new Mac into a free AI office">
-  <meta name="twitter:description" content="A beginner-friendly path from a new Mac to twelve persistent knowledge-work specialists.">
+  <meta name="twitter:description" content="The Wut CLI turns a new Mac into an AI office with 53 verified tools, 12 specialists, and 30 career toolpacks.">
   <meta name="twitter:image" content="https://sfungwinbond.github.io/Gstackwut/social-card.png">
   <meta name="twitter:image:alt" content="WutPack: turn a new Mac into your AI office">
   <link rel="canonical" href="https://sfungwinbond.github.io/Gstackwut/">
@@ -944,6 +944,121 @@
       font-size: 0.61rem;
     }
 
+    .pack-preview-board {
+      display: grid;
+      border: 1px solid var(--line-strong);
+      background: var(--paper-raised);
+    }
+
+    .pack-preview-command {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: clamp(1.3rem, 4vw, 2.2rem);
+      background: var(--terminal);
+      color: var(--terminal-ink);
+    }
+
+    .pack-preview-command > span {
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .pack-preview-command > code {
+      display: block;
+      padding: 1rem;
+      border: 1px solid #52615a;
+      background: #0a0f0d;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: clamp(1rem, 3vw, 1.45rem);
+    }
+
+    .pack-preview-command p code {
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+    }
+
+    .pack-preview-command p {
+      margin: 0;
+      color: #aeb9b3;
+      font-size: 0.86rem;
+    }
+
+    .pack-preview-command .button {
+      align-self: flex-start;
+      border-color: var(--green-bright);
+      background: var(--green-bright);
+      color: #14201d;
+    }
+
+    .pack-track-list {
+      border-top: 1px solid var(--line-strong);
+    }
+
+    .pack-track {
+      display: grid;
+      grid-template-columns: 2.2rem minmax(0, 1fr) auto;
+      gap: 0.8rem;
+      min-height: 7.5rem;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--line-strong);
+      color: var(--ink);
+      text-decoration: none;
+      transition: background 160ms ease, padding-left 160ms ease;
+    }
+
+    .pack-track:last-child {
+      border-bottom: 0;
+    }
+
+    .pack-track:hover {
+      padding-left: 1.25rem;
+      background: color-mix(in srgb, var(--green-bright) 24%, transparent);
+    }
+
+    .pack-track-number {
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.67rem;
+      font-weight: 600;
+    }
+
+    .pack-track h3 {
+      margin: 0;
+      font-size: clamp(1.15rem, 3vw, 1.55rem);
+      line-height: 1.1;
+    }
+
+    .pack-track p {
+      margin: 0.4rem 0 0;
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .pack-track strong {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .pack-track strong span {
+      display: block;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
     .tool-gallery-summary {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1555,6 +1670,15 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .pack-preview-board {
+        grid-template-columns: minmax(18rem, 0.78fr) minmax(0, 1.22fr);
+      }
+
+      .pack-track-list {
+        border-top: 0;
+        border-left: 1px solid var(--line-strong);
+      }
+
       .tool-layer {
         grid-template-columns: 12rem minmax(0, 1fr);
         gap: 2rem;
@@ -1785,7 +1909,7 @@
       "license": "https://opensource.org/license/mit",
       "url": "https://sfungwinbond.github.io/Gstackwut/",
       "downloadUrl": "https://github.com/sfungwinbond/Gstackwut",
-      "description": "A beginner-friendly, persistent AI office workbench that turns a new Mac into a tool for documents, spreadsheets, presentations, PDFs, research, publishing, and software workflows."
+      "description": "The Wut CLI turns a new Mac into a persistent AI office with 53 verified tool workflows, 12 specialists, and 30 career toolpacks for high-pay professions, finance, and engineering."
     }
   </script>
 </head>
@@ -1802,8 +1926,8 @@
       <div class="nav-links">
         <a href="#new-mac-start">Start here</a>
         <a href="#work">What it does</a>
+        <a href="toolpacks.html">30 toolpacks</a>
         <a href="#tool-gallery">53 examples</a>
-        <a href="#specialists">12 specialists</a>
         <a href="#questions">Questions</a>
         <a class="button" href="#install">Install free</a>
       </div>
@@ -1816,6 +1940,7 @@
     <div class="mobile-menu" id="mobile-menu" data-open="false" hidden>
       <a href="#new-mac-start">Start here</a>
       <a href="#work">What it does</a>
+      <a href="toolpacks.html">30 toolpacks</a>
       <a href="#tool-gallery">53 examples</a>
       <a href="#specialists">12 specialists</a>
       <a href="#questions">Questions</a>
@@ -2003,6 +2128,43 @@
             <p>Inspect a difficult PDF, repair it when possible, run OCR when needed, and report what was recovered or lost.</p>
             <span class="task-output">searchable .pdf</span>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="career-packs">
+      <div class="shell">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow">Thirty job-shaped toolchains</p>
+            <h2>Pick the profession. Wut picks the bench.</h2>
+          </div>
+          <p>Each CLI pack combines the right specialists, deterministic tools, deliverables, starter prompt, and human-review boundary for one kind of work.</p>
+        </div>
+        <div class="pack-preview-board reveal">
+          <div class="pack-preview-command">
+            <span>New in the Wut CLI</span>
+            <code>$ wut packs</code>
+            <p>Search all 30 on the public site, inspect the exact Markdown source, then run a pack locally. Codex starts only when you explicitly choose the <code>codex</code> action.</p>
+            <a class="button" href="toolpacks.html">Open all 30 toolpacks</a>
+          </div>
+          <div class="pack-track-list" aria-label="Career toolpack collections">
+            <a class="pack-track" href="toolpacks.html#profession">
+              <span class="pack-track-number">01</span>
+              <div><h3>General high-pay snapshot</h3><p>Clinical operations, quality, evidence, workflow, and controlled drafts.</p></div>
+              <strong>10<span>packs</span></strong>
+            </a>
+            <a class="pack-track" href="toolpacks.html#finance">
+              <span class="pack-track-number">02</span>
+              <div><h3>Finance snapshot</h3><p>Risk, analysis, controls, underwriting, budgets, credit, and reporting.</p></div>
+              <strong>10<span>packs</span></strong>
+            </a>
+            <a class="pack-track" href="toolpacks.html#engineering">
+              <span class="pack-track-number">03</span>
+              <div><h3>Engineering snapshot</h3><p>Requirements, analysis, diagrams, verification, review, and traceability.</p></div>
+              <strong>10<span>packs</span></strong>
+            </a>
+          </div>
         </div>
       </div>
     </section>
@@ -2508,6 +2670,8 @@
     <div class="footer-grid shell">
       <p class="footer-note">WutPack is an independent open-source project. Microsoft, Word, Excel, and PowerPoint are trademarks of Microsoft Corporation. Codex and Claude Code are provided by their respective owners.</p>
       <div class="footer-links">
+        <a href="toolpacks.html">30 toolpacks</a>
+        <a href="https://github.com/sfungwinbond/Gstackwut/releases/tag/v0.2.0">Release 0.2</a>
         <a href="https://github.com/sfungwinbond/Gstackwut">GitHub</a>
         <a href="https://github.com/sfungwinbond/Gstackwut/blob/main/LICENSE">MIT license</a>
         <a href="https://github.com/sfungwinbond/Gstackwut/blob/main/docs/getting-started.md">Docs</a>

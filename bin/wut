@@ -49,6 +49,43 @@ EXPECTED_SKILLS=(
   technical-deck
 )
 EXPECTED_SKILL_COUNT="${#EXPECTED_SKILLS[@]}"
+EXPECTED_PROFESSION_PACKS=(
+  psychiatry
+  surgery
+  dermatology
+  pediatric-surgery
+  prosthodontics
+  anesthesiology
+  emergency-medicine
+  radiology
+  ophthalmology
+  pathology
+)
+EXPECTED_FINANCE_PACKS=(
+  finance-management
+  finance-advisory
+  finance-risk
+  finance-investment-analysis
+  finance-examination
+  finance-credit
+  finance-budget
+  finance-accounting
+  finance-underwriting
+  finance-lending
+)
+EXPECTED_ENGINEERING_PACKS=(
+  engineering-hardware
+  engineering-petroleum
+  engineering-aerospace
+  engineering-nuclear
+  engineering-chemical
+  engineering-electrical
+  engineering-safety
+  engineering-materials
+  engineering-biomedical
+  engineering-marine
+)
+EXPECTED_TOOLPACK_COUNT=$((${#EXPECTED_PROFESSION_PACKS[@]} + ${#EXPECTED_FINANCE_PACKS[@]} + ${#EXPECTED_ENGINEERING_PACKS[@]}))
 
 export PATH="$NODE_PREFIX/bin:$PATH"
 export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$CACHE_ROOT/playwright}"
@@ -69,6 +106,8 @@ Usage: wut <command> [arguments]
   paths              Show every persistent location
   skills             List scenario specialists
   routes             Show which specialist fits which job
+  packs [CATEGORY]   List all 30 toolpacks or one category
+  pack NAME [ACTION] Show a pack, its tools, its prompt, or launch Codex
   setup [options]    Re-run setup from the installed source
   update [options]   Fetch the latest source and re-run setup
   python [args]      Run the knowledge-work Python
@@ -126,6 +165,7 @@ doctor() {
   local missing=0
   local command_name
   local packaged_skills
+  local packaged_toolpacks
   local codex_skills
   local claude_skills
   while [ "$#" -gt 0 ]; do
@@ -171,6 +211,13 @@ doctor() {
     printf '  [ok]   setup command\n'
   else
     printf '  [miss] setup command    %s/setup\n' "$PROJECT_ROOT"
+    missing=$((missing + 1))
+  fi
+  packaged_toolpacks="$(count_toolpacks)"
+  if [ "$packaged_toolpacks" -eq "$EXPECTED_TOOLPACK_COUNT" ]; then
+    printf '  [ok]   toolpacks        %s/%s\n' "$packaged_toolpacks" "$EXPECTED_TOOLPACK_COUNT"
+  else
+    printf '  [miss] toolpacks        %s/%s\n' "$packaged_toolpacks" "$EXPECTED_TOOLPACK_COUNT"
     missing=$((missing + 1))
   fi
   if [ -f "$PROJECT_ROOT/skills/technical-deck/scripts/new_technical_deck.mjs" ]; then
@@ -246,6 +293,215 @@ list_skills() {
   done
 }
 
+count_toolpacks() {
+  local count=0
+  local pack_name
+  for pack_name in "${EXPECTED_PROFESSION_PACKS[@]}"; do
+    [ -f "$PROJECT_ROOT/packs/professions/$pack_name.md" ] || continue
+    count=$((count + 1))
+  done
+  for pack_name in "${EXPECTED_FINANCE_PACKS[@]}"; do
+    [ -f "$PROJECT_ROOT/packs/finance/$pack_name.md" ] || continue
+    count=$((count + 1))
+  done
+  for pack_name in "${EXPECTED_ENGINEERING_PACKS[@]}"; do
+    [ -f "$PROJECT_ROOT/packs/engineering/$pack_name.md" ] || continue
+    count=$((count + 1))
+  done
+  printf '%s\n' "$count"
+}
+
+toolpack_field() {
+  local field="$1"
+  local pack_file="$2"
+  awk -v field="$field" '
+    $0 == "---" { markers += 1; next }
+    markers == 2 { exit }
+    markers == 1 && index($0, field ":") == 1 {
+      sub(/^[^:]+:[[:space:]]*/, "")
+      print
+      exit
+    }
+  ' "$pack_file"
+}
+
+toolpack_path() {
+  local pack_name="$1"
+  local pack_file
+  local pack_category
+  case "$pack_name" in
+    ''|*[!a-z0-9-]*) return 1 ;;
+  esac
+  for pack_category in professions finance engineering; do
+    pack_file="$PROJECT_ROOT/packs/$pack_category/$pack_name.md"
+    if [ -f "$pack_file" ]; then
+      printf '%s\n' "$pack_file"
+      return 0
+    fi
+  done
+  return 1
+}
+
+list_toolpack_group() {
+  local title="$1"
+  local basis="$2"
+  local pack_directory="$3"
+  shift 3
+  local pack_name
+  local pack_file
+  local rank
+  local profession
+  local description
+  printf '%s\n' "$title"
+  printf 'Basis: %s\n\n' "$basis"
+  for pack_name in "$@"; do
+    pack_file="$PROJECT_ROOT/packs/$pack_directory/$pack_name.md"
+    rank="$(toolpack_field rank "$pack_file")"
+    profession="$(toolpack_field profession "$pack_file")"
+    description="$(toolpack_field description "$pack_file")"
+    printf '  %02d  %-29s %-42s %s\n' "$rank" "$pack_name" "$profession" "$description"
+  done
+}
+
+list_toolpacks() {
+  [ "$#" -le 1 ] || {
+    printf 'Usage: wut packs [all|profession|finance|engineering]\n' >&2
+    return 2
+  }
+  local category="${1:-all}"
+  case "$category" in
+    all|profession|finance|engineering) ;;
+    *)
+      printf 'Unknown toolpack category: %s\nUsage: wut packs [all|profession|finance|engineering]\n' \
+        "$category" >&2
+      return 2
+      ;;
+  esac
+  [ "$(count_toolpacks)" -eq "$EXPECTED_TOOLPACK_COUNT" ] || {
+    printf 'WutPack toolpacks are incomplete under %s\n' "$PROJECT_ROOT" >&2
+    return 1
+  }
+
+  printf 'WutPack career toolpacks (%s total)\n\n' "$EXPECTED_TOOLPACK_COUNT"
+  if [ "$category" = "all" ] || [ "$category" = "profession" ]; then
+    list_toolpack_group \
+      'High-pay profession toolpacks' \
+      'first ten entries in the U.S. BLS 2024 highest-pay table; all are tied in its top-coded bracket.' \
+      professions "${EXPECTED_PROFESSION_PACKS[@]}"
+  fi
+  if [ "$category" = "all" ] || [ "$category" = "finance" ]; then
+    [ "$category" = "all" ] && printf '\n'
+    list_toolpack_group \
+      'Finance toolpacks' \
+      'finance-focused roles ordered by U.S. BLS May 2025 annual mean wage.' \
+      finance "${EXPECTED_FINANCE_PACKS[@]}"
+  fi
+  if [ "$category" = "all" ] || [ "$category" = "engineering" ]; then
+    [ "$category" = "all" ] && printf '\n'
+    list_toolpack_group \
+      'Engineering toolpacks' \
+      'ten highest-paid detailed roles in the U.S. BLS 2024 architecture and engineering table.' \
+      engineering "${EXPECTED_ENGINEERING_PACKS[@]}"
+  fi
+  printf '\nUse: wut pack NAME [show|tools|prompt|codex] [request]\n'
+}
+
+toolpack_prompt() {
+  local pack_file="$1"
+  awk '
+    $0 == "## Starter prompt" { in_prompt = 1; next }
+    in_prompt && /^## / { exit }
+    in_prompt { print }
+  ' "$pack_file" | awk '
+    BEGIN { pending = "" }
+    /^[[:space:]]*$/ && output == 0 { next }
+    {
+      if (pending != "") print pending
+      print
+      output = 1
+      pending = ""
+    }
+  '
+}
+
+toolpack_command() {
+  if [ "$#" -eq 0 ] || [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
+    printf 'Usage: wut pack NAME [show|tools|prompt|codex] [request]\n'
+    printf '  show    Print the complete pack (default)\n'
+    printf '  tools   Print its specialists and deterministic tools\n'
+    printf '  prompt  Print a copy-ready prompt; optional request text is appended\n'
+    printf '  codex   Launch interactive Codex with that prompt and request\n'
+    return 0
+  fi
+
+  local pack_name="$1"
+  shift
+  local pack_file
+  pack_file="$(toolpack_path "$pack_name")" || {
+    printf 'Unknown toolpack: %s\nRun: wut packs\n' "$pack_name" >&2
+    return 2
+  }
+
+  local action="${1:-show}"
+  [ "$#" -gt 0 ] && shift
+  local request="$*"
+  local prompt
+  local codex_bin
+  case "$action" in
+    show)
+      [ "$#" -eq 0 ] || {
+        printf 'Usage: wut pack %s show\n' "$pack_name" >&2
+        return 2
+      }
+      cat "$pack_file"
+      ;;
+    tools)
+      [ "$#" -eq 0 ] || {
+        printf 'Usage: wut pack %s tools\n' "$pack_name" >&2
+        return 2
+      }
+      printf 'Category: %s\n' "$(toolpack_field category "$pack_file")"
+      printf 'Profession: %s\n' "$(toolpack_field profession "$pack_file")"
+      printf 'Pay basis: %s\n' "$(toolpack_field pay "$pack_file")"
+      printf 'Specialists: %s\n' "$(toolpack_field specialists "$pack_file")"
+      printf 'Tools: %s\n' "$(toolpack_field tools "$pack_file")"
+      ;;
+    prompt|codex)
+      prompt="$(toolpack_prompt "$pack_file")"
+      [ -n "$prompt" ] || {
+        printf 'Toolpack has no starter prompt: %s\n' "$pack_name" >&2
+        return 1
+      }
+      prompt="WutPack toolpack: $pack_name
+Profession: $(toolpack_field profession "$pack_file")
+Use these WutPack specialists when relevant: $(toolpack_field specialists "$pack_file")
+Use these deterministic tools when they fit: $(toolpack_field tools "$pack_file")
+
+$prompt"
+      if [ -n "$request" ]; then
+        prompt="$prompt
+
+User request: $request"
+      fi
+      if [ "$action" = "prompt" ]; then
+        printf '%s\n' "$prompt"
+        return 0
+      fi
+      codex_bin="$(command -v codex 2>/dev/null || true)"
+      [ -n "$codex_bin" ] || {
+        printf 'Codex CLI is not installed. Run: wut setup\n' >&2
+        return 1
+      }
+      exec "$codex_bin" "$prompt"
+      ;;
+    *)
+      printf 'Unknown pack action: %s\nUsage: wut pack %s [show|tools|prompt|codex] [request]\n' \
+        "$action" "$pack_name" >&2
+      return 2
+      ;;
+  esac
+}
+
 routes() {
   cat <<'EOF'
 Scenario                  Specialist
@@ -282,6 +538,8 @@ case "$command_name" in
     ;;
   skills) list_skills ;;
   routes) routes ;;
+  packs) list_toolpacks "$@" ;;
+  pack) toolpack_command "$@" ;;
   setup)
     [ -x "$PROJECT_ROOT/setup" ] || { printf 'WutPack setup is unavailable under %s\n' "$PROJECT_ROOT" >&2; exit 1; }
     exec "$PROJECT_ROOT/setup" "$@"

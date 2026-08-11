@@ -36,6 +36,38 @@ EXPECTED_SKILLS=(
   system-diagram
   technical-deck
 )
+EXPECTED_TOOLPACK_PATHS=(
+  professions/psychiatry
+  professions/surgery
+  professions/dermatology
+  professions/pediatric-surgery
+  professions/prosthodontics
+  professions/anesthesiology
+  professions/emergency-medicine
+  professions/radiology
+  professions/ophthalmology
+  professions/pathology
+  finance/finance-management
+  finance/finance-advisory
+  finance/finance-risk
+  finance/finance-investment-analysis
+  finance/finance-examination
+  finance/finance-credit
+  finance/finance-budget
+  finance/finance-accounting
+  finance/finance-underwriting
+  finance/finance-lending
+  engineering/engineering-hardware
+  engineering/engineering-petroleum
+  engineering/engineering-aerospace
+  engineering/engineering-nuclear
+  engineering/engineering-chemical
+  engineering/engineering-electrical
+  engineering/engineering-safety
+  engineering/engineering-materials
+  engineering/engineering-biomedical
+  engineering/engineering-marine
+)
 
 validate_source_tree() {
   local root="$1"
@@ -43,6 +75,7 @@ validate_source_tree() {
   local skill_name
   local skill_dir
   local skill_count=0
+  local pack_path
 
   for required_file in \
     VERSION install.sh setup bin/wut \
@@ -61,6 +94,14 @@ validate_source_tree() {
   for skill_name in "${EXPECTED_SKILLS[@]}"; do
     if [ ! -f "$root/skills/$skill_name/SKILL.md" ]; then
       printf 'WutPack source is incomplete: missing skill %s\n' "$skill_name" >&2
+      return 1
+    fi
+  done
+
+  for pack_path in "${EXPECTED_TOOLPACK_PATHS[@]}"; do
+    if [ ! -f "$root/packs/$pack_path.md" ]; then
+      printf 'WutPack source is incomplete: missing toolpack %s\n' \
+        "$pack_path" >&2
       return 1
     fi
   done
@@ -99,6 +140,7 @@ is_wutpack_install() {
     [ -f "$root/setup" ] && \
     [ -f "$root/bin/wut" ] && \
     [ -d "$root/skills" ] && \
+    [ -d "$root/packs/professions" ] && \
     grep -Fq 'WutPack setup' "$root/setup" && \
     grep -Fq 'WutPack control command' "$root/bin/wut"
 }

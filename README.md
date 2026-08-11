@@ -5,9 +5,10 @@
 [![website](https://img.shields.io/badge/website-live-176b4d)](https://sfungwinbond.github.io/Gstackwut/)
 [![release](https://img.shields.io/github/v/release/sfungwinbond/Gstackwut?display_name=tag&amp;sort=semver)](https://github.com/sfungwinbond/Gstackwut/releases/latest)
 
-**The persistent knowledge-work harness for Codex and Claude Code.**
+**The Wut CLI: a persistent AI workbench with 53 verified tools, twelve
+specialists, and 30 career toolpacks.**
 
-One install. Twelve specialists. A Mac workbench that is still there tomorrow.
+One install. Real local tools. A Mac workbench that is still there tomorrow.
 
 [See the small-business landing page →](https://sfungwinbond.github.io/Gstackwut/)
 
@@ -16,7 +17,8 @@ station. It installs both CLIs by default, then provides the
 environment-and-workflow layer around them: durable document, data, browser,
 diagram, publishing, and agent tools; focused skills
 that know when and how to use them; and validation gates for the artifacts they
-produce.
+produce. The `wut` CLI also exposes 30 role-shaped packs across a transparent
+high-pay snapshot, finance, and engineering.
 
 The point is not another folder of prompts. The point is a working toolchain:
 research a market, recover a broken PDF, build a Windows-safe decision model,
@@ -132,6 +134,11 @@ exercised, while unauthenticated Claude Code is documented as installed-only.
 | Engineering utilities | [GitHub CLI](https://sfungwinbond.github.io/Gstackwut/tool-examples/github-cli.html) · [ripgrep](https://sfungwinbond.github.io/Gstackwut/tool-examples/ripgrep.html) · [fd](https://sfungwinbond.github.io/Gstackwut/tool-examples/fd.html) · [fzf](https://sfungwinbond.github.io/Gstackwut/tool-examples/fzf.html) · [jq](https://sfungwinbond.github.io/Gstackwut/tool-examples/jq.html) · [yq](https://sfungwinbond.github.io/Gstackwut/tool-examples/yq.html) · [ShellCheck](https://sfungwinbond.github.io/Gstackwut/tool-examples/shellcheck.html) · [shfmt](https://sfungwinbond.github.io/Gstackwut/tool-examples/shfmt.html) · [delta](https://sfungwinbond.github.io/Gstackwut/tool-examples/delta.html) · [hyperfine](https://sfungwinbond.github.io/Gstackwut/tool-examples/hyperfine.html) · [just](https://sfungwinbond.github.io/Gstackwut/tool-examples/just.html) |
 
 [Open the searchable gallery on the website →](https://sfungwinbond.github.io/Gstackwut/#tool-gallery)
+
+[Browse all 30 career toolpacks on the live website →](https://sfungwinbond.github.io/Gstackwut/toolpacks.html)
+
+[Read the 0.2 release announcement](docs/release-v0.2.0.md) ·
+[Use the launch and press kit](docs/launch-kit.md)
 
 ## Twelve-specialist consulting walkthrough
 
@@ -373,6 +380,11 @@ a readable folder in [`skills/`](skills/). Nothing relies on a mystery binary.
 ```bash
 wut doctor                         # environment health
 wut skills                         # installed specialists
+wut packs                          # all 30 career toolpacks
+wut packs finance                  # ten finance toolpacks
+wut packs engineering              # ten engineering toolpacks
+wut pack radiology tools           # inspect one curated toolchain
+wut pack radiology prompt "Map de-identified turnaround by modality"
 wut python analysis.py             # managed knowledge Python
 wut lab                            # JupyterLab
 wut diagram architecture.mmd architecture.svg
@@ -381,8 +393,12 @@ wut render report.docx ./rendered
 wut ocr scan.pdf searchable.pdf
 ```
 
-See the [getting-started tutorial](docs/getting-started.md), [workflow recipes](docs/how-to-workflows.md),
-[command reference](docs/commands.md), and [persistence design](docs/why-persistent.md).
+The career packs follow transparent salary snapshots and enforce explicit
+clinical, financial, engineering-safety, and human-review boundaries. Read the
+[live 30-pack catalog](https://sfungwinbond.github.io/Gstackwut/toolpacks.html),
+[profession-pack methodology](docs/profession-packs.md), [getting-started tutorial](docs/getting-started.md),
+[workflow recipes](docs/how-to-workflows.md), [command reference](docs/commands.md),
+and [persistence design](docs/why-persistent.md).
 
 ## Boundaries
 

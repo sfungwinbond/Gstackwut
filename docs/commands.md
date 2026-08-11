@@ -7,11 +7,13 @@ same summary in a terminal.
 
 | Command | Behavior |
 |---|---|
-| `wut doctor` | Checks core binaries, managed deck/diagram dependencies, installed source integrity, Python environments, and complete host skill sets |
+| `wut doctor` | Checks core binaries, managed deck/diagram dependencies, installed source and all 30 toolpacks, Python environments, and complete host skill sets |
 | `wut doctor --headless` | Runs the same check without requiring a desktop LibreOffice installation |
 | `wut paths` | Prints source, state, cache, Python, and Node locations |
 | `wut skills` | Lists installed specialists and their trigger descriptions |
 | `wut routes` | Maps common scenarios to specialist names |
+| `wut packs [CATEGORY]` | Lists all 30 career toolpacks or the profession, finance, or engineering category |
+| `wut pack NAME [ACTION]` | Shows a profession pack, prints its tools or prompt, or launches interactive Codex |
 | `wut version` | Prints the installed WutPack version |
 
 ## Work commands
@@ -27,6 +29,23 @@ same summary in a terminal.
 | `wut ocr INPUT.pdf OUTPUT.pdf` | Deskews, rotates, and OCRs a PDF with OCRmyPDF |
 
 Commands use `exec`, so signals and exit codes come from the underlying tool.
+
+## Profession toolpacks
+
+```bash
+wut packs
+wut packs finance
+wut packs engineering
+wut pack pathology tools
+wut pack pathology prompt "Map a de-identified specimen workflow."
+wut pack pathology codex "Map a de-identified specimen workflow."
+```
+
+The available categories are `profession`, `finance`, and `engineering`; the
+available actions are `show` (the default), `tools`, `prompt`, and `codex`.
+Only the explicit `codex` action launches an agent; it uses the normal interactive
+Codex authentication and permission flow. See the
+[selection methodology and safety boundaries](profession-packs.md).
 
 ## Website proof gallery
 

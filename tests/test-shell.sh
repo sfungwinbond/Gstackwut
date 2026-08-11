@@ -46,6 +46,44 @@ WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" paths | \
 test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" skills | wc -l | tr -d ' ')" = "12"
 WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" setup --help | grep -Fq -- '--skills-only'
 
+PACKS_LOG="$TEST_ROOT/profession-packs.log"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" packs > "$PACKS_LOG"
+test "$(grep -Ec '^  [0-9]{2}  ' "$PACKS_LOG")" = "30"
+grep -Fq 'psychiatry' "$PACKS_LOG"
+grep -Fq 'pathology' "$PACKS_LOG"
+grep -Fq 'all are tied in its top-coded bracket' "$PACKS_LOG"
+PACKS_FINANCE_LOG="$TEST_ROOT/finance-packs.log"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" packs finance > "$PACKS_FINANCE_LOG"
+test "$(grep -Ec '^  [0-9]{2}  ' "$PACKS_FINANCE_LOG")" = "10"
+grep -Fq 'finance-management' "$PACKS_FINANCE_LOG"
+grep -Fq 'finance-lending' "$PACKS_FINANCE_LOG"
+PACKS_ENGINEERING_LOG="$TEST_ROOT/engineering-packs.log"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" packs engineering > "$PACKS_ENGINEERING_LOG"
+test "$(grep -Ec '^  [0-9]{2}  ' "$PACKS_ENGINEERING_LOG")" = "10"
+grep -Fq 'engineering-hardware' "$PACKS_ENGINEERING_LOG"
+grep -Fq 'engineering-marine' "$PACKS_ENGINEERING_LOG"
+RADIOLOGY_TOOLS_LOG="$TEST_ROOT/radiology-pack-tools.log"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" pack radiology tools > "$RADIOLOGY_TOOLS_LOG"
+grep -Fq 'Specialists: data-lab, research-brief, system-diagram' "$RADIOLOGY_TOOLS_LOG"
+FINANCE_TOOLS_LOG="$TEST_ROOT/finance-pack-tools.log"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" pack finance-risk tools > "$FINANCE_TOOLS_LOG"
+grep -Fq 'Pay basis: USD 124,420 annual mean wage (May 2025)' "$FINANCE_TOOLS_LOG"
+PACK_PROMPT="$TEST_ROOT/profession-pack-prompt.txt"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" pack radiology prompt \
+  'Analyze de-identified turnaround by modality.' > "$PACK_PROMPT"
+grep -Fq 'do not copy diagnostic images' "$PACK_PROMPT"
+grep -Fq 'Use these WutPack specialists when relevant: data-lab, research-brief' "$PACK_PROMPT"
+grep -Fq 'User request: Analyze de-identified turnaround by modality.' "$PACK_PROMPT"
+ENGINEERING_PROMPT="$TEST_ROOT/engineering-pack-prompt.txt"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" pack engineering-safety prompt \
+  'Build a fictional hazard register.' > "$ENGINEERING_PROMPT"
+grep -Fq 'Do not certify safety' "$ENGINEERING_PROMPT"
+grep -Fq 'User request: Build a fictional hazard register.' "$ENGINEERING_PROMPT"
+if WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" pack not-a-pack >/dev/null 2>&1; then
+  printf 'wut pack accepted an unknown toolpack\n' >&2
+  exit 1
+fi
+
 mkdir -p "$TEST_ROOT/link-one" "$TEST_ROOT/link-two"
 ln -s ../link-two/wut "$TEST_ROOT/link-one/wut"
 ln -s ../.local/bin/wut "$TEST_ROOT/link-two/wut"
@@ -54,18 +92,27 @@ test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" "$TEST_ROOT/link-one/wut" version)" = \
 
 NODE_STUB_DIR="$TEST_ROOT/Library/Application Support/WutPack/npm-global/bin"
 NODE_STUB_LOG="$TEST_ROOT/deck-node-args.txt"
+CODEX_STUB_LOG="$TEST_ROOT/profession-pack-codex-prompt.txt"
 DECK_OUTPUT="$TEST_ROOT/deck-output.pptx"
 mkdir -p "$NODE_STUB_DIR"
 cat > "$NODE_STUB_DIR/node" <<'EOF'
 #!/usr/bin/env bash
 printf '%s\n' "$@" > "$WUTPACK_NODE_STUB_LOG"
 EOF
-chmod +x "$NODE_STUB_DIR/node"
+cat > "$NODE_STUB_DIR/codex" <<'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "$@" > "$WUTPACK_CODEX_STUB_LOG"
+EOF
+chmod +x "$NODE_STUB_DIR/node" "$NODE_STUB_DIR/codex"
 WUTPACK_NODE_STUB_LOG="$NODE_STUB_LOG" WUTPACK_TEST_ROOT="$TEST_ROOT" \
   "$SYMLINK_WUT" deck "$DECK_OUTPUT"
 test "$(sed -n '1p' "$NODE_STUB_LOG")" = \
   "$CANONICAL_INSTALL_ROOT/skills/technical-deck/scripts/new_technical_deck.mjs"
 test "$(sed -n '2p' "$NODE_STUB_LOG")" = "--output=$DECK_OUTPUT"
+WUTPACK_CODEX_STUB_LOG="$CODEX_STUB_LOG" WUTPACK_TEST_ROOT="$TEST_ROOT" \
+  "$SYMLINK_WUT" pack pathology codex 'Map aggregate laboratory turnaround.'
+grep -Fq 'Use the pathology laboratory quality toolpack.' "$CODEX_STUB_LOG"
+grep -Fq 'User request: Map aggregate laboratory turnaround.' "$CODEX_STUB_LOG"
 if WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" deck one.pptx extra \
   >/dev/null 2>&1; then
   printf 'wut deck accepted too many arguments\n' >&2
@@ -187,6 +234,7 @@ if WUTPACK_TEST_ROOT="$TEST_ROOT/no-host-user" \
   exit 1
 fi
 grep -Fq "[ok]   WutPack source   $CANONICAL_INSTALL_ROOT" "$DOCTOR_LOG"
+grep -Fq '[ok]   toolpacks        30/30' "$DOCTOR_LOG"
 grep -Fq '[miss] host skills' "$DOCTOR_LOG"
 grep -Fq '[miss] pptxgenjs' "$DOCTOR_LOG"
 
@@ -237,10 +285,11 @@ PARTIAL_SOURCE_LOG="$TEST_ROOT/doctor-partial-source.log"
 WUTPACK_INSTALL_ROOT="$PARTIAL_SOURCE" WUTPACK_TEST_ROOT="$PARTIAL_HOME" \
   "$INSTALL_ROOT/bin/wut" doctor --headless >"$PARTIAL_SOURCE_LOG" 2>&1 || true
 grep -Fq '[miss] packaged skills  1/12' "$PARTIAL_SOURCE_LOG"
+grep -Fq '[miss] toolpacks        0/30' "$PARTIAL_SOURCE_LOG"
 
 BROKEN_SOURCE="$TEST_ROOT/broken-source"
 mkdir -p "$BROKEN_SOURCE/skills"
-for broken_command in version skills setup deck; do
+for broken_command in version skills packs setup deck; do
   if WUTPACK_INSTALL_ROOT="$BROKEN_SOURCE" "$INSTALL_ROOT/bin/wut" \
     "$broken_command" >/dev/null 2>&1; then
     printf 'wut %s passed with an incomplete source tree\n' "$broken_command" >&2
