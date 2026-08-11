@@ -28,6 +28,24 @@ same summary in a terminal.
 
 Commands use `exec`, so signals and exit codes come from the underlying tool.
 
+## Website proof gallery
+
+The public gallery is generated from real local tool runs. Rebuild all 53 proof
+pages and make one authenticated, read-only Codex call with:
+
+```bash
+wut python tools/build_tool_gallery.py --real-ai
+```
+
+Claude Code is deliberately recorded as installed-only and is never invoked by
+the gallery builder. To reproduce the site without another model call, pass a
+previously schema-validated Codex result with `--codex-result FILE`. Validate
+the generated links, layouts, media, and responsive behavior with:
+
+```bash
+wut python tools/check_tool_gallery.py
+```
+
 ## Maintenance
 
 ### `wut setup [options]`

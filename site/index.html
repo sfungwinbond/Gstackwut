@@ -944,6 +944,200 @@
       font-size: 0.61rem;
     }
 
+    .tool-gallery-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: var(--space-6);
+      border-top: 1px solid #5a6761;
+      border-left: 1px solid #5a6761;
+    }
+
+    .tool-gallery-stat {
+      min-height: 7.5rem;
+      padding: 1rem;
+      border-right: 1px solid #5a6761;
+      border-bottom: 1px solid #5a6761;
+    }
+
+    .tool-gallery-stat strong {
+      display: block;
+      color: var(--green-bright);
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 7vw, 4.4rem);
+      font-weight: 400;
+      line-height: 0.9;
+    }
+
+    .tool-gallery-stat span {
+      display: block;
+      margin-top: 0.65rem;
+      color: #b7c1bb;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .tool-gallery-controls {
+      margin-bottom: var(--space-5);
+    }
+
+    .tool-gallery-controls label {
+      display: block;
+      margin-bottom: 0.55rem;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tool-search-wrap {
+      display: flex;
+      min-height: 3.6rem;
+      align-items: center;
+      border: 1px solid #617067;
+      background: #101714;
+    }
+
+    .tool-search-wrap input {
+      min-width: 0;
+      flex: 1;
+      min-height: 3.5rem;
+      padding: 0.8rem 1rem;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #edf2ed;
+      font: inherit;
+    }
+
+    .tool-search-wrap input::placeholder {
+      color: #87918b;
+    }
+
+    .tool-search-wrap span {
+      padding: 0 1rem;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      white-space: nowrap;
+    }
+
+    .tool-layer-board {
+      border-top: 1px solid #5a6761;
+    }
+
+    .tool-layer {
+      display: grid;
+      gap: 1rem;
+      padding: 1.5rem 0;
+      border-bottom: 1px solid #5a6761;
+    }
+
+    .tool-layer[hidden],
+    .tool-example-link[hidden] {
+      display: none;
+    }
+
+    .tool-layer-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.8rem;
+    }
+
+    .tool-layer-heading > span {
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+
+    .tool-layer-heading h3 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .tool-layer-heading p {
+      margin: 0.35rem 0 0;
+      color: #aeb9b3;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+    }
+
+    .tool-example-grid {
+      display: grid;
+      gap: 0.65rem;
+    }
+
+    .tool-example-link {
+      display: flex;
+      min-height: 10rem;
+      flex-direction: column;
+      padding: 1rem;
+      border: 1px solid #52615a;
+      background: #1b2824;
+      color: #edf2ed;
+      text-decoration: none;
+      transition: border-color 160ms ease, transform 160ms ease, background 160ms ease;
+    }
+
+    .tool-example-link:hover {
+      transform: translateY(-2px);
+      border-color: var(--green-bright);
+      background: #22352d;
+    }
+
+    .tool-example-name {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .tool-example-name i {
+      width: 0.55rem;
+      height: 0.55rem;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: var(--green-bright);
+    }
+
+    .tool-example-link.installed-only .tool-example-name i {
+      background: var(--yellow);
+    }
+
+    .tool-example-name strong {
+      font-size: 1.05rem;
+    }
+
+    .tool-example-link > span:nth-child(2) {
+      margin: 0.65rem 0 1rem;
+      color: #b7c1bb;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+
+    .tool-example-link small {
+      margin-top: auto;
+      color: var(--green-bright);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .tool-empty {
+      padding: 2rem;
+      border: 1px solid #617067;
+      color: #b7c1bb;
+      text-align: center;
+    }
+
     .harness-flow {
       display: grid;
       gap: 0;
@@ -1361,6 +1555,15 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
+      .tool-layer {
+        grid-template-columns: 12rem minmax(0, 1fr);
+        gap: 2rem;
+      }
+
+      .tool-example-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .case:first-child {
         grid-row: span 2;
         min-height: 37rem;
@@ -1413,25 +1616,16 @@
     }
 
     @media (min-width: 1024px) {
-      .nav-links {
-        display: flex;
-      }
-
-      .menu-button,
-      .mobile-menu {
-        display: none;
-      }
-
-      .hero-facts {
-        min-width: 25rem;
-      }
-
       .fact {
         padding: 1.2rem;
       }
 
       .case-grid {
         grid-template-columns: 1.1fr 0.9fr 0.9fr;
+      }
+
+      .tool-example-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .case:first-child {
@@ -1450,6 +1644,21 @@
 
       .specialist-list {
         grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (min-width: 1200px) {
+      .hero-facts {
+        min-width: 25rem;
+      }
+
+      .nav-links {
+        display: flex;
+      }
+
+      .menu-button,
+      .mobile-menu {
+        display: none;
       }
     }
 
@@ -1593,6 +1802,7 @@
       <div class="nav-links">
         <a href="#new-mac-start">Start here</a>
         <a href="#work">What it does</a>
+        <a href="#tool-gallery">53 examples</a>
         <a href="#specialists">12 specialists</a>
         <a href="#questions">Questions</a>
         <a class="button" href="#install">Install free</a>
@@ -1606,6 +1816,7 @@
     <div class="mobile-menu" id="mobile-menu" data-open="false" hidden>
       <a href="#new-mac-start">Start here</a>
       <a href="#work">What it does</a>
+      <a href="#tool-gallery">53 examples</a>
       <a href="#specialists">12 specialists</a>
       <a href="#questions">Questions</a>
       <a href="#install">Install free</a>
@@ -1796,49 +2007,325 @@
       </div>
     </section>
 
-    <section class="section dark">
+    <section class="section dark" id="tool-gallery">
       <div class="shell">
         <div class="section-heading reveal">
           <div>
-            <p class="eyebrow">A week of work, compressed</p>
-            <h2>Built for the moments small teams actually face.</h2>
+            <p class="eyebrow">Proof, not a package list</p>
+            <h2>Open the output from every tool.</h2>
           </div>
-          <p>No fictional testimonials. These are concrete example workflows you can run and inspect in the repository today.</p>
+          <p>Each link opens a visual HTML page with the exact local command or API, installed version, observed result, and downloadable artifact where the tool creates one. All business data is fictional.</p>
         </div>
-        <div class="case-grid reveal">
-          <article class="case">
-            <span class="case-label">Board meeting · 3:00 PM</span>
-            <div>
-              <h3>The numbers changed this morning.</h3>
-              <p>Refresh the operating model, rebuild the chart, update the decision slide, and run a visual validation before anyone opens the deck.</p>
-              <div class="case-files"><span>forecast.xlsx</span><span>board-update.pptx</span><span>QA report</span></div>
-            </div>
-          </article>
-          <article class="case">
-            <span class="case-label">New service launch</span>
-            <div>
-              <h3>Price it with evidence.</h3>
-              <p>Compare competitors, model unit economics, and publish a one-page recommendation.</p>
-              <div class="case-files"><span>sources</span><span>model.xlsx</span></div>
-            </div>
-          </article>
-          <article class="case">
-            <span class="case-label">Proposal due Friday</span>
-            <div>
-              <h3>One story, every format.</h3>
-              <p>Move from research to a structured proposal, a client deck, and a clean PDF handoff.</p>
-              <div class="case-files"><span>proposal.docx</span><span>pitch.pptx</span></div>
-            </div>
-          </article>
-          <article class="case">
-            <span class="case-label">Monthly operations</span>
-            <div>
-              <h3>Make the repeatable work actually repeatable.</h3>
-              <p>Keep the same tools, routes, and validation checks available next month, in the next terminal, and with either supported coding agent.</p>
-              <div class="case-files"><span>persistent tools</span><span>reusable skills</span><span>clear checks</span></div>
-            </div>
-          </article>
+        <div class="tool-gallery-summary reveal" aria-label="Tool gallery totals">
+          <div class="tool-gallery-stat"><strong>53</strong><span>linked tool pages</span></div>
+          <div class="tool-gallery-stat"><strong>52</strong><span>tools exercised locally</span></div>
+          <div class="tool-gallery-stat"><strong>1</strong><span>installed only · Claude</span></div>
         </div>
+        <!-- TOOL_GALLERY_START -->
+      <div class="tool-gallery-controls reveal">
+        <label for="tool-search">Find a tool or job</label>
+        <div class="tool-search-wrap"><input id="tool-search" type="search" placeholder="Try PDF, diagram, browser, Excel…" autocomplete="off" data-tool-search><span data-tool-count aria-live="polite">53 tools</span></div>
+      </div>
+      <div class="tool-layer-board reveal" data-tool-board>
+        <section class="tool-layer" aria-labelledby="tool-layer-1">
+          <div class="tool-layer-heading">
+            <span>01</span>
+            <div><h3 id="tool-layer-1">Desktop workbench</h3><p>5 exercised · 5 pages</p></div>
+          </div>
+          <div class="tool-example-grid"><a class="tool-example-link" href="tool-examples/libreoffice.html" data-tool-name="libreoffice turns a structured word document into a clean, standard pdf without opening a gui.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>LibreOffice</strong></span>
+              <span>Turns a structured Word document into a clean, standard PDF without opening a GUI.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/chromium.html" data-tool-name="chromium loads and captures a local business dashboard in a real chromium engine.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Chromium</strong></span>
+              <span>Loads and captures a local business dashboard in a real Chromium engine.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/quarto.html" data-tool-name="quarto executes a small analysis and publishes the narrative, code, and result as one html report.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Quarto</strong></span>
+              <span>Executes a small analysis and publishes the narrative, code, and result as one HTML report.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/drawio.html" data-tool-name="draw.io exports an editable decision flow into a browser-ready vector graphic.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>draw.io</strong></span>
+              <span>Exports an editable decision flow into a browser-ready vector graphic.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/inkscape.html" data-tool-name="inkscape renders a scalable score graphic to a presentation-ready bitmap.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Inkscape</strong></span>
+              <span>Renders a scalable score graphic to a presentation-ready bitmap.</span>
+              <small>Open visual proof →</small>
+            </a></div>
+        </section><section class="tool-layer" aria-labelledby="tool-layer-2">
+          <div class="tool-layer-heading">
+            <span>02</span>
+            <div><h3 id="tool-layer-2">AI coding CLIs</h3><p>1 exercised · 2 pages</p></div>
+          </div>
+          <div class="tool-example-grid"><a class="tool-example-link" href="tool-examples/codex.html" data-tool-name="codex reads the real fictional scorecard in a read-only sandbox and returns a schema-validated market decision.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Codex</strong></span>
+              <span>Reads the real fictional scorecard in a read-only sandbox and returns a schema-validated market decision.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link installed-only" href="tool-examples/claude-code.html" data-tool-name="claude code records the installed claude code package without invoking the unauthenticated cli or making a model call.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Claude Code</strong></span>
+              <span>Records the installed Claude Code package without invoking the unauthenticated CLI or making a model call.</span>
+              <small>Open install record →</small>
+            </a></div>
+        </section><section class="tool-layer" aria-labelledby="tool-layer-3">
+          <div class="tool-layer-heading">
+            <span>03</span>
+            <div><h3 id="tool-layer-3">Office, PDF, and media</h3><p>13 exercised · 13 pages</p></div>
+          </div>
+          <div class="tool-example-grid"><a class="tool-example-link" href="tool-examples/openpyxl.html" data-tool-name="openpyxl builds a styled excel-compatible scorecard, formula, freeze pane, and native chart, then reopens the workbook to verify them.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>openpyxl</strong></span>
+              <span>Builds a styled Excel-compatible scorecard, formula, freeze pane, and native chart, then reopens the workbook to verify them.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/xlsxwriter.html" data-tool-name="xlsxwriter creates an excel-compatible scenario model with formats, conditional bars, and a native column chart.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>XlsxWriter</strong></span>
+              <span>Creates an Excel-compatible scenario model with formats, conditional bars, and a native column chart.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/python-docx.html" data-tool-name="python-docx creates and reopens a structured decision memo with named headings, body text, and a real word table.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>python-docx</strong></span>
+              <span>Creates and reopens a structured decision memo with named headings, body text, and a real Word table.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/python-pptx.html" data-tool-name="python-pptx builds a widescreen presentation from native text boxes and editable powerpoint shapes.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>python-pptx</strong></span>
+              <span>Builds a widescreen presentation from native text boxes and editable PowerPoint shapes.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/cairosvg.html" data-tool-name="cairosvg converts an editable svg score graphic into a crisp png with a deterministic python call.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>CairoSVG</strong></span>
+              <span>Converts an editable SVG score graphic into a crisp PNG with a deterministic Python call.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/pandoc.html" data-tool-name="pandoc transforms a markdown decision brief and table into a standalone semantic html document.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Pandoc</strong></span>
+              <span>Transforms a Markdown decision brief and table into a standalone semantic HTML document.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/poppler.html" data-tool-name="poppler inspects pdf metadata, extracts positioned text, and renders a page preview with three standard poppler utilities.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Poppler</strong></span>
+              <span>Inspects PDF metadata, extracts positioned text, and renders a page preview with three standard Poppler utilities.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/qpdf.html" data-tool-name="qpdf rewrites a valid pdf for fast web access, then checks the new file&#x27;s structure.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>qpdf</strong></span>
+              <span>Rewrites a valid PDF for fast web access, then checks the new file&#x27;s structure.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/mupdf.html" data-tool-name="mupdf renders a selected pdf page at a controlled resolution with the compact mupdf engine.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>MuPDF</strong></span>
+              <span>Renders a selected PDF page at a controlled resolution with the compact MuPDF engine.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/ocrmypdf.html" data-tool-name="ocrmypdf adds a searchable text layer to an image-only pdf and proves the expected words can be extracted.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>OCRmyPDF</strong></span>
+              <span>Adds a searchable text layer to an image-only PDF and proves the expected words can be extracted.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/tesseract.html" data-tool-name="tesseract reads text directly from a rasterized pilot note and returns plain machine-searchable text.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Tesseract</strong></span>
+              <span>Reads text directly from a rasterized pilot note and returns plain machine-searchable text.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/imagemagick.html" data-tool-name="imagemagick resizes, frames, strips metadata, and compresses a large raster into a web-ready image.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>ImageMagick</strong></span>
+              <span>Resizes, frames, strips metadata, and compresses a large raster into a web-ready image.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/ffmpeg.html" data-tool-name="ffmpeg encodes a 24-frame business-status animation as a browser-playable h.264 video.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>FFmpeg</strong></span>
+              <span>Encodes a 24-frame business-status animation as a browser-playable H.264 video.</span>
+              <small>Open visual proof →</small>
+            </a></div>
+        </section><section class="tool-layer" aria-labelledby="tool-layer-4">
+          <div class="tool-layer-heading">
+            <span>04</span>
+            <div><h3 id="tool-layer-4">Data and research</h3><p>11 exercised · 11 pages</p></div>
+          </div>
+          <div class="tool-example-grid"><a class="tool-example-link" href="tool-examples/pandas.html" data-tool-name="pandas loads a csv, ranks markets, and calculates each market&#x27;s share of the fictional revenue pool.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>pandas</strong></span>
+              <span>Loads a CSV, ranks markets, and calculates each market&#x27;s share of the fictional revenue pool.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/polars.html" data-tool-name="polars runs a lazy csv query, computes score distance from the mean, sorts, and collects only the decision columns.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Polars</strong></span>
+              <span>Runs a lazy CSV query, computes score distance from the mean, sorts, and collects only the decision columns.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/apache-arrow.html" data-tool-name="arrow reads csv into a typed columnar table, writes compressed parquet, and verifies an exact round trip.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Arrow</strong></span>
+              <span>Reads CSV into a typed columnar table, writes compressed Parquet, and verifies an exact round trip.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/duckdb.html" data-tool-name="duckdb queries the csv directly with sql and calculates a sortable growth-value proxy without loading a server.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>DuckDB</strong></span>
+              <span>Queries the CSV directly with SQL and calculates a sortable growth-value proxy without loading a server.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/scipy.html" data-tool-name="scipy measures rank correlation and draws a shape-preserving interpolation through the supplied market observations.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>SciPy</strong></span>
+              <span>Measures rank correlation and draws a shape-preserving interpolation through the supplied market observations.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/scikit-learn.html" data-tool-name="scikit-learn fits a seeded two-cluster model and labels each market with a reproducible peer group.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>scikit-learn</strong></span>
+              <span>Fits a seeded two-cluster model and labels each market with a reproducible peer group.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/statsmodels.html" data-tool-name="statsmodels fits an explicit ols model and reports the coefficient, uncertainty, fit, and sample size instead of only drawing a trend line.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>statsmodels</strong></span>
+              <span>Fits an explicit OLS model and reports the coefficient, uncertainty, fit, and sample size instead of only drawing a trend line.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/jupyterlab.html" data-tool-name="jupyterlab executes a real notebook kernel and exports the markdown, code, and computed output as portable html.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>JupyterLab</strong></span>
+              <span>Executes a real notebook kernel and exports the markdown, code, and computed output as portable HTML.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/playwright.html" data-tool-name="playwright launches chromium, navigates a local page, asserts visible data, and captures a full-page screenshot.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Playwright</strong></span>
+              <span>Launches Chromium, navigates a local page, asserts visible data, and captures a full-page screenshot.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/selenium.html" data-tool-name="selenium exercises the selenium client through the w3c webdriver protocol: create session, navigate, read title, locate text, and quit.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Selenium</strong></span>
+              <span>Exercises the Selenium client through the W3C WebDriver protocol: create session, navigate, read title, locate text, and quit.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/scrapy.html" data-tool-name="scrapy runs a real spider against a local html fixture and exports four structured market records.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Scrapy</strong></span>
+              <span>Runs a real spider against a local HTML fixture and exports four structured market records.</span>
+              <small>Open visual proof →</small>
+            </a></div>
+        </section><section class="tool-layer" aria-labelledby="tool-layer-5">
+          <div class="tool-layer-heading">
+            <span>05</span>
+            <div><h3 id="tool-layer-5">Diagrams and documentation</h3><p>11 exercised · 11 pages</p></div>
+          </div>
+          <div class="tool-example-grid"><a class="tool-example-link" href="tool-examples/pptxgenjs.html" data-tool-name="pptxgenjs creates a widescreen powerpoint from editable javascript-defined shapes and text, then render-checks the slide.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>PptxGenJS</strong></span>
+              <span>Creates a widescreen PowerPoint from editable JavaScript-defined shapes and text, then render-checks the slide.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/mermaid.html" data-tool-name="mermaid compiles a text flowchart into an accessible, scalable decision diagram using local chromium.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Mermaid</strong></span>
+              <span>Compiles a text flowchart into an accessible, scalable decision diagram using local Chromium.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/graphviz.html" data-tool-name="graphviz lays out a directed decision graph from dot source and emits a portable vector file.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Graphviz</strong></span>
+              <span>Lays out a directed decision graph from DOT source and emits a portable vector file.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/plantuml.html" data-tool-name="plantuml turns a four-part handoff description into a sequence diagram that stays reviewable as text.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>PlantUML</strong></span>
+              <span>Turns a four-part handoff description into a sequence diagram that stays reviewable as text.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/typst.html" data-tool-name="typst compiles concise typesetting source into a polished one-page pdf with an explicit decision table.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Typst</strong></span>
+              <span>Compiles concise typesetting source into a polished one-page PDF with an explicit decision table.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/mkdocs.html" data-tool-name="mkdocs builds a linked two-page documentation site from markdown and fails on broken references in strict mode.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>MkDocs</strong></span>
+              <span>Builds a linked two-page documentation site from Markdown and fails on broken references in strict mode.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/sphinx.html" data-tool-name="sphinx builds reference documentation from restructuredtext and live python docstrings with warnings treated as errors.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Sphinx</strong></span>
+              <span>Builds reference documentation from reStructuredText and live Python docstrings with warnings treated as errors.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/pdoc.html" data-tool-name="pdoc publishes a readable python module reference directly from a real function signature and docstring.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>pdoc</strong></span>
+              <span>Publishes a readable Python module reference directly from a real function signature and docstring.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/doxygen.html" data-tool-name="doxygen turns documented c source into browsable api reference pages with warnings promoted to build failures.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>Doxygen</strong></span>
+              <span>Turns documented C source into browsable API reference pages with warnings promoted to build failures.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/jsdoc.html" data-tool-name="jsdoc reads javascript annotations and emits a linked function reference with parameter and return contracts.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>JSDoc</strong></span>
+              <span>Reads JavaScript annotations and emits a linked function reference with parameter and return contracts.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/typedoc.html" data-tool-name="typedoc builds a navigable typescript reference that preserves the interface and typed return contract.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>TypeDoc</strong></span>
+              <span>Builds a navigable TypeScript reference that preserves the interface and typed return contract.</span>
+              <small>Open visual proof →</small>
+            </a></div>
+        </section><section class="tool-layer" aria-labelledby="tool-layer-6">
+          <div class="tool-layer-heading">
+            <span>06</span>
+            <div><h3 id="tool-layer-6">Engineering utilities</h3><p>11 exercised · 11 pages</p></div>
+          </div>
+          <div class="tool-example-grid"><a class="tool-example-link" href="tool-examples/github-cli.html" data-tool-name="github cli checks the installed github cli and its local authentication state while redacting account and credential details.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>GitHub CLI</strong></span>
+              <span>Checks the installed GitHub CLI and its local authentication state while redacting account and credential details.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/ripgrep.html" data-tool-name="ripgrep searches the scorecard with a regular expression and reports exact source line numbers.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>ripgrep</strong></span>
+              <span>Searches the scorecard with a regular expression and reports exact source line numbers.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/fd.html" data-tool-name="fd finds only current markdown deliverables in a nested project tree with a concise file-type filter.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>fd</strong></span>
+              <span>Finds only current Markdown deliverables in a nested project tree with a concise file-type filter.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/fzf.html" data-tool-name="fzf ranks a list of project files with fuzzy matching and returns only the market-related choices.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>fzf</strong></span>
+              <span>Ranks a list of project files with fuzzy matching and returns only the market-related choices.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/jq.html" data-tool-name="jq filters, sorts, and reshapes nested json into the two markets that clear a decision threshold.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>jq</strong></span>
+              <span>Filters, sorts, and reshapes nested JSON into the two markets that clear a decision threshold.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/yq.html" data-tool-name="yq queries a yaml launch plan and emits a normalized json list of gates and accountable owners.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>yq</strong></span>
+              <span>Queries a YAML launch plan and emits a normalized JSON list of gates and accountable owners.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/shellcheck.html" data-tool-name="shellcheck finds unsafe shell expansion in a small script and returns line-addressable diagnostics before the script ships.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>ShellCheck</strong></span>
+              <span>Finds unsafe shell expansion in a small script and returns line-addressable diagnostics before the script ships.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/shfmt.html" data-tool-name="shfmt normalizes shell indentation and control-flow spacing into a deterministic style.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>shfmt</strong></span>
+              <span>Normalizes shell indentation and control-flow spacing into a deterministic style.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/delta.html" data-tool-name="delta turns a raw git patch into a line-numbered, readable review view that makes the decision change obvious.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>delta</strong></span>
+              <span>Turns a raw Git patch into a line-numbered, readable review view that makes the decision change obvious.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/hyperfine.html" data-tool-name="hyperfine benchmarks two equivalent local searches with warmup, repeated runs, statistical timing, and json export.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>hyperfine</strong></span>
+              <span>Benchmarks two equivalent local searches with warmup, repeated runs, statistical timing, and JSON export.</span>
+              <small>Open visual proof →</small>
+            </a>
+<a class="tool-example-link" href="tool-examples/just.html" data-tool-name="just runs a named, parameterized project recipe so a repeated score check has one memorable command.">
+              <span class="tool-example-name"><i aria-hidden="true"></i><strong>just</strong></span>
+              <span>Runs a named, parameterized project recipe so a repeated score check has one memorable command.</span>
+              <small>Open visual proof →</small>
+            </a></div>
+        </section>
+      </div>
+      <p class="tool-empty" data-tool-empty hidden>No matching tool. Try a broader word.</p>
+      <!-- TOOL_GALLERY_END -->
       </div>
     </section>
 
@@ -1923,12 +2410,12 @@
           <div>
             <p class="eyebrow">Step one · copy and paste</p>
             <h2>Put this into Terminal exactly as shown.</h2>
-            <p>Click <strong>Copy command</strong>, return to Terminal, paste, and press Return. You do not need to edit the command. When setup finishes, reopen Terminal and run <code>wut doctor</code>.</p>
+            <p>Click <strong>Copy command</strong>, return to Terminal, paste, and press Return. You do not need to edit the command. It starts with macOS system tools so a broken Homebrew Git or curl cannot block its own repair. When setup finishes, reopen Terminal and run <code>wut doctor</code>.</p>
           </div>
           <div>
             <div class="terminal">
               <div class="terminal-head"><span>Terminal · public installer</span><button class="copy-button" type="button" data-copy-command>Copy command</button></div>
-              <code class="command" id="install-command"><span class="prompt">$</span> curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh | bash</code>
+              <code class="command" id="install-command"><span class="prompt">$</span> /usr/bin/curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh | env PATH="/usr/bin:/bin:/usr/sbin:/sbin" /bin/bash</code>
             </div>
             <div class="install-notes">
               <div class="install-note"><strong>Persists</strong><span>Managed tools live under your user Library, not a disposable chat session.</span></div>
@@ -2010,7 +2497,7 @@
           <p>Start with one useful request. The office, data, research, diagram, publishing, and software tools will still be there for the next one.</p>
           <div class="hero-actions">
             <a class="button" href="#install">Install WutPack</a>
-            <a class="button secondary" href="https://github.com/sfungwinbond/Gstackwut#twelve-specialist-consulting-walkthrough" rel="noreferrer">See all examples</a>
+            <a class="button secondary" href="#tool-gallery">See all 53 examples</a>
           </div>
         </div>
       </div>
@@ -2050,7 +2537,28 @@
       });
     });
 
-    const installText = 'curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh | bash';
+    const toolSearch = document.querySelector('[data-tool-search]');
+    const toolLinks = [...document.querySelectorAll('[data-tool-name]')];
+    const toolLayers = [...document.querySelectorAll('.tool-layer')];
+    const toolCount = document.querySelector('[data-tool-count]');
+    const toolEmpty = document.querySelector('[data-tool-empty]');
+
+    toolSearch?.addEventListener('input', () => {
+      const query = toolSearch.value.trim().toLowerCase();
+      let visible = 0;
+      toolLinks.forEach((link) => {
+        const matches = !query || link.dataset.toolName.includes(query);
+        link.hidden = !matches;
+        visible += Number(matches);
+      });
+      toolLayers.forEach((layer) => {
+        layer.hidden = !layer.querySelector('[data-tool-name]:not([hidden])');
+      });
+      if (toolCount) toolCount.textContent = `${visible} ${visible === 1 ? 'tool' : 'tools'}`;
+      if (toolEmpty) toolEmpty.hidden = visible !== 0;
+    });
+
+    const installText = '/usr/bin/curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh | env PATH="/usr/bin:/bin:/usr/sbin:/sbin" /bin/bash';
     const copyButton = document.querySelector('[data-copy-command]');
 
     copyButton?.addEventListener('click', async () => {

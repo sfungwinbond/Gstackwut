@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <meta name="description" content="A reproducible WutPack example for Codex.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/gallery.css">
+  <title>Codex example | WutPack</title>
+</head>
+<body class="proof-page status-passed layer-ai-coding-clis">
+  <a class="skip-link" href="#proof">Skip to proof</a>
+  <header class="proof-header">
+    <a class="proof-brand" href="../index.html#tool-gallery"><span>W</span> WutPack</a>
+    <a class="back-link" href="../index.html#tool-gallery">All 53 tool examples</a>
+  </header>
+  <main id="proof">
+    <section class="proof-hero">
+      <div>
+        <p class="proof-layer">AI coding CLIs</p>
+        <h1>Codex</h1>
+        <p class="proof-tagline" data-pretext contenteditable="true">Reads the real fictional scorecard in a read-only sandbox and returns a schema-validated market decision.</p>
+      </div>
+      <div class="proof-status"><span></span> exercised locally</div>
+    </section>
+    <section class="proof-stage" aria-label="Visual output from Codex">
+      <div class="browser-visual"><div class="browser-top"><span class="browser-dots" aria-hidden="true">● ● ●</span><span class="address">codex://structured-output</span></div><div class="browser-page"><h2>Coastal is the first market.</h2><p>Enter Coastal first because it has the highest weighted score, largest market size, and fastest growth among the supplied markets.</p><div class="browser-card"><strong>Score 81</strong><br>Proceed beyond the pilot only if Coastal demonstrates an EBITDA margin of at least 20%.</div></div></div>
+    </section>
+    <section class="proof-evidence">
+      <div class="evidence-copy">
+        <p class="proof-kicker">What ran</p>
+        <h2>Produce a structured recommendation from repository data</h2>
+        <p>The command completed against a local fictional fixture. The page records the tool version and the output used in the visual above.</p>
+        <p class="proof-note">This is the final structured output from an authenticated, ephemeral Codex model run against the repository&#x27;s fictional CSV. The CLI had read-only sandbox access.</p>
+        <div class="artifact-actions"><a class="artifact-link" href="artifacts/codex-decision.json" download>Download JSON</a></div>
+      </div>
+      <div class="run-card">
+        <div><span>Tool version</span><strong>codex-cli 0.147.0</strong></div>
+        <div><span>Command or API</span><code>codex exec --ephemeral --sandbox read-only --output-schema decision.schema.json</code></div>
+        <div><span>Observed result</span><pre>{
+  &quot;recommended_market&quot;: &quot;Coastal&quot;,
+  &quot;score&quot;: 81,
+  &quot;decision&quot;: &quot;Enter Coastal first because it has the highest weighted score, largest market size, and fastest growth among the supplied markets.&quot;,
+  &quot;gate&quot;: &quot;Proceed beyond the pilot only if Coastal demonstrates an EBITDA margin of at least 20%.&quot;
+}</pre></div>
+        <div><span>Local runtime</span><strong>2 ms</strong></div>
+      </div>
+    </section>
+    <nav class="proof-pagination" aria-label="Tool examples">
+      <a href="inkscape.html"><span>Previous proof</span>←</a>
+      <a href="../index.html#tool-gallery"><span>Gallery</span>53 tools</a>
+      <a href="claude-code.html"><span>Next proof</span>→</a>
+    </nav>
+  </main>
+  <footer class="proof-footer">
+    <p>Evidence is labeled precisely: authenticated Codex ran; unauthenticated Claude Code did not. No credential is embedded in this site.</p>
+    <a href="https://github.com/sfungwinbond/Gstackwut">Source on GitHub</a>
+  </footer>
+  <script type="module" src="assets/gallery.js"></script>
+</body>
+</html>

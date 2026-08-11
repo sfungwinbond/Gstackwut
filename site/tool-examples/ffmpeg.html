@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <meta name="description" content="A reproducible WutPack example for FFmpeg.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/gallery.css">
+  <title>FFmpeg example | WutPack</title>
+</head>
+<body class="proof-page status-passed layer-office-pdf-and-media">
+  <a class="skip-link" href="#proof">Skip to proof</a>
+  <header class="proof-header">
+    <a class="proof-brand" href="../index.html#tool-gallery"><span>W</span> WutPack</a>
+    <a class="back-link" href="../index.html#tool-gallery">All 53 tool examples</a>
+  </header>
+  <main id="proof">
+    <section class="proof-hero">
+      <div>
+        <p class="proof-layer">Office, PDF, and media</p>
+        <h1>FFmpeg</h1>
+        <p class="proof-tagline" data-pretext contenteditable="true">Encodes a 24-frame business-status animation as a browser-playable H.264 video.</p>
+      </div>
+      <div class="proof-status"><span></span> exercised locally</div>
+    </section>
+    <section class="proof-stage" aria-label="Visual output from FFmpeg">
+      <div class="media-visual"><div class="visual-chrome"><span>ffmpeg-pilot.mp4</span><span>H.264 · 2 seconds</span></div><video controls muted loop playsinline poster="artifacts/ffmpeg-poster.png"><source src="artifacts/ffmpeg-pilot.mp4" type="video/mp4">Video preview unavailable.</video></div>
+    </section>
+    <section class="proof-evidence">
+      <div class="evidence-copy">
+        <p class="proof-kicker">What ran</p>
+        <h2>Encode a two-second pilot-progress animation</h2>
+        <p>The command completed against a local fictional fixture. The page records the tool version and the output used in the visual above.</p>
+
+        <div class="artifact-actions"><a class="artifact-link" href="artifacts/ffmpeg-pilot.mp4" download>Download MP4</a></div>
+      </div>
+      <div class="run-card">
+        <div><span>Tool version</span><strong>ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers</strong></div>
+        <div><span>Command or API</span><code>ffmpeg -framerate 12 -i frame-%02d.png -c:v libx264 -pix_fmt yuv420p pilot.mp4</code></div>
+        <div><span>Observed result</span><pre>Encoded 24 frames into 6,688 bytes.</pre></div>
+        <div><span>Local runtime</span><strong>195 ms</strong></div>
+      </div>
+    </section>
+    <nav class="proof-pagination" aria-label="Tool examples">
+      <a href="imagemagick.html"><span>Previous proof</span>←</a>
+      <a href="../index.html#tool-gallery"><span>Gallery</span>53 tools</a>
+      <a href="pandas.html"><span>Next proof</span>→</a>
+    </nav>
+  </main>
+  <footer class="proof-footer">
+    <p>Generated from a deterministic, fictional local fixture. No credential or paid API call was used.</p>
+    <a href="https://github.com/sfungwinbond/Gstackwut">Source on GitHub</a>
+  </footer>
+  <script type="module" src="assets/gallery.js"></script>
+</body>
+</html>

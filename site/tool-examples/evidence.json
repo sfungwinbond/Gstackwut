@@ -1,0 +1,833 @@
+{
+  "exercised_count": 52,
+  "fixture_policy": "fictional, local, deterministic; no credentials embedded",
+  "generated_on": "2026-08-11",
+  "installed_only_count": 1,
+  "layers": {
+    "AI coding CLIs": 2,
+    "Data and research": 11,
+    "Desktop workbench": 5,
+    "Diagrams and documentation": 11,
+    "Engineering utilities": 11,
+    "Office, PDF, and media": 13
+  },
+  "tool_count": 53,
+  "tools": [
+    {
+      "artifacts": [
+        "artifacts/libreoffice-memo.pdf"
+      ],
+      "command": "soffice --headless --convert-to pdf atlas-memo.docx",
+      "duration_ms": 5297,
+      "layer": "Desktop workbench",
+      "name": "LibreOffice",
+      "note": "",
+      "result": "convert $WORK/source/atlas-memo.docx as a Writer document -> $WORK/desktop/libreoffice/atlas-memo.pdf using filter : writer_pdf_Export",
+      "slug": "libreoffice",
+      "status": "passed",
+      "tagline": "Turns a structured Word document into a clean, standard PDF without opening a GUI.",
+      "task": "Render an editable decision memo headlessly",
+      "version": "LibreOffice 25.8.0.4 48f00303701489684e67c38c28aff00cd5929e67"
+    },
+    {
+      "artifacts": [
+        "artifacts/chromium-dashboard.png"
+      ],
+      "command": "chromium --headless --screenshot dashboard.html",
+      "duration_ms": 2237,
+      "layer": "Desktop workbench",
+      "name": "Chromium",
+      "note": "The installed Playwright-managed Chromium binary is used so the example remains headless and deterministic.",
+      "result": "Captured a 1200 \u00d7 760 PNG from a local file URL.",
+      "slug": "chromium",
+      "status": "passed",
+      "tagline": "Loads and captures a local business dashboard in a real Chromium engine.",
+      "task": "Render a local dashboard at a fixed viewport",
+      "version": "Google Chrome for Testing 151.0.7922.34"
+    },
+    {
+      "artifacts": [
+        "artifacts/quarto-analysis.html"
+      ],
+      "command": "quarto render analysis.qmd --to html",
+      "duration_ms": 25753,
+      "layer": "Desktop workbench",
+      "name": "Quarto",
+      "note": "",
+      "result": "Selected market: Coastal (81)",
+      "slug": "quarto",
+      "status": "passed",
+      "tagline": "Executes a small analysis and publishes the narrative, code, and result as one HTML report.",
+      "task": "Render an executable decision brief",
+      "version": "1.10.18"
+    },
+    {
+      "artifacts": [
+        "artifacts/drawio-decision.svg"
+      ],
+      "command": "drawio --export --format svg decision.drawio",
+      "duration_ms": 1662,
+      "layer": "Desktop workbench",
+      "name": "draw.io",
+      "note": "",
+      "result": "Exported decision.drawio to SVG.",
+      "slug": "drawio",
+      "status": "passed",
+      "tagline": "Exports an editable decision flow into a browser-ready vector graphic.",
+      "task": "Export a three-step decision diagram",
+      "version": "31.1.8"
+    },
+    {
+      "artifacts": [
+        "artifacts/inkscape-gauge.png"
+      ],
+      "command": "inkscape market-gauge.svg --export-width=1200",
+      "duration_ms": 1210,
+      "layer": "Desktop workbench",
+      "name": "Inkscape",
+      "note": "",
+      "result": "Created a 1200 \u00d7 675 PNG from editable SVG source.",
+      "slug": "inkscape",
+      "status": "passed",
+      "tagline": "Renders a scalable score graphic to a presentation-ready bitmap.",
+      "task": "Export a 1,200-pixel market-score graphic",
+      "version": "Inkscape 1.4.4 (dcaf3e7d, 2026-05-05)"
+    },
+    {
+      "artifacts": [
+        "artifacts/codex-decision.json"
+      ],
+      "command": "codex exec --ephemeral --sandbox read-only --output-schema decision.schema.json",
+      "duration_ms": 2,
+      "layer": "AI coding CLIs",
+      "name": "Codex",
+      "note": "This is the final structured output from an authenticated, ephemeral Codex model run against the repository's fictional CSV. The CLI had read-only sandbox access.",
+      "result": "{\n  \"recommended_market\": \"Coastal\",\n  \"score\": 81,\n  \"decision\": \"Enter Coastal first because it has the highest weighted score, largest market size, and fastest growth among the supplied markets.\",\n  \"gate\": \"Proceed beyond the pilot only if Coastal demonstrates an EBITDA margin of at least 20%.\"\n}",
+      "slug": "codex",
+      "status": "passed",
+      "tagline": "Reads the real fictional scorecard in a read-only sandbox and returns a schema-validated market decision.",
+      "task": "Produce a structured recommendation from repository data",
+      "version": "codex-cli 0.147.0"
+    },
+    {
+      "artifacts": [],
+      "command": "Not run \u2014 owner requested no Claude test",
+      "duration_ms": 0,
+      "layer": "AI coding CLIs",
+      "name": "Claude Code",
+      "note": "This is the one deliberate exception in the gallery: 52 tools are exercised, while Claude Code is documented but not invoked.",
+      "result": "Installed package metadata found. Authentication and model execution intentionally not tested.",
+      "slug": "claude-code",
+      "status": "installed-only",
+      "tagline": "Records the installed Claude Code package without invoking the unauthenticated CLI or making a model call.",
+      "task": "Document the intentionally untested AI CLI",
+      "version": "2.1.226"
+    },
+    {
+      "artifacts": [
+        "artifacts/openpyxl-scorecard.xlsx"
+      ],
+      "command": "openpyxl.Workbook() \u2192 save() \u2192 load_workbook()",
+      "duration_ms": 19,
+      "layer": "Office, PDF, and media",
+      "name": "openpyxl",
+      "note": "",
+      "result": "Workbook reopened; formula =AVERAGE(D2:D5) and chart object are present.",
+      "slug": "openpyxl",
+      "status": "passed",
+      "tagline": "Builds a styled Excel-compatible scorecard, formula, freeze pane, and native chart, then reopens the workbook to verify them.",
+      "task": "Create and reopen a market scorecard workbook",
+      "version": "3.1.5"
+    },
+    {
+      "artifacts": [
+        "artifacts/xlsxwriter-scenarios.xlsx"
+      ],
+      "command": "xlsxwriter.Workbook() + add_chart() + close()",
+      "duration_ms": 10,
+      "layer": "Office, PDF, and media",
+      "name": "XlsxWriter",
+      "note": "",
+      "result": "Created three scenarios, a data-bar rule, and a native chart.",
+      "slug": "xlsxwriter",
+      "status": "passed",
+      "tagline": "Creates an Excel-compatible scenario model with formats, conditional bars, and a native column chart.",
+      "task": "Write a three-scenario economics workbook",
+      "version": "3.2.9"
+    },
+    {
+      "artifacts": [
+        "artifacts/python-docx-memo.docx"
+      ],
+      "command": "Document(source) \u2192 add_heading() \u2192 save() \u2192 reopen",
+      "duration_ms": 36,
+      "layer": "Office, PDF, and media",
+      "name": "python-docx",
+      "note": "",
+      "result": "Reopened 6 paragraphs, 2 headings, and 1 table.",
+      "slug": "python-docx",
+      "status": "passed",
+      "tagline": "Creates and reopens a structured decision memo with named headings, body text, and a real Word table.",
+      "task": "Extend and validate a Word decision memo",
+      "version": "1.2.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/python-pptx-pilot.pptx"
+      ],
+      "command": "Presentation() + add_shape() + save() + reopen",
+      "duration_ms": 7506,
+      "layer": "Office, PDF, and media",
+      "name": "python-pptx",
+      "note": "",
+      "result": "Reopened 1 slide with 5 native shapes.",
+      "slug": "python-pptx",
+      "status": "passed",
+      "tagline": "Builds a widescreen presentation from native text boxes and editable PowerPoint shapes.",
+      "task": "Create and reopen an editable decision slide",
+      "version": "1.0.2"
+    },
+    {
+      "artifacts": [
+        "artifacts/cairosvg-gauge.png"
+      ],
+      "command": "cairosvg.svg2png(output_width=1200)",
+      "duration_ms": 90,
+      "layer": "Office, PDF, and media",
+      "name": "CairoSVG",
+      "note": "",
+      "result": "Created a 1,200-pixel PNG from SVG source.",
+      "slug": "cairosvg",
+      "status": "passed",
+      "tagline": "Converts an editable SVG score graphic into a crisp PNG with a deterministic Python call.",
+      "task": "Rasterize an SVG market-score graphic",
+      "version": "2.9.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/pandoc-brief.html"
+      ],
+      "command": "pandoc decision-brief.md --standalone --output brief.html",
+      "duration_ms": 605,
+      "layer": "Office, PDF, and media",
+      "name": "Pandoc",
+      "note": "",
+      "result": "Preserved the heading, recommendation, table, and fictional-data notice.",
+      "slug": "pandoc",
+      "status": "passed",
+      "tagline": "Transforms a Markdown decision brief and table into a standalone semantic HTML document.",
+      "task": "Publish a Markdown brief as standalone HTML",
+      "version": "pandoc 3.10.1"
+    },
+    {
+      "artifacts": [
+        "artifacts/poppler-page.png"
+      ],
+      "command": "pdfinfo decision.pdf && pdftotext -layout decision.pdf - && pdftoppm -png decision.pdf",
+      "duration_ms": 255,
+      "layer": "Office, PDF, and media",
+      "name": "Poppler",
+      "note": "",
+      "result": "FICTIONAL DECISION BRIEF\n\n\n\nCoastal is the first pilot.",
+      "slug": "poppler",
+      "status": "passed",
+      "tagline": "Inspects PDF metadata, extracts positioned text, and renders a page preview with three standard Poppler utilities.",
+      "task": "Inspect, extract, and render a decision PDF",
+      "version": "pdfinfo version 26.08.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/qpdf-linearized.pdf"
+      ],
+      "command": "qpdf --linearize decision.pdf linearized.pdf && qpdf --check linearized.pdf",
+      "duration_ms": 43,
+      "layer": "Office, PDF, and media",
+      "name": "qpdf",
+      "note": "",
+      "result": "checking $WORK/office-media/qpdf-linearized.pdf\nPDF Version: 1.3\nFile is not encrypted\nFile is linearized\nNo syntax or stream encoding errors found; the file may still contain\nerrors that qpdf cannot detect",
+      "slug": "qpdf",
+      "status": "passed",
+      "tagline": "Rewrites a valid PDF for fast web access, then checks the new file's structure.",
+      "task": "Linearize and validate a decision PDF",
+      "version": "qpdf version 12.4.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/mupdf-page.png"
+      ],
+      "command": "mutool draw -r 144 -o page.png decision.pdf 1",
+      "duration_ms": 78,
+      "layer": "Office, PDF, and media",
+      "name": "MuPDF",
+      "note": "",
+      "result": "Rendered page 1 at 144 DPI.",
+      "slug": "mupdf",
+      "status": "passed",
+      "tagline": "Renders a selected PDF page at a controlled resolution with the compact MuPDF engine.",
+      "task": "Render page one of a decision PDF",
+      "version": "mutool version 1.28.2"
+    },
+    {
+      "artifacts": [
+        "artifacts/ocr-searchable.pdf"
+      ],
+      "command": "ocrmypdf --force-ocr --deskew scan.pdf searchable.pdf",
+      "duration_ms": 3928,
+      "layer": "Office, PDF, and media",
+      "name": "OCRmyPDF",
+      "note": "",
+      "result": "FICTIONAL PILOT NOTE\n\nCoastal is\nScore 81 *\n\nfirst.",
+      "slug": "ocrmypdf",
+      "status": "passed",
+      "tagline": "Adds a searchable text layer to an image-only PDF and proves the expected words can be extracted.",
+      "task": "Deskew and OCR a scanned pilot note",
+      "version": "17.10.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/tesseract-input.png"
+      ],
+      "command": "tesseract pilot-note.png stdout --psm 6",
+      "duration_ms": 234,
+      "layer": "Office, PDF, and media",
+      "name": "Tesseract",
+      "note": "",
+      "result": "FICTIONAL PILOT NOTE\nCoastal is first.\nScore 81 * Owner Avery \u00ab Gate 30 days",
+      "slug": "tesseract",
+      "status": "passed",
+      "tagline": "Reads text directly from a rasterized pilot note and returns plain machine-searchable text.",
+      "task": "Extract text from a scanned PNG",
+      "version": "tesseract 5.5.3"
+    },
+    {
+      "artifacts": [
+        "artifacts/imagemagick-card.webp"
+      ],
+      "command": "magick input.png -resize 1200x -border 18 -strip -quality 82 output.webp",
+      "duration_ms": 218,
+      "layer": "Office, PDF, and media",
+      "name": "ImageMagick",
+      "note": "",
+      "result": "Created imagemagick-card.webp at 17,278 bytes.",
+      "slug": "imagemagick",
+      "status": "passed",
+      "tagline": "Resizes, frames, strips metadata, and compresses a large raster into a web-ready image.",
+      "task": "Prepare a scanned note for the web",
+      "version": "Version: ImageMagick 7.1.2-15 Q16-HDRI x86_64 23686 https://imagemagick.org"
+    },
+    {
+      "artifacts": [
+        "artifacts/ffmpeg-pilot.mp4"
+      ],
+      "command": "ffmpeg -framerate 12 -i frame-%02d.png -c:v libx264 -pix_fmt yuv420p pilot.mp4",
+      "duration_ms": 195,
+      "layer": "Office, PDF, and media",
+      "name": "FFmpeg",
+      "note": "",
+      "result": "Encoded 24 frames into 6,688 bytes.",
+      "slug": "ffmpeg",
+      "status": "passed",
+      "tagline": "Encodes a 24-frame business-status animation as a browser-playable H.264 video.",
+      "task": "Encode a two-second pilot-progress animation",
+      "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers"
+    },
+    {
+      "artifacts": [],
+      "command": "pandas.read_csv() + rank() + vectorized share calculation",
+      "duration_ms": 35,
+      "layer": "Data and research",
+      "name": "pandas",
+      "note": "",
+      "result": " market  score  rank  revenue_share_pct\nCoastal     81     1               31.0\n  North     78     2               28.5\nCentral     72     3               24.9\n   West     58     4               15.5",
+      "slug": "pandas",
+      "status": "passed",
+      "tagline": "Loads a CSV, ranks markets, and calculates each market's share of the fictional revenue pool.",
+      "task": "Transform a market scorecard into a ranked decision table",
+      "version": "3.0.5"
+    },
+    {
+      "artifacts": [],
+      "command": "pl.scan_csv() \u2192 with_columns() \u2192 sort() \u2192 collect()",
+      "duration_ms": 100,
+      "layer": "Data and research",
+      "name": "Polars",
+      "note": "",
+      "result": "shape: (4, 4)\n\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u252c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\n\u2502 market  \u2506 growth_pct \u2506 score \u2506 vs_mean \u2502\n\u2502 ---     \u2506 ---        \u2506 ---   \u2506 ---     \u2502\n\u2502 str     \u2506 f64        \u2506 i64   \u2506 f64     \u2502\n\u255e\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u256a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u256a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u256a\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2561\n\u2502 Coastal \u2506 14.0       \u2506 81    \u2506 8.8     \u2502\n\u2502 North   \u2506 9.2        \u2506 78    \u2506 5.8     \u2502\n\u2502 Central \u2506 11.2       \u2506 72    \u2506 -0.2    \u2502\n\u2502 West    \u2506 5.8        \u2506 58    \u2506 -14.2   \u2502\n\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2534\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518",
+      "slug": "polars",
+      "status": "passed",
+      "tagline": "Runs a lazy CSV query, computes score distance from the mean, sorts, and collects only the decision columns.",
+      "task": "Execute a lazy market-ranking query",
+      "version": "1.43.2"
+    },
+    {
+      "artifacts": [
+        "artifacts/markets.parquet"
+      ],
+      "command": "pyarrow.csv.read_csv() \u2192 parquet.write_table() \u2192 parquet.read_table()",
+      "duration_ms": 187,
+      "layer": "Data and research",
+      "name": "Arrow",
+      "note": "",
+      "result": "4 rows \u00d7 5 columns; schema preserved; 0 nulls.",
+      "slug": "apache-arrow",
+      "status": "passed",
+      "tagline": "Reads CSV into a typed columnar table, writes compressed Parquet, and verifies an exact round trip.",
+      "task": "Create and validate a typed Parquet dataset",
+      "version": "24.0.0"
+    },
+    {
+      "artifacts": [],
+      "command": "duckdb -csv -c \"SELECT \u2026 FROM read_csv_auto('scorecard.csv')\"",
+      "duration_ms": 150,
+      "layer": "Data and research",
+      "name": "DuckDB",
+      "note": "",
+      "result": "market,score,growth_value\nCoastal,81,12.04\nNorth,78,7.27\nCentral,72,7.73\nWest,58,2.49",
+      "slug": "duckdb",
+      "status": "passed",
+      "tagline": "Queries the CSV directly with SQL and calculates a sortable growth-value proxy without loading a server.",
+      "task": "Run an analytical SQL query against CSV",
+      "version": "v1.5.5 (Variegata) d8cdaa33fd"
+    },
+    {
+      "artifacts": [
+        "artifacts/scipy-interpolation.svg"
+      ],
+      "command": "scipy.stats.spearmanr() + scipy.interpolate.PchipInterpolator()",
+      "duration_ms": 148,
+      "layer": "Data and research",
+      "name": "SciPy",
+      "note": "Four rows are enough to exercise the method, not enough to support a causal claim. The page reports n explicitly.",
+      "result": "Spearman rho=0.800; p=0.200; n=4.",
+      "slug": "scipy",
+      "status": "passed",
+      "tagline": "Measures rank correlation and draws a shape-preserving interpolation through the supplied market observations.",
+      "task": "Quantify and visualize growth-to-score association",
+      "version": "1.18.0"
+    },
+    {
+      "artifacts": [],
+      "command": "KMeans(n_clusters=2, random_state=7, n_init=20).fit()",
+      "duration_ms": 264,
+      "layer": "Data and research",
+      "name": "scikit-learn",
+      "note": "This is a mechanics example on four fictional rows, not a production segmentation model.",
+      "result": "Inertia=53.63; centers=[[11.47, 77.0], [5.8, 58.0]]",
+      "slug": "scikit-learn",
+      "status": "passed",
+      "tagline": "Fits a seeded two-cluster model and labels each market with a reproducible peer group.",
+      "task": "Cluster markets by growth and weighted score",
+      "version": "1.9.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/statsmodels-ols.svg"
+      ],
+      "command": "statsmodels.api.OLS(score, add_constant(growth)).fit()",
+      "duration_ms": 86,
+      "layer": "Data and research",
+      "name": "statsmodels",
+      "note": "The tiny fictional sample is deliberately labeled; the proof is the model workflow, not a statistically reliable market conclusion.",
+      "result": "growth coefficient=2.519; 95% CI=[-2.207, 7.245]; R\u00b2=0.724; n=4.",
+      "slug": "statsmodels",
+      "status": "passed",
+      "tagline": "Fits an explicit OLS model and reports the coefficient, uncertainty, fit, and sample size instead of only drawing a trend line.",
+      "task": "Estimate score association with market growth",
+      "version": "0.14.6"
+    },
+    {
+      "artifacts": [
+        "artifacts/jupyterlab-notebook.html"
+      ],
+      "command": "jupyter nbconvert --to html --execute atlas.ipynb",
+      "duration_ms": 5705,
+      "layer": "Data and research",
+      "name": "JupyterLab",
+      "note": "",
+      "result": "Pilot: Coastal (81)",
+      "slug": "jupyterlab",
+      "status": "passed",
+      "tagline": "Executes a real notebook kernel and exports the markdown, code, and computed output as portable HTML.",
+      "task": "Execute and publish a scorecard notebook",
+      "version": "4.6.2"
+    },
+    {
+      "artifacts": [
+        "artifacts/playwright-dashboard.png"
+      ],
+      "command": "sync_playwright() \u2192 page.goto() \u2192 locator().inner_text() \u2192 screenshot()",
+      "duration_ms": 3825,
+      "layer": "Data and research",
+      "name": "Playwright",
+      "note": "",
+      "result": "Atlas local dashboard\nCoastal leads the scorecard. North remains the gated follow-on.",
+      "slug": "playwright",
+      "status": "passed",
+      "tagline": "Launches Chromium, navigates a local page, asserts visible data, and captures a full-page screenshot.",
+      "task": "Run a browser assertion and visual capture",
+      "version": "1.62.0"
+    },
+    {
+      "artifacts": [],
+      "command": "webdriver.Remote() \u2192 get() \u2192 title \u2192 find_element(By.ID) \u2192 quit()",
+      "duration_ms": 724,
+      "layer": "Data and research",
+      "name": "Selenium",
+      "note": "Playwright already proves a real local Chromium launch. This Selenium page isolates and visibly proves the client-side WebDriver command flow without downloading a separate ChromeDriver binary.",
+      "result": "Atlas local dashboard\nCoastal leads the scorecard. North remains the gated follow-on.\nPOST /session\nPOST /session/wutpack-proof/url\nGET /session/wutpack-proof/title\nPOST /session/wutpack-proof/element\nGET /session/wutpack-proof/element/summary/text\nDELETE /session/wutpack-proof",
+      "slug": "selenium",
+      "status": "passed",
+      "tagline": "Exercises the Selenium client through the W3C WebDriver protocol: create session, navigate, read title, locate text, and quit.",
+      "task": "Drive a deterministic local WebDriver protocol fixture",
+      "version": "4.46.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/scrapy-markets.json"
+      ],
+      "command": "scrapy runspider market_spider.py -O markets.json",
+      "duration_ms": 1735,
+      "layer": "Data and research",
+      "name": "Scrapy",
+      "note": "",
+      "result": "[\n  {\n    \"market\": \"Coastal\",\n    \"score\": 81\n  },\n  {\n    \"market\": \"North\",\n    \"score\": 78\n  },\n  {\n    \"market\": \"Central\",\n    \"score\": 72\n  },\n  {\n    \"market\": \"West\",\n    \"score\": 58\n  }\n]",
+      "slug": "scrapy",
+      "status": "passed",
+      "tagline": "Runs a real spider against a local HTML fixture and exports four structured market records.",
+      "task": "Extract market cards with CSS selectors",
+      "version": "2.17.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/pptxgenjs-pilot.pptx"
+      ],
+      "command": "node pptxgen-demo.js \u2192 pptx.writeFile()",
+      "duration_ms": 228,
+      "layer": "Diagrams and documentation",
+      "name": "PptxGenJS",
+      "note": "",
+      "result": "Created a 16:9 PPTX with native rectangles and editable text.",
+      "slug": "pptxgenjs",
+      "status": "passed",
+      "tagline": "Creates a widescreen PowerPoint from editable JavaScript-defined shapes and text, then render-checks the slide.",
+      "task": "Generate an editable pilot-gate presentation",
+      "version": "4.0.1"
+    },
+    {
+      "artifacts": [
+        "artifacts/mermaid-engagement.svg"
+      ],
+      "command": "mmdc -i engagement.mmd -o engagement.svg",
+      "duration_ms": 2901,
+      "layer": "Diagrams and documentation",
+      "name": "Mermaid",
+      "note": "",
+      "result": "Generating single mermaid chart",
+      "slug": "mermaid",
+      "status": "passed",
+      "tagline": "Compiles a text flowchart into an accessible, scalable decision diagram using local Chromium.",
+      "task": "Render a source-controlled pilot flow",
+      "version": "11.16.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/graphviz-decision.svg"
+      ],
+      "command": "dot -Tsvg decision.dot -o decision.svg",
+      "duration_ms": 177,
+      "layer": "Diagrams and documentation",
+      "name": "Graphviz",
+      "note": "",
+      "result": "Rendered Evidence \u2192 Score \u2192 Economics \u2192 Gate with pass and hold branches.",
+      "slug": "graphviz",
+      "status": "passed",
+      "tagline": "Lays out a directed decision graph from DOT source and emits a portable vector file.",
+      "task": "Lay out a decision dependency graph",
+      "version": "dot - graphviz version 15.1.1 (20260805.0921)"
+    },
+    {
+      "artifacts": [
+        "artifacts/handoff.svg"
+      ],
+      "command": "plantuml -tsvg handoff.puml",
+      "duration_ms": 1494,
+      "layer": "Diagrams and documentation",
+      "name": "PlantUML",
+      "note": "",
+      "result": "Rendered Owner \u2192 AI host \u2192 WutPack skill \u2192 persistent tool.",
+      "slug": "plantuml",
+      "status": "passed",
+      "tagline": "Turns a four-part handoff description into a sequence diagram that stays reviewable as text.",
+      "task": "Render an agent-to-tool handoff sequence",
+      "version": "PlantUML version 1.2026.6 / 6287b33 [2026-06-08 16:02:56 UTC]"
+    },
+    {
+      "artifacts": [
+        "artifacts/typst-decision.pdf"
+      ],
+      "command": "typst compile one-page.typ decision.pdf",
+      "duration_ms": 243,
+      "layer": "Diagrams and documentation",
+      "name": "Typst",
+      "note": "",
+      "result": "Compiled a US Letter PDF with heading, narrative, and three-row table.",
+      "slug": "typst",
+      "status": "passed",
+      "tagline": "Compiles concise typesetting source into a polished one-page PDF with an explicit decision table.",
+      "task": "Typeset a one-page pilot decision note",
+      "version": "typst 0.15.1 (unknown commit)"
+    },
+    {
+      "artifacts": [
+        "artifacts/mkdocs-site.zip"
+      ],
+      "command": "python -m mkdocs build --strict",
+      "duration_ms": 4536,
+      "layer": "Diagrams and documentation",
+      "name": "MkDocs",
+      "note": "",
+      "result": "Built two linked pages in strict mode.",
+      "slug": "mkdocs",
+      "status": "passed",
+      "tagline": "Builds a linked two-page documentation site from Markdown and fails on broken references in strict mode.",
+      "task": "Publish a small decision room",
+      "version": "1.6.1"
+    },
+    {
+      "artifacts": [
+        "artifacts/sphinx-site.zip"
+      ],
+      "command": "python -m sphinx -W -b html source html",
+      "duration_ms": 1333,
+      "layer": "Diagrams and documentation",
+      "name": "Sphinx",
+      "note": "",
+      "result": "The HTML pages are in html.",
+      "slug": "sphinx",
+      "status": "passed",
+      "tagline": "Builds reference documentation from reStructuredText and live Python docstrings with warnings treated as errors.",
+      "task": "Generate a Python API reference",
+      "version": "9.1.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/pdoc-site.zip"
+      ],
+      "command": "python -m pdoc -o html market_model.py",
+      "duration_ms": 607,
+      "layer": "Diagrams and documentation",
+      "name": "pdoc",
+      "note": "",
+      "result": "Generated module documentation with signature and return type.",
+      "slug": "pdoc",
+      "status": "passed",
+      "tagline": "Publishes a readable Python module reference directly from a real function signature and docstring.",
+      "task": "Document a market-scoring Python module",
+      "version": "16.0.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/doxygen-site.zip"
+      ],
+      "command": "doxygen Doxyfile",
+      "duration_ms": 106,
+      "layer": "Diagrams and documentation",
+      "name": "Doxygen",
+      "note": "",
+      "result": "Generated HTML documentation with zero warnings.",
+      "slug": "doxygen",
+      "status": "passed",
+      "tagline": "Turns documented C source into browsable API reference pages with warnings promoted to build failures.",
+      "task": "Generate a C function reference",
+      "version": "1.17.0"
+    },
+    {
+      "artifacts": [
+        "artifacts/jsdoc-site.zip"
+      ],
+      "command": "jsdoc decision.js -d html",
+      "duration_ms": 485,
+      "layer": "Diagrams and documentation",
+      "name": "JSDoc",
+      "note": "",
+      "result": "Generated documentation for selectMarket(markets).",
+      "slug": "jsdoc",
+      "status": "passed",
+      "tagline": "Reads JavaScript annotations and emits a linked function reference with parameter and return contracts.",
+      "task": "Document a JavaScript market selector",
+      "version": "4.0.5"
+    },
+    {
+      "artifacts": [
+        "artifacts/typedoc-site.zip"
+      ],
+      "command": "typedoc --entryPoints decision.ts --out html",
+      "duration_ms": 2285,
+      "layer": "Diagrams and documentation",
+      "name": "TypeDoc",
+      "note": "",
+      "result": "[info] html generated at $WORK/diagrams-docs/typedoc",
+      "slug": "typedoc",
+      "status": "passed",
+      "tagline": "Builds a navigable TypeScript reference that preserves the interface and typed return contract.",
+      "task": "Publish a typed market-selection API",
+      "version": "0.28.20"
+    },
+    {
+      "artifacts": [],
+      "command": "gh auth status --hostname github.com",
+      "duration_ms": 409,
+      "layer": "Engineering utilities",
+      "name": "GitHub CLI",
+      "note": "The proof is intentionally read-only. It does not create an issue, branch, pull request, or network-side change.",
+      "result": "github.com\n  \u2713 Logged in to github.com account $ACCOUNT (keyring)\n  - Active account: true\n  - Git operations protocol: https",
+      "slug": "github-cli",
+      "status": "passed",
+      "tagline": "Checks the installed GitHub CLI and its local authentication state while redacting account and credential details.",
+      "task": "Verify the local GitHub command is ready",
+      "version": "gh version 2.85.0 (2026-01-14)"
+    },
+    {
+      "artifacts": [],
+      "command": "rg -n 'Coastal|North' market-scorecard.csv",
+      "duration_ms": 46,
+      "layer": "Engineering utilities",
+      "name": "ripgrep",
+      "note": "",
+      "result": "2:Coastal,86,14.0,20,81\n3:North,79,9.2,19,78",
+      "slug": "ripgrep",
+      "status": "passed",
+      "tagline": "Searches the scorecard with a regular expression and reports exact source line numbers.",
+      "task": "Find the two leading market rows",
+      "version": "ripgrep 15.2.0"
+    },
+    {
+      "artifacts": [],
+      "command": "fd --extension md . files/",
+      "duration_ms": 32,
+      "layer": "Engineering utilities",
+      "name": "fd",
+      "note": "",
+      "result": "$WORK/engineering/files/reports/2026/market-brief.md\n$WORK/engineering/files/reports/2026/pilot-plan.md",
+      "slug": "fd",
+      "status": "passed",
+      "tagline": "Finds only current Markdown deliverables in a nested project tree with a concise file-type filter.",
+      "task": "Discover all Markdown reports",
+      "version": "fd 10.4.2"
+    },
+    {
+      "artifacts": [],
+      "command": "printf '<files>' | fzf --filter market",
+      "duration_ms": 22,
+      "layer": "Engineering utilities",
+      "name": "fzf",
+      "note": "",
+      "result": "data/market-scorecard.csv\nreports/2026/market-brief.md",
+      "slug": "fzf",
+      "status": "passed",
+      "tagline": "Ranks a list of project files with fuzzy matching and returns only the market-related choices.",
+      "task": "Filter a deliverable list without an interactive UI",
+      "version": "0.74.2 (Homebrew)"
+    },
+    {
+      "artifacts": [],
+      "command": "jq '[.markets[] | select(.score >= 75)] | sort_by(-.score)' markets.json",
+      "duration_ms": 23,
+      "layer": "Engineering utilities",
+      "name": "jq",
+      "note": "",
+      "result": "[\n  {\n    \"market\": \"Coastal\",\n    \"score\": 81,\n    \"decision\": \"pilot\"\n  },\n  {\n    \"market\": \"North\",\n    \"score\": 78,\n    \"decision\": \"pilot\"\n  }\n]",
+      "slug": "jq",
+      "status": "passed",
+      "tagline": "Filters, sorts, and reshapes nested JSON into the two markets that clear a decision threshold.",
+      "task": "Turn raw JSON into a pilot shortlist",
+      "version": "jq-1.8.2"
+    },
+    {
+      "artifacts": [],
+      "command": "yq -o=json '.gates | map({\"gate\": .name, \"owner\": .owner})' launch-plan.yml",
+      "duration_ms": 36,
+      "layer": "Engineering utilities",
+      "name": "yq",
+      "note": "",
+      "result": "[\n  {\n    \"gate\": \"evidence complete\",\n    \"owner\": \"strategy\"\n  },\n  {\n    \"gate\": \"economics approved\",\n    \"owner\": \"finance\"\n  },\n  {\n    \"gate\": \"pilot ready\",\n    \"owner\": \"operations\"\n  }\n]",
+      "slug": "yq",
+      "status": "passed",
+      "tagline": "Queries a YAML launch plan and emits a normalized JSON list of gates and accountable owners.",
+      "task": "Extract controls from a YAML plan",
+      "version": "yq (https://github.com/mikefarah/yq/) version v4.53.3"
+    },
+    {
+      "artifacts": [],
+      "command": "shellcheck --format=gcc broken.sh",
+      "duration_ms": 84,
+      "layer": "Engineering utilities",
+      "name": "ShellCheck",
+      "note": "A non-zero exit is expected here: the successful proof is that the deliberately broken fixture is rejected with actionable diagnostics.",
+      "result": "$WORK/source/broken.sh:4:8: note: Double quote to prevent globbing and word splitting. [SC2086]",
+      "slug": "shellcheck",
+      "status": "passed",
+      "tagline": "Finds unsafe shell expansion in a small script and returns line-addressable diagnostics before the script ships.",
+      "task": "Lint an intentionally unsafe shell loop",
+      "version": "ShellCheck - shell script analysis tool"
+    },
+    {
+      "artifacts": [],
+      "command": "shfmt -w -i 2 messy.sh",
+      "duration_ms": 44,
+      "layer": "Engineering utilities",
+      "name": "shfmt",
+      "note": "",
+      "result": "#!/bin/sh\nowner=\"strategy\"\nif [ -n \"$owner\" ]; then\n  printf '%s\\n' \"pilot owner: $owner\"\nfi\n",
+      "slug": "shfmt",
+      "status": "passed",
+      "tagline": "Normalizes shell indentation and control-flow spacing into a deterministic style.",
+      "task": "Format a deliberately messy shell script",
+      "version": "3.13.1"
+    },
+    {
+      "artifacts": [],
+      "command": "git diff --no-index before.md after.md | delta --line-numbers",
+      "duration_ms": 96,
+      "layer": "Engineering utilities",
+      "name": "delta",
+      "note": "",
+      "result": "a$WORK/engineering/before.md \u27f6   b$WORK/engineering/after.md\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\n\u2500\u2500\u2500\u2510\n1: \u2502\n\u2500\u2500\u2500\u2518\n  1 \u22ee  1 \u2502# Pilot plan\n  2 \u22ee  2 \u2502\n  3 \u22ee    \u2502- Coastal: analyze\n  4 \u22ee    \u2502- North: analyze\n    \u22ee  3 \u2502- Coastal: launch gated pilot\n    \u22ee  4 \u2502- North: prepare next\n    \u22ee  5 \u2502- Control: 20% margin gate",
+      "slug": "delta",
+      "status": "passed",
+      "tagline": "Turns a raw Git patch into a line-numbered, readable review view that makes the decision change obvious.",
+      "task": "Render a plan revision for code review",
+      "version": "delta 0.19.2"
+    },
+    {
+      "artifacts": [
+        "artifacts/hyperfine.json"
+      ],
+      "command": "hyperfine --warmup 1 --runs 3 --export-json results.json '<rg>' '<grep>'",
+      "duration_ms": 376,
+      "layer": "Engineering utilities",
+      "name": "hyperfine",
+      "note": "The tiny benchmark proves the harness and JSON output; it is not a general claim that one command is always faster.",
+      "result": "Benchmark 1: /usr/local/bin/rg -c Coastal $WORK/engineering/benchmark.txt\n  Time (mean \u00b1 \u03c3):       5.5 ms \u00b1   0.4 ms    [User: 3.2 ms, System: 1.6 ms]\n  Range (min \u2026 max):     5.2 ms \u2026   5.9 ms    3 runs\n \nBenchmark 2: /usr/bin/grep -c Coastal $WORK/engineering/benchmark.txt\n  Time (mean \u00b1 \u03c3):       3.8 ms \u00b1   0.7 ms    [User: 2.3 ms, System: 1.2 ms]\n  Range (min \u2026 max):     3.1 ms \u2026   4.5 ms    3 runs\n \nSummary\n  /usr/bin/grep -c Coastal $WORK/engineering/benchmark.txt ran\n    1.44 \u00b1 0.27 times faster than /usr/local/bin/rg -c Coastal $WORK/engineering/benchmark.txt",
+      "slug": "hyperfine",
+      "status": "passed",
+      "tagline": "Benchmarks two equivalent local searches with warmup, repeated runs, statistical timing, and JSON export.",
+      "task": "Compare two text-search commands",
+      "version": "hyperfine 1.20.0"
+    },
+    {
+      "artifacts": [],
+      "command": "just --justfile justfile score Coastal 81",
+      "duration_ms": 36,
+      "layer": "Engineering utilities",
+      "name": "just",
+      "note": "",
+      "result": "Coastal: 81 / 100 \u2014 pilot ready",
+      "slug": "just",
+      "status": "passed",
+      "tagline": "Runs a named, parameterized project recipe so a repeated score check has one memorable command.",
+      "task": "Execute a reusable score recipe",
+      "version": "just 1.58.0"
+    }
+  ]
+}

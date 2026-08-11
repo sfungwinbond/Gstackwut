@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <meta name="description" content="A reproducible WutPack example for ImageMagick.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/gallery.css">
+  <title>ImageMagick example | WutPack</title>
+</head>
+<body class="proof-page status-passed layer-office-pdf-and-media">
+  <a class="skip-link" href="#proof">Skip to proof</a>
+  <header class="proof-header">
+    <a class="proof-brand" href="../index.html#tool-gallery"><span>W</span> WutPack</a>
+    <a class="back-link" href="../index.html#tool-gallery">All 53 tool examples</a>
+  </header>
+  <main id="proof">
+    <section class="proof-hero">
+      <div>
+        <p class="proof-layer">Office, PDF, and media</p>
+        <h1>ImageMagick</h1>
+        <p class="proof-tagline" data-pretext contenteditable="true">Resizes, frames, strips metadata, and compresses a large raster into a web-ready image.</p>
+      </div>
+      <div class="proof-status"><span></span> exercised locally</div>
+    </section>
+    <section class="proof-stage" aria-label="Visual output from ImageMagick">
+      <figure class="image-visual"><div class="visual-chrome"><span>output.webp</span><span>resized + compressed</span></div><div class="image-stage"><img src="artifacts/imagemagick-card.webp" alt="ImageMagick-processed pilot note" loading="lazy"></div></figure>
+    </section>
+    <section class="proof-evidence">
+      <div class="evidence-copy">
+        <p class="proof-kicker">What ran</p>
+        <h2>Prepare a scanned note for the web</h2>
+        <p>The command completed against a local fictional fixture. The page records the tool version and the output used in the visual above.</p>
+
+        <div class="artifact-actions"><a class="artifact-link" href="artifacts/imagemagick-card.webp" download>Download WEBP</a></div>
+      </div>
+      <div class="run-card">
+        <div><span>Tool version</span><strong>Version: ImageMagick 7.1.2-15 Q16-HDRI x86_64 23686 https://imagemagick.org</strong></div>
+        <div><span>Command or API</span><code>magick input.png -resize 1200x -border 18 -strip -quality 82 output.webp</code></div>
+        <div><span>Observed result</span><pre>Created imagemagick-card.webp at 17,278 bytes.</pre></div>
+        <div><span>Local runtime</span><strong>218 ms</strong></div>
+      </div>
+    </section>
+    <nav class="proof-pagination" aria-label="Tool examples">
+      <a href="tesseract.html"><span>Previous proof</span>←</a>
+      <a href="../index.html#tool-gallery"><span>Gallery</span>53 tools</a>
+      <a href="ffmpeg.html"><span>Next proof</span>→</a>
+    </nav>
+  </main>
+  <footer class="proof-footer">
+    <p>Generated from a deterministic, fictional local fixture. No credential or paid API call was used.</p>
+    <a href="https://github.com/sfungwinbond/Gstackwut">Source on GitHub</a>
+  </footer>
+  <script type="module" src="assets/gallery.js"></script>
+</body>
+</html>

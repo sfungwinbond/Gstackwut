@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "recommended_market": {
+      "type": "string"
+    },
+    "score": {
+      "type": "number"
+    },
+    "decision": {
+      "type": "string"
+    },
+    "gate": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "recommended_market",
+    "score",
+    "decision",
+    "gate"
+  ]
+}

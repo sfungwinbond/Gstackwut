@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import sys
@@ -23,6 +24,62 @@ EXPECTED_SKILLS = {
     "debug-lab",
     "review-gate",
     "ship-check",
+}
+
+EXPECTED_TOOL_EXAMPLES = {
+    "libreoffice",
+    "chromium",
+    "quarto",
+    "drawio",
+    "inkscape",
+    "codex",
+    "claude-code",
+    "openpyxl",
+    "xlsxwriter",
+    "python-docx",
+    "python-pptx",
+    "cairosvg",
+    "pandoc",
+    "poppler",
+    "qpdf",
+    "mupdf",
+    "ocrmypdf",
+    "tesseract",
+    "imagemagick",
+    "ffmpeg",
+    "pandas",
+    "polars",
+    "apache-arrow",
+    "duckdb",
+    "scipy",
+    "scikit-learn",
+    "statsmodels",
+    "jupyterlab",
+    "playwright",
+    "selenium",
+    "scrapy",
+    "pptxgenjs",
+    "mermaid",
+    "graphviz",
+    "plantuml",
+    "typst",
+    "mkdocs",
+    "sphinx",
+    "pdoc",
+    "doxygen",
+    "jsdoc",
+    "typedoc",
+    "github-cli",
+    "ripgrep",
+    "fd",
+    "fzf",
+    "jq",
+    "yq",
+    "shellcheck",
+    "shfmt",
+    "delta",
+    "hyperfine",
+    "just",
 }
 
 
@@ -242,6 +299,71 @@ def validate_public_examples(errors: list[str]) -> None:
             fail(errors, f"{path.relative_to(ROOT)}: must state that the example is fictional")
 
 
+def validate_tool_gallery(errors: list[str]) -> None:
+    gallery = ROOT / "site/tool-examples"
+    pages = {path.stem for path in gallery.glob("*.html")}
+    if pages != EXPECTED_TOOL_EXAMPLES:
+        fail(
+            errors,
+            f"site/tool-examples: expected={sorted(EXPECTED_TOOL_EXAMPLES)} actual={sorted(pages)}",
+        )
+
+    evidence_path = gallery / "evidence.json"
+    if not evidence_path.is_file():
+        fail(errors, "site/tool-examples/evidence.json: missing tool evidence manifest")
+        return
+    try:
+        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        fail(errors, f"site/tool-examples/evidence.json: invalid JSON: {exc}")
+        return
+
+    if evidence.get("tool_count") != 53 or evidence.get("exercised_count") != 52:
+        fail(errors, "site/tool-examples/evidence.json: expected 53 pages and 52 exercised tools")
+    records = evidence.get("tools", [])
+    if not isinstance(records, list) or len(records) != 53:
+        fail(errors, "site/tool-examples/evidence.json: must contain 53 tool records")
+        return
+    records_by_slug = {record.get("slug"): record for record in records if isinstance(record, dict)}
+    if set(records_by_slug) != EXPECTED_TOOL_EXAMPLES:
+        fail(errors, "site/tool-examples/evidence.json: record slugs differ from HTML pages")
+    installed_only = [
+        record.get("slug") for record in records if record.get("status") == "installed-only"
+    ]
+    if installed_only != ["claude-code"]:
+        fail(errors, "site/tool-examples/evidence.json: Claude Code must be the only installed-only page")
+    codex = records_by_slug.get("codex", {})
+    if codex.get("status") != "passed" or "authenticated" not in codex.get("note", ""):
+        fail(errors, "site/tool-examples/evidence.json: Codex must record the authenticated real run")
+
+    required_assets = [
+        gallery / "assets/gallery.css",
+        gallery / "assets/gallery.js",
+        gallery / "artifacts/codex-decision.json",
+    ]
+    for path in required_assets:
+        if not path.is_file():
+            fail(errors, f"missing {path.relative_to(ROOT)}")
+
+    for slug in sorted(EXPECTED_TOOL_EXAMPLES):
+        page = gallery / f"{slug}.html"
+        text = page.read_text(encoding="utf-8")
+        if "../index.html#tool-gallery" not in text:
+            fail(errors, f"{page.relative_to(ROOT)}: missing gallery return link")
+        if 'href="assets/gallery.css"' not in text or 'src="assets/gallery.js"' not in text:
+            fail(errors, f"{page.relative_to(ROOT)}: missing shared gallery assets")
+        if any(fragment in text for fragment in ("/Users/", "/var/folders/", "/private/tmp/")):
+            fail(errors, f"{page.relative_to(ROOT)}: leaks an absolute local path")
+
+    evidence_text = evidence_path.read_text(encoding="utf-8")
+    if any(fragment in evidence_text for fragment in ("/Users/", "/var/folders/", "/private/tmp/")):
+        fail(errors, "site/tool-examples/evidence.json: leaks an absolute local path")
+
+    generated_size = sum(path.stat().st_size for path in gallery.rglob("*") if path.is_file())
+    if generated_size > 8_000_000:
+        fail(errors, f"site/tool-examples: generated gallery exceeds 8 MB ({generated_size} bytes)")
+
+
 def validate_landing_page(errors: list[str]) -> None:
     path = ROOT / "site/index.html"
     if not path.is_file():
@@ -257,20 +379,34 @@ def validate_landing_page(errors: list[str]) -> None:
         fail(errors, f"site/index.html: duplicate ids {duplicate_ids}")
 
     id_set = set(parser.ids)
-    for required_id in {"main", "new-mac-start", "work", "specialists", "install", "questions"}:
+    for required_id in {"main", "new-mac-start", "work", "tool-gallery", "specialists", "install", "questions"}:
         if required_id not in id_set:
             fail(errors, f"site/index.html: missing required section id {required_id!r}")
     for target in parser.links:
         if target.startswith("#") and target[1:] not in id_set:
             fail(errors, f"site/index.html: broken page anchor {target}")
 
+    gallery_links = {
+        Path(target).stem
+        for target in parser.links
+        if target.startswith("tool-examples/") and target.endswith(".html")
+    }
+    if gallery_links != EXPECTED_TOOL_EXAMPLES:
+        fail(errors, "site/index.html: every tool example must be linked directly from the homepage")
+
     normalized_title = " ".join("".join(parser.title_text).split())
     if "WutPack" not in normalized_title or "small business" not in normalized_title.lower():
         fail(errors, "site/index.html: title must name WutPack and the small-business audience")
 
+    install_command = (
+        '/usr/bin/curl -fsSL https://raw.githubusercontent.com/sfungwinbond/Gstackwut/main/install.sh '
+        '| env PATH="/usr/bin:/bin:/usr/sbin:/sbin" /bin/bash'
+    )
+    if text.count(install_command) != 2:
+        fail(errors, "site/index.html: safe installer command must match in the terminal and copy action")
+
     required_fragments = [
         "MIT licensed",
-        "install.sh | bash",
         "summary_large_image",
         "social-card.png",
         "The honest boundary",
@@ -329,6 +465,11 @@ def validate_repository(errors: list[str]) -> None:
         "site/index.html",
         "site/favicon.svg",
         "site/social-card.png",
+        "site/tool-examples/evidence.json",
+        "site/tool-examples/assets/gallery.css",
+        "site/tool-examples/assets/gallery.js",
+        "tools/build_tool_gallery.py",
+        "tools/tool_gallery_decision.schema.json",
         "site/f2816059f4e9897a617c4f65de3dee83.txt",
         "site/robots.txt",
         "site/sitemap.xml",
@@ -359,6 +500,7 @@ def main() -> int:
         validate_repository(errors)
         validate_readme_examples(errors)
         validate_public_examples(errors)
+        validate_tool_gallery(errors)
         validate_landing_page(errors)
     if errors:
         for error in errors:

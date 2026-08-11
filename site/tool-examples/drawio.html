@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f0e8">
+  <meta name="description" content="A reproducible WutPack example for draw.io.">
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=Instrument+Serif:ital@0;1&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/gallery.css">
+  <title>draw.io example | WutPack</title>
+</head>
+<body class="proof-page status-passed layer-desktop-workbench">
+  <a class="skip-link" href="#proof">Skip to proof</a>
+  <header class="proof-header">
+    <a class="proof-brand" href="../index.html#tool-gallery"><span>W</span> WutPack</a>
+    <a class="back-link" href="../index.html#tool-gallery">All 53 tool examples</a>
+  </header>
+  <main id="proof">
+    <section class="proof-hero">
+      <div>
+        <p class="proof-layer">Desktop workbench</p>
+        <h1>draw.io</h1>
+        <p class="proof-tagline" data-pretext contenteditable="true">Exports an editable decision flow into a browser-ready vector graphic.</p>
+      </div>
+      <div class="proof-status"><span></span> exercised locally</div>
+    </section>
+    <section class="proof-stage" aria-label="Visual output from draw.io">
+      <figure class="image-visual"><div class="visual-chrome"><span>decision.drawio</span><span>SVG export</span></div><div class="image-stage"><img src="artifacts/drawio-decision.svg" alt="Evidence to pilot gate to launch diagram" loading="lazy"></div></figure>
+    </section>
+    <section class="proof-evidence">
+      <div class="evidence-copy">
+        <p class="proof-kicker">What ran</p>
+        <h2>Export a three-step decision diagram</h2>
+        <p>The command completed against a local fictional fixture. The page records the tool version and the output used in the visual above.</p>
+
+        <div class="artifact-actions"><a class="artifact-link" href="artifacts/drawio-decision.svg" download>Download SVG</a></div>
+      </div>
+      <div class="run-card">
+        <div><span>Tool version</span><strong>31.1.8</strong></div>
+        <div><span>Command or API</span><code>drawio --export --format svg decision.drawio</code></div>
+        <div><span>Observed result</span><pre>Exported decision.drawio to SVG.</pre></div>
+        <div><span>Local runtime</span><strong>1,662 ms</strong></div>
+      </div>
+    </section>
+    <nav class="proof-pagination" aria-label="Tool examples">
+      <a href="quarto.html"><span>Previous proof</span>←</a>
+      <a href="../index.html#tool-gallery"><span>Gallery</span>53 tools</a>
+      <a href="inkscape.html"><span>Next proof</span>→</a>
+    </nav>
+  </main>
+  <footer class="proof-footer">
+    <p>Generated from a deterministic, fictional local fixture. No credential or paid API call was used.</p>
+    <a href="https://github.com/sfungwinbond/Gstackwut">Source on GitHub</a>
+  </footer>
+  <script type="module" src="assets/gallery.js"></script>
+</body>
+</html>
