@@ -308,6 +308,16 @@ def validate_tool_gallery(errors: list[str]) -> None:
             f"site/tool-examples: expected={sorted(EXPECTED_TOOL_EXAMPLES)} actual={sorted(pages)}",
         )
 
+    readme_text = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme_gallery_links = set(
+        re.findall(
+            r"https://sfungwinbond\.github\.io/Gstackwut/tool-examples/([a-z0-9-]+)\.html",
+            readme_text,
+        )
+    )
+    if readme_gallery_links != EXPECTED_TOOL_EXAMPLES:
+        fail(errors, "README.md: every tool example must have a direct live-site link")
+
     evidence_path = gallery / "evidence.json"
     if not evidence_path.is_file():
         fail(errors, "site/tool-examples/evidence.json: missing tool evidence manifest")
