@@ -43,6 +43,7 @@ EXPECTED_SKILLS=(
   publish-docs
   research-brief
   review-gate
+  security-engineer
   ship-check
   spreadsheet-lab
   system-diagram
@@ -114,6 +115,7 @@ Usage: wut <command> [arguments]
   agent-python       Run the agent-framework Python
   lab [args]         Start JupyterLab
   deck [output]      Generate an editable technical PPTX example
+  security-lab [out] Build the interactive security engineering HTML lab
   diagram IN OUT     Render Mermaid source to SVG/PNG/PDF
   render FILE [DIR]  Convert an Office document to PDF with LibreOffice
   ocr IN OUT         OCR a scanned PDF
@@ -513,6 +515,7 @@ Editable PowerPoint       technical-deck
 Data exploration          data-lab
 HTML/PDF documentation    publish-docs
 Architecture diagrams     system-diagram
+Security systems + crypto  security-engineer
 Professional Word docs    document-studio
 Implement a change        code-build
 Diagnose a failure        debug-lab
@@ -585,6 +588,22 @@ case "$command_name" in
     }
     output="${1:-executive-consulting-demo.pptx}"
     exec node "$PROJECT_ROOT/skills/technical-deck/scripts/new_technical_deck.mjs" --output="$output"
+    ;;
+  security-lab)
+    [ "$#" -le 1 ] || { printf 'Usage: wut security-lab [OUTPUT.html]\n' >&2; exit 2; }
+    [ -f "$PROJECT_ROOT/skills/security-engineer/scripts/build_security_lab.py" ] || {
+      printf 'WutPack security lab generator is unavailable under %s\n' "$PROJECT_ROOT" >&2
+      exit 1
+    }
+    output="${1:-security-engineering-lab.html}"
+    if [ -x "$KNOWLEDGE_ENV/bin/python" ]; then
+      security_python="$KNOWLEDGE_ENV/bin/python"
+    else
+      security_python="$(command -v python3 2>/dev/null || true)"
+    fi
+    [ -n "$security_python" ] || { printf 'Python 3 is not installed. Run: wut setup\n' >&2; exit 1; }
+    exec "$security_python" \
+      "$PROJECT_ROOT/skills/security-engineer/scripts/build_security_lab.py" --output "$output"
     ;;
   diagram)
     [ "$#" -eq 2 ] || { printf 'Usage: wut diagram INPUT.mmd OUTPUT.svg\n' >&2; exit 2; }

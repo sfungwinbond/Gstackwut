@@ -13,7 +13,7 @@ full product story.
 
 - 53 public tool-proof pages: 52 tools exercised locally and Claude Code
   recorded as installed-only because it was not authenticated or invoked.
-- Twelve specialist workflows for documents, spreadsheets, decks, PDFs,
+- Thirteen specialist workflows for documents, spreadsheets, decks, PDFs,
   research, data, diagrams, publishing, building, debugging, review, and ship
   readiness.
 - Thirty CLI-selectable career toolpacks: ten from a general high-pay snapshot,
@@ -26,13 +26,13 @@ full product story.
 ## One-line pitch
 
 Wut CLI turns a new Mac into a persistent AI workbench with 53 verified tool
-workflows, twelve specialists, and 30 career toolpacks.
+workflows, thirteen specialists, and 30 career toolpacks.
 
 ## Short description
 
 WutPack is an open-source macOS installer and workflow layer for Codex and
 Claude Code. It makes Office, PDF, browser, data, diagram, publishing, and
-engineering tools persist across sessions, then exposes them through twelve
+engineering tools persist across sessions, then exposes them through thirteen
 specialists and 30 role-shaped CLI toolpacks with explicit human-review
 boundaries.
 
@@ -72,7 +72,7 @@ boundaries.
 **Description**
 
 > One guided install adds durable Office, PDF, data, browser, diagram, and
-> publishing tools, twelve specialist workflows, and 30 Wut CLI career packs.
+> publishing tools, thirteen specialist workflows, and 30 Wut CLI career packs.
 > Open source, inspectable, and built around editable outputs and human review.
 
 **First comment**
@@ -90,7 +90,7 @@ boundaries.
 > for real AI-assisted business work.
 >
 > WutPack 0.2 adds 30 career toolpacks to a persistent workbench of 53 verified
-> tools and twelve specialist workflows. The new packs cover a transparent
+> tools and thirteen specialist workflows. The new packs cover a transparent
 > high-pay snapshot, finance, and engineering. Each one defines its toolchain,
 > deliverables, starter prompt, and the decision that must stay with a qualified
 > person.

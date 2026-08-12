@@ -43,7 +43,7 @@ SYMLINK_WUT="$TEST_ROOT/.local/bin/wut"
 test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" version)" = "$EXPECTED_VERSION"
 WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" paths | \
   grep -Fq "source=$CANONICAL_INSTALL_ROOT"
-test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" skills | wc -l | tr -d ' ')" = "12"
+test "$(WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" skills | wc -l | tr -d ' ')" = "13"
 WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" setup --help | grep -Fq -- '--skills-only'
 
 PACKS_LOG="$TEST_ROOT/profession-packs.log"
@@ -149,8 +149,16 @@ grep -Fq 'Could not download the WutPack installer' "$UPDATE_FAILURE_LOG"
 
 test -f "$TEST_ROOT/.codex/skills/technical-deck/SKILL.md"
 test -f "$TEST_ROOT/.claude/skills/spreadsheet-lab/SKILL.md"
-test "$(find "$TEST_ROOT/.codex/skills" -name SKILL.md | wc -l | tr -d ' ')" = "12"
-test "$(find "$TEST_ROOT/.claude/skills" -name SKILL.md | wc -l | tr -d ' ')" = "12"
+test "$(find "$TEST_ROOT/.codex/skills" -name SKILL.md | wc -l | tr -d ' ')" = "13"
+test "$(find "$TEST_ROOT/.claude/skills" -name SKILL.md | wc -l | tr -d ' ')" = "13"
+test -f "$TEST_ROOT/.codex/skills/security-engineer/SKILL.md"
+
+SECURITY_LAB="$TEST_ROOT/security-engineering-lab.html"
+WUTPACK_TEST_ROOT="$TEST_ROOT" "$SYMLINK_WUT" security-lab "$SECURITY_LAB" >/dev/null
+test -s "$SECURITY_LAB"
+grep -Fq 'A certificate can use ECDSA. X.509 is not ECDSA.' "$SECURITY_LAB"
+grep -Fq 'StrongBox storage planning estimator' "$SECURITY_LAB"
+grep -Fq 'DS28C40 HARDWARE SECURITY BOUNDARY' "$SECURITY_LAB"
 grep -Fxq 'WutPack managed skill v1: code-build' \
   "$TEST_ROOT/.codex/skills/code-build/.wutpack-skill"
 
@@ -275,7 +283,7 @@ if WUTPACK_TEST_ROOT="$PARTIAL_HOME" \
   printf 'wut doctor passed with an incomplete host skill installation\n' >&2
   exit 1
 fi
-grep -Fq '[miss] Codex skills     11/12' "$PARTIAL_DOCTOR_LOG"
+grep -Fq '[miss] Codex skills     12/13' "$PARTIAL_DOCTOR_LOG"
 
 PARTIAL_SOURCE="$TEST_ROOT/partial-source"
 mkdir -p "$PARTIAL_SOURCE/skills"
@@ -284,7 +292,7 @@ ditto "$INSTALL_ROOT/skills/code-build" "$PARTIAL_SOURCE/skills/code-build"
 PARTIAL_SOURCE_LOG="$TEST_ROOT/doctor-partial-source.log"
 WUTPACK_INSTALL_ROOT="$PARTIAL_SOURCE" WUTPACK_TEST_ROOT="$PARTIAL_HOME" \
   "$INSTALL_ROOT/bin/wut" doctor --headless >"$PARTIAL_SOURCE_LOG" 2>&1 || true
-grep -Fq '[miss] packaged skills  1/12' "$PARTIAL_SOURCE_LOG"
+grep -Fq '[miss] packaged skills  1/13' "$PARTIAL_SOURCE_LOG"
 grep -Fq '[miss] toolpacks        0/30' "$PARTIAL_SOURCE_LOG"
 
 BROKEN_SOURCE="$TEST_ROOT/broken-source"

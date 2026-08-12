@@ -5,7 +5,7 @@
 [![website](https://img.shields.io/badge/website-live-176b4d)](https://sfungwinbond.github.io/Gstackwut/)
 [![release](https://img.shields.io/github/v/release/sfungwinbond/Gstackwut?display_name=tag&amp;sort=semver)](https://github.com/sfungwinbond/Gstackwut/releases/latest)
 
-**The Wut CLI: a persistent AI workbench with 53 verified tools, twelve
+**The Wut CLI: a persistent AI workbench with 53 verified tools, thirteen
 specialists, and 30 career toolpacks.**
 
 One install. Real local tools. A Mac workbench that is still there tomorrow.
@@ -22,7 +22,8 @@ high-pay snapshot, finance, and engineering.
 
 The point is not another folder of prompts. The point is a working toolchain:
 research a market, recover a broken PDF, build a Windows-safe decision model,
-draw an editable executive roadmap, analyze customer data, publish code as HTML,
+draw an editable executive roadmap, analyze customer data, model a secure boot
+chain, publish code as HTML,
 or take a code change through review—with the same commands available in the
 next terminal and the next agent session.
 
@@ -56,12 +57,13 @@ flowchart LR
     U[Your request] --> H{Codex or<br/>Claude Code}
     H --> R[Scenario specialist]
 
-    subgraph S[12 focused specialists]
+    subgraph S[13 focused specialists]
       R1[Research and PDFs]
       R2[Excel and data]
       R3[PowerPoint and diagrams]
       R4[Docs and publishing]
       R5[Build, debug, review, ship]
+      R6[Cryptography and security systems]
     end
 
     R --> S
@@ -87,6 +89,7 @@ model runtime.
 | CSV, Parquet, SQL, statistics, or ML | `data-lab` | Reproducible notebook, figures, and findings |
 | HTML/PDF sites, books, and API docs | `publish-docs` | Quarto, MkDocs, Sphinx, pdoc, or TypeDoc output |
 | Architecture, sequence, and state diagrams | `system-diagram` | Mermaid/Graphviz/PlantUML source plus render |
+| Applied cryptography and embedded trust | `security-engineer` | Threat model, protocol/boot diagrams, simulations, and interview drills |
 | Professional Word or OpenDocument files | `document-studio` | Structured `.docx`/`.odt` with compatibility check |
 | Implementing repository changes | `code-build` | Scoped change with tests and handoff |
 | Root-cause debugging | `debug-lab` | Reproduction, evidence, fix, and regression test |
@@ -140,7 +143,7 @@ exercised, while unauthenticated Claude Code is documented as installed-only.
 [Read the 0.2 release announcement](docs/release-v0.2.0.md) ·
 [Use the launch and press kit](docs/launch-kit.md)
 
-## Twelve-specialist consulting walkthrough
+## Thirteen-specialist consulting walkthrough
 
 This fictional case follows Atlas Services, a mid-sized field-services company
 choosing where to grow and how to fund the move. It is a classic
@@ -157,6 +160,7 @@ flowchart LR
     D --> E[Implement with controls]
 
     A --- R[research-brief]
+    A --- SE[security-engineer]
     B --- P[pdf-forensics]
     B --- DL[data-lab]
     C --- X[spreadsheet-lab]
@@ -183,6 +187,20 @@ two-page recommendation with citations, risks, and evidence that would change it
 
 **Produces:** an answer-first decision brief, source ledger, confidence notes,
 and explicit open questions.
+
+#### `security-engineer` — cryptography and embedded trust design
+
+```text
+$security-engineer Explain and threat-model a fictional component-authentication
+design. Draw its X.509 chain, ECDH plus HKDF transcript, MCU verified-boot and
+TEE boundaries, StrongBox key-storage assumptions, and DS28C40 challenge/response.
+Include negative tests and interview questions; use no production credentials.
+```
+
+**Produces:** an evidence-backed architecture explanation, original diagrams,
+toy simulations, lifecycle/misuse tests, and a standalone interactive course.
+Open the [Security Engineering Lab](https://sfungwinbond.github.io/Gstackwut/security-engineer.html)
+or generate it locally with `wut security-lab security-engineering-lab.html`.
 
 ### 2. Build the evidence
 
@@ -387,6 +405,7 @@ wut pack radiology tools           # inspect one curated toolchain
 wut pack radiology prompt "Map de-identified turnaround by modality"
 wut python analysis.py             # managed knowledge Python
 wut lab                            # JupyterLab
+wut security-lab security-engineering-lab.html
 wut diagram architecture.mmd architecture.svg
 wut deck architecture.pptx
 wut render report.docx ./rendered

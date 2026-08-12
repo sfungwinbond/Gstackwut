@@ -4,6 +4,18 @@ All notable changes to WutPack are documented here.
 
 ## Unreleased
 
+### Added
+
+- Added the `[wutlabs] Security Engineer` specialist for applied cryptography,
+  X.509, KMS, StrongBox/KeyMint, MCU verified boot, TEEs, and hardware roots of
+  trust including the DS28C40.
+- Added `wut security-lab [OUTPUT.html]`, a deterministic builder for an
+  original, dependency-free undergraduate course with interactive finite-field,
+  ECDH, ECDSA, HKDF, LMS, boot-policy, and key-storage simulations.
+- Published original Alice/Bob, KMS, hybrid ML-KEM, LMS, certificate-chain,
+  StrongBox, boot/TEE, and DS28C40 system diagrams with primary-source links and
+  security-system interview questions.
+
 ## [0.2.0] - 2026-08-11
 
 ### Added

@@ -24,11 +24,14 @@ same summary in a terminal.
 | `wut agent-python ARGS...` | Runs the separate agent-framework Python |
 | `wut lab ARGS...` | Starts managed JupyterLab |
 | `wut deck [OUTPUT.pptx]` | Generates an editable fictional consulting-deck example |
+| `wut security-lab [OUTPUT.html]` | Builds the standalone interactive cryptography, embedded-security, and interview course |
 | `wut diagram INPUT.mmd OUTPUT.svg` | Renders Mermaid through the private Node prefix |
 | `wut render FILE [OUTPUT_DIR]` | Converts an Office document to PDF with headless LibreOffice |
 | `wut ocr INPUT.pdf OUTPUT.pdf` | Deskews, rotates, and OCRs a PDF with OCRmyPDF |
 
 Commands use `exec`, so signals and exit codes come from the underlying tool.
+The security lab defaults to `security-engineering-lab.html`; its maintainable
+source lives with the `security-engineer` skill and requires no network assets.
 
 ## Profession toolpacks
 

@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An interactive upper-undergraduate security engineering course covering finite fields, ECC, ECDH, ECDSA, HKDF, OpenSSL, KMS, ML-KEM, LMS, X.509, StrongBox, MCU verified boot, TEEs, and the DS28C40.">
+  <meta name="theme-color" content="#071b1b">
+  <meta property="og:title" content="Security Engineering Lab · WutPack">
+  <meta property="og:description" content="Work the math. Draw the trust boundary. Break the protocol. Repair the system.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sfungwinbond.github.io/Gstackwut/security-engineer.html">
+  <title>Security Engineering Lab · WutPack</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #e8f2ec;
+      --muted: #9db5aa;
+      --bg: #061313;
+      --panel: #0b2020;
+      --panel-2: #102929;
+      --line: #28504a;
+      --green: #74f0bd;
+      --amber: #ffca69;
+      --orange: #ff815e;
+      --blue: #8ecdf7;
+      --pink: #e7a7d8;
+      --danger: #ff8a8a;
+      --max: 1180px;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --serif: Iowan Old Style, Charter, Georgia, serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); line-height: 1.65; }
+    body::before { content: ""; position: fixed; inset: 0; z-index: -1; opacity: .25; pointer-events: none; background-image: linear-gradient(rgba(116,240,189,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(116,240,189,.035) 1px, transparent 1px); background-size: 32px 32px; }
+    a { color: var(--green); text-underline-offset: .2em; }
+    a:hover { color: #b9ffdf; }
+    code, pre, output { font-family: var(--mono); }
+    code { color: #c7f9e2; }
+    img, svg { max-width: 100%; }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .skip { position: fixed; left: 1rem; top: -5rem; z-index: 99; padding: .7rem 1rem; background: var(--green); color: #04100c; border-radius: .4rem; }
+    .skip:focus { top: 1rem; }
+    .shell { width: min(calc(100% - 2rem), var(--max)); margin-inline: auto; }
+    .topbar { position: sticky; top: 0; z-index: 20; border-bottom: 1px solid rgba(116,240,189,.18); background: rgba(6,19,19,.92); backdrop-filter: blur(16px); }
+    .topbar .shell { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .brand { display: flex; align-items: center; gap: .75rem; color: var(--ink); text-decoration: none; font-weight: 800; letter-spacing: -.02em; }
+    .brand-mark { display: grid; place-items: center; width: 34px; height: 34px; background: var(--green); color: #04130d; border-radius: 9px; font-family: var(--mono); }
+    .topnav { display: flex; gap: 1.1rem; font-size: .88rem; }
+    .topnav a { color: var(--muted); text-decoration: none; }
+    .topnav a:hover { color: var(--ink); }
+    .hero { padding: 7rem 0 5rem; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 4rem; align-items: end; }
+    .eyebrow { margin: 0 0 1rem; color: var(--green); font: 700 .76rem/1.2 var(--mono); letter-spacing: .13em; text-transform: uppercase; }
+    h1, h2, h3 { text-wrap: balance; }
+    h1 { max-width: 900px; margin: 0; font-size: clamp(3.2rem, 8vw, 7.8rem); line-height: .91; letter-spacing: -.072em; font-weight: 780; }
+    h1 em { color: var(--green); font-family: var(--serif); font-weight: 500; }
+    .lede { margin: 2rem 0 0; max-width: 720px; color: #bed0c8; font-size: clamp(1.08rem, 2vw, 1.35rem); }
+    .hero-card { position: relative; padding: 1.5rem; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(145deg, rgba(16,41,41,.95), rgba(8,26,26,.95)); box-shadow: 0 30px 80px rgba(0,0,0,.28); }
+    .hero-card::before { content: "LAB 13"; position: absolute; right: 1.2rem; top: -1rem; padding: .35rem .7rem; border-radius: 99px; background: var(--amber); color: #241802; font: 800 .72rem var(--mono); }
+    .hero-card ol { margin: .8rem 0 0; padding: 0; list-style: none; counter-reset: path; }
+    .hero-card li { counter-increment: path; display: grid; grid-template-columns: 2rem 1fr; gap: .7rem; padding: .65rem 0; border-bottom: 1px solid rgba(157,181,170,.14); }
+    .hero-card li::before { content: counter(path, decimal-leading-zero); color: var(--amber); font: 700 .76rem var(--mono); }
+    .hero-card li:last-child { border: 0; }
+    .hero-actions { display: flex; gap: .8rem; flex-wrap: wrap; margin-top: 2rem; }
+    .button { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: .65rem 1rem; border: 1px solid var(--green); border-radius: 7px; background: var(--green); color: #04130d; text-decoration: none; font-weight: 800; }
+    .button.secondary { background: transparent; color: var(--green); }
+    .course-note { margin-top: 2rem; padding-left: 1rem; border-left: 3px solid var(--amber); color: var(--muted); }
+    .section { padding: 5.5rem 0; border-top: 1px solid rgba(116,240,189,.12); scroll-margin-top: 76px; }
+    .section.alt { background: rgba(12,31,31,.65); }
+    .section-head { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(260px,.8fr); gap: 3rem; align-items: end; margin-bottom: 2.5rem; }
+    h2 { margin: 0; font-size: clamp(2.3rem, 5vw, 4.7rem); line-height: .98; letter-spacing: -.055em; }
+    .section-head > p { margin: 0; color: var(--muted); }
+    h3 { margin: 0 0 .7rem; font-size: 1.35rem; line-height: 1.2; }
+    p { margin-top: 0; }
+    .grid-2, .grid-3, .grid-4 { display: grid; gap: 1rem; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0,1fr)); }
+    .card, .lab, .diagram { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+    .card { padding: 1.4rem; }
+    .card p:last-child { margin-bottom: 0; }
+    .card small, .tag { color: var(--amber); font: 700 .72rem var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+    .callout { padding: 1.15rem 1.3rem; border-left: 4px solid var(--amber); background: rgba(255,202,105,.08); }
+    .callout.danger { border-color: var(--danger); background: rgba(255,138,138,.07); }
+    .callout strong { color: var(--ink); }
+    .equation { overflow-x: auto; padding: 1rem; border: 1px solid var(--line); border-radius: 8px; background: #041010; color: var(--green); font: 700 clamp(.82rem,2vw,1rem)/1.7 var(--mono); }
+    .diagram { padding: 1rem; overflow: hidden; }
+    .diagram figcaption { padding: .8rem .4rem .2rem; color: var(--muted); font-size: .85rem; }
+    .diagram svg { display: block; width: 100%; height: auto; }
+    .svg-box { fill: #102d2b; stroke: #4f867c; stroke-width: 2; }
+    .svg-trust { fill: none; stroke: #ffca69; stroke-width: 2; stroke-dasharray: 8 7; }
+    .svg-arrow { fill: none; stroke: #74f0bd; stroke-width: 2.2; marker-end: url(#arrow); }
+    .svg-arrow-amber { fill: none; stroke: #ffca69; stroke-width: 2.2; marker-end: url(#arrowAmber); }
+    .svg-label { fill: #e8f2ec; font: 700 15px var(--sans); }
+    .svg-small { fill: #9db5aa; font: 12px var(--mono); }
+    .svg-accent { fill: #74f0bd; }
+    .legend { display: flex; gap: 1rem; flex-wrap: wrap; padding: .4rem; color: var(--muted); font-size: .78rem; }
+    .legend span::before { content: ""; display: inline-block; width: .8rem; height: .8rem; margin-right: .4rem; vertical-align: -.08rem; border: 2px solid var(--line); }
+    .legend .trusted::before { border-color: var(--amber); border-style: dashed; }
+    .legend .secret::before { background: var(--green); border-color: var(--green); }
+    .lab { padding: 1.4rem; background: linear-gradient(145deg, #0c2423, #081b1b); }
+    .lab-head { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; margin-bottom: 1rem; }
+    .lab-head span { color: var(--amber); font: 700 .75rem var(--mono); }
+    .control-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+    label { display: grid; gap: .38rem; color: var(--muted); font-size: .84rem; }
+    input[type="range"] { width: 100%; accent-color: var(--green); }
+    input[type="number"], input[type="text"], select { width: 100%; padding: .62rem .7rem; border: 1px solid var(--line); border-radius: 7px; background: #061616; color: var(--ink); }
+    .readout { margin-top: 1rem; padding: 1rem; border-radius: 8px; background: #041111; color: #c6d7cf; font: .82rem/1.7 var(--mono); word-break: break-word; }
+    .readout strong { color: var(--green); }
+    .lab button { padding: .55rem .8rem; border: 1px solid var(--green); border-radius: 6px; background: transparent; color: var(--green); cursor: pointer; font-weight: 750; }
+    .lab button:hover, .lab button:focus-visible { background: var(--green); color: #04130d; }
+    .button-row { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: 1rem; }
+    .status { display: inline-flex; align-items: center; gap: .45rem; padding: .28rem .55rem; border-radius: 999px; background: rgba(116,240,189,.1); color: var(--green); font: 700 .72rem var(--mono); }
+    .status::before { content: ""; width: .45rem; height: .45rem; border-radius: 50%; background: currentColor; }
+    .status.bad { color: var(--danger); background: rgba(255,138,138,.1); }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { padding: .8rem; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--amber); font: 700 .74rem var(--mono); letter-spacing: .05em; text-transform: uppercase; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; }
+    details { border-top: 1px solid var(--line); }
+    details:last-child { border-bottom: 1px solid var(--line); }
+    summary { padding: 1rem 0; cursor: pointer; font-weight: 750; }
+    details > div { padding: 0 0 1.2rem; color: #bfd0c8; }
+    .term { color: var(--green); font-family: var(--mono); }
+    .flow-list { list-style: none; margin: 0; padding: 0; counter-reset: flow; }
+    .flow-list li { counter-increment: flow; position: relative; margin-left: 1rem; padding: 0 0 1.4rem 2.7rem; border-left: 1px solid var(--line); }
+    .flow-list li::before { content: counter(flow); position: absolute; left: -1rem; top: -.1rem; display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--green); color: #03130d; font: 800 .8rem var(--mono); }
+    .flow-list li:last-child { border-left-color: transparent; }
+    .source-list { columns: 2; column-gap: 3rem; }
+    .source-list li { break-inside: avoid; margin-bottom: .65rem; }
+    footer { padding: 3rem 0 5rem; border-top: 1px solid var(--line); color: var(--muted); }
+    .footer-row { display: flex; justify-content: space-between; gap: 2rem; align-items: flex-start; }
+    .print-only { display: none; }
+    @media (max-width: 900px) {
+      .hero-grid, .section-head, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .hero { padding-top: 4rem; }
+      .topnav a:not(:last-child) { display: none; }
+      .source-list { columns: 1; }
+    }
+    @media (max-width: 650px) {
+      .grid-2, .control-grid { grid-template-columns: 1fr; }
+      h1 { font-size: clamp(3rem,17vw,5.2rem); }
+      .section { padding: 4rem 0; }
+      .footer-row { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @media print {
+      :root { color-scheme: light; --ink: #111; --muted: #444; --bg: #fff; --panel: #fff; --panel-2: #fff; --line: #aaa; --green: #075b3b; --amber: #805100; }
+      body::before, .topbar, .hero-actions, .button-row { display: none; }
+      .hero, .section { padding: 1.5rem 0; break-inside: avoid; }
+      .card, .lab, .diagram, .table-wrap { break-inside: avoid; box-shadow: none; }
+      .print-only { display: block; }
+      a { color: inherit; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to course</a>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" href="index.html"><span class="brand-mark">W</span><span>WutPack / Security Lab</span></a>
+      <nav class="topnav" aria-label="Course navigation">
+        <a href="#math">Math</a><a href="#systems">Systems</a><a href="#boot">Boot + TEE</a><a href="#ds28c40">DS28C40</a><a href="#interview">Interview</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="shell hero-grid">
+        <div>
+          <p class="eyebrow">WutPack specialist 13 · EE undergraduate studio</p>
+          <h1>Work the math. Draw the <em>trust boundary.</em></h1>
+          <p class="lede">A rigorous, visual course in the path from finite fields to deployed security: ECC, ECDSA, ECDH, KDFs, OpenSSL, KMS, ML-KEM, LMS, X.509, Android StrongBox, MCU verified boot, TEEs, and the DS28C40.</p>
+          <div class="hero-actions"><a class="button" href="#math">Enter the lab</a><a class="button secondary" href="#interview">Jump to interview board</a></div>
+          <p class="course-note"><strong>Boundary:</strong> every numeric simulator uses tiny public values for learning. It deliberately provides no production key generation, signing, or device provisioning.</p>
+        </div>
+        <aside class="hero-card" aria-label="Course path">
+          <p class="eyebrow">Four passes through every system</p>
+          <ol>
+            <li><span><strong>Primitive</strong><br>What equation or assumption does the work?</span></li>
+            <li><span><strong>Protocol</strong><br>What exact transcript binds identities and roles?</span></li>
+            <li><span><strong>Boundary</strong><br>Where do plaintext, keys, and decisions exist?</span></li>
+            <li><span><strong>Lifecycle</strong><br>What happens on crash, rollback, rotation, and compromise?</span></li>
+          </ol>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section alt" id="map">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">The whole stack</p><h2>No magic boxes.</h2></div><p>Each layer establishes a narrow property. A secure design composes them and keeps the gaps visible.</p></div>
+        <div class="grid-4">
+          <article class="card"><small>Mathematics</small><h3>Finite fields + groups</h3><p>Deterministic algebra gives ECC its structure. Hard inverse problems give it a security assumption.</p></article>
+          <article class="card"><small>Primitives</small><h3>Sign, agree, derive</h3><p>ECDSA authenticates messages. ECDH/ML-KEM contribute secret material. HKDF separates keys.</p></article>
+          <article class="card"><small>Protocols</small><h3>Identity + transcript</h3><p>X.509, pinning, signatures, roles, and negotiation stop substitution and downgrade.</p></article>
+          <article class="card"><small>Systems</small><h3>Boot, isolate, operate</h3><p>ROM roots, TEEs, StrongBox, KMS, and authenticators constrain where trust lives.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="math">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">01 · finite fields → ECC</p><h2>A curve is a group, not a drawing.</h2></div><p>Over a prime field, division means multiplication by an inverse. Curve points plus the point at infinity form an abelian group; scalar multiplication is repeated group addition.</p></div>
+        <div class="grid-2">
+          <div>
+            <div class="equation">F<sub>p</sub>: a / b = a · b<sup>p−2</sup> (mod p)<br>E: y² = x³ + ax + b (mod p)<br>Q = dG</div>
+            <p>The real security question is not “can I draw the curve?” It is whether a reviewed curve, subgroup, encoding, and implementation make recovering <code>d</code> from <code>G</code> and <code>Q</code> infeasible.</p>
+            <div class="callout"><strong>Validation is part of the primitive boundary.</strong> Reject invalid encodings, the point at infinity, off-curve points, and inappropriate subgroup/order cases before using a peer key.</div>
+          </div>
+          <section class="lab" aria-labelledby="field-lab-title">
+            <div class="lab-head"><h3 id="field-lab-title">Toy curve explorer</h3><span>y²=x³+2x+2 mod 17</span></div>
+            <div class="control-grid">
+              <label>Alice scalar a <input id="aliceScalar" type="range" min="1" max="18" value="5"><output id="aliceScalarValue">5</output></label>
+              <label>Bob scalar b <input id="bobScalar" type="range" min="1" max="18" value="7"><output id="bobScalarValue">7</output></label>
+            </div>
+            <div class="readout" id="curveReadout" aria-live="polite"></div>
+            <p><small>Public base G=(5,1), group order 19. Tiny enough to brute-force—never a production curve.</small></p>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="ecdh">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">02 · ECDH + HKDF</p><h2>Same point. Different responsibilities.</h2></div><p>ECDH gives both parties the same group result. Authentication and key separation must come from the surrounding protocol.</p></div>
+        <div class="grid-2">
+          <figure class="diagram">
+            <svg viewBox="0 0 720 430" role="img" aria-labelledby="paintTitle paintDesc">
+              <title id="paintTitle">Alice and Bob paint-mixing analogy beside ECDH algebra</title><desc id="paintDesc">Alice and Bob mix a public yellow paint with private colors to reach the same brown. The adjacent labels show the ECDH algebra and warn the paint is intuition only.</desc>
+              <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs>
+              <text x="28" y="35" class="svg-small">ORIGINAL INSTRUCTIONAL REDRAW · ANALOGY, NOT MECHANISM</text>
+              <circle cx="360" cy="92" r="44" fill="#ffd84d"/><text x="360" y="96" text-anchor="middle" fill="#211b03" font-weight="800">public</text>
+              <circle cx="115" cy="190" r="48" fill="#ef4a8a"/><text x="115" y="194" text-anchor="middle" fill="#fff" font-weight="800">Alice a</text>
+              <circle cx="605" cy="190" r="48" fill="#3c78ea"/><text x="605" y="194" text-anchor="middle" fill="#fff" font-weight="800">Bob b</text>
+              <path d="M324 119L150 166M396 119L570 166" class="svg-arrow"/>
+              <circle cx="115" cy="315" r="55" fill="#d47761"/><circle cx="605" cy="315" r="55" fill="#7a9a65"/>
+              <path d="M115 240V258M605 240V258" class="svg-arrow"/>
+              <text x="115" y="312" text-anchor="middle" fill="#fff" font-weight="800">aG → A</text><text x="605" y="312" text-anchor="middle" fill="#fff" font-weight="800">bG → B</text>
+              <path d="M172 315H548" class="svg-arrow"/>
+              <text x="360" y="300" text-anchor="middle" class="svg-small">exchange public results</text>
+              <rect x="225" y="375" width="270" height="38" rx="8" class="svg-box"/><text x="360" y="399" text-anchor="middle" class="svg-label">aB = abG = bA</text>
+            </svg>
+            <figcaption>The classic paint analogy conveys easy mixing and hard unmixing. It does not convey the finite-field group, active attackers, entropy, public-key validation, or HKDF.</figcaption>
+          </figure>
+          <figure class="diagram">
+            <svg viewBox="0 0 720 430" role="img" aria-labelledby="ecdhTitle ecdhDesc">
+              <title id="ecdhTitle">Authenticated ECDH and HKDF sequence</title><desc id="ecdhDesc">Alice and Bob exchange ephemeral keys and credentials, authenticate the transcript, derive the same point, and use HKDF to create directional traffic keys.</desc>
+              <defs><marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs>
+              <rect x="30" y="35" width="190" height="55" rx="10" class="svg-box"/><rect x="500" y="35" width="190" height="55" rx="10" class="svg-box"/>
+              <text x="125" y="68" text-anchor="middle" class="svg-label">Alice · a, A=aG</text><text x="595" y="68" text-anchor="middle" class="svg-label">Bob · b, B=bG</text>
+              <path d="M125 90V390M595 90V390" stroke="#28504a" stroke-width="2" stroke-dasharray="5 6"/>
+              <path d="M135 135H585" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow2)"/><text x="360" y="124" text-anchor="middle" class="svg-small">A, suite, nonce, credential</text>
+              <path d="M585 195H135" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow2)"/><text x="360" y="184" text-anchor="middle" class="svg-small">B, suite, nonce, credential, proof</text>
+              <path d="M135 255H585" stroke="#ffca69" stroke-width="2" marker-end="url(#arrow2)"/><text x="360" y="244" text-anchor="middle" class="svg-small">proof over transcript + roles</text>
+              <rect x="245" y="292" width="230" height="72" rx="10" class="svg-box"/><text x="360" y="319" text-anchor="middle" class="svg-label">shared = x(abG)</text><text x="360" y="344" text-anchor="middle" class="svg-small">HKDF(salt, shared, transcript)</text>
+              <text x="360" y="398" text-anchor="middle" class="svg-small">derive separate client→server, server→client, IV, exporter keys</text>
+            </svg>
+            <figcaption>ECDH does not authenticate by itself. Credentials may be pinned keys, signatures, or validated X.509 paths, but their proofs must bind the actual exchange.</figcaption>
+          </figure>
+        </div>
+        <section class="lab" aria-labelledby="hkdf-title" style="margin-top:1rem">
+          <div class="lab-head"><h3 id="hkdf-title">HKDF context lab</h3><span>WebCrypto · SHA-256 · demo inputs</span></div>
+          <div class="control-grid"><label>Input keying material (demo text)<input id="hkdfIkm" type="text" value="toy shared secret"></label><label>Info / domain label<input id="hkdfInfo" type="text" value="wutlab/v1/alice-to-bob/aead"></label></div>
+          <div class="button-row"><button id="deriveButton" type="button">Derive 32 demo bytes</button></div><div class="readout" id="hkdfReadout" aria-live="polite">Change the purpose label to see domain separation change the output.</div>
+        </section>
+      </div>
+    </section>
+
+    <section class="section" id="ecdsa">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">03 · ECDSA</p><h2>The nonce is private-key material.</h2></div><p>A signature proves knowledge of the private key for one encoded message. It does not encrypt, establish identity by itself, or forgive a weak nonce generator.</p></div>
+        <div class="grid-2">
+          <div><div class="equation">R = kG; r = x(R) mod n<br>s = k⁻¹(z + rd) mod n<br><br>reuse: k = (z₁−z₂)(s₁−s₂)⁻¹ mod n<br>d = (s₁k−z₁)r⁻¹ mod n</div><p>Real verification also rejects out-of-range values, validates the public key, follows the required message encoding and hashing rules, and obtains the public key through a trusted path.</p><div class="callout danger"><strong>Catastrophic failure:</strong> reuse, bias, leakage, or faulting of <code>k</code> can expose <code>d</code>. Deterministic nonce generation helps with RNG failures but does not remove constant-time and fault-resistance requirements.</div></div>
+          <section class="lab" aria-labelledby="nonce-title"><div class="lab-head"><h3 id="nonce-title">Nonce-reuse autopsy</h3><span>toy scalar arithmetic mod 101</span></div><div class="control-grid"><label>Private d<input id="nonceD" type="range" min="1" max="100" value="37"><output id="nonceDValue">37</output></label><label>Repeated nonce k<input id="nonceK" type="range" min="1" max="100" value="17"><output id="nonceKValue">17</output></label></div><div class="readout" id="nonceReadout"></div><p><small>The demo fixes r=26, z₁=13, z₂=42 and uses a prime scalar field only. It is an algebra exhibit, not an ECDSA implementation.</small></p></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt" id="systems">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">04 · OpenSSL + KMS</p><h2>APIs and operations are part of the proof.</h2></div><p>Use reviewed high-level crypto APIs, then design the key lifecycle and outage path around them.</p></div>
+        <div class="grid-2">
+          <article class="card"><small>OpenSSL 3.x</small><h3>Stay at the EVP/provider layer</h3><p><code>EVP_DigestSign*</code> / <code>EVP_DigestVerify*</code> for signatures, <code>EVP_PKEY_derive*</code> for ECDH, <code>EVP_KDF_derive</code> for HKDF, and <code>EVP_PKEY_encapsulate*</code> / <code>decapsulate*</code> for KEMs.</p><p>Pin the deployed version and provider policy, validate peers, check every result, size outputs according to the API, and clear sensitive buffers. OpenSSL 3.5 introduced native ML-KEM support.</p></article>
+          <article class="card"><small>Key lifecycle</small><h3>Ask the questions APIs cannot answer</h3><p>Who can create, use, export, rotate, disable, schedule deletion, audit, and recover each key? What plaintext exists during use? What happens if KMS is slow, unavailable, throttled, compromised, or regionally isolated?</p><p>A KMS narrows and observes key use. It does not make a compromised caller honest.</p></article>
+        </div>
+        <figure class="diagram" style="margin-top:1rem">
+          <svg viewBox="0 0 1000 430" role="img" aria-labelledby="kmsTitle kmsDesc">
+            <title id="kmsTitle">Envelope encryption with KMS trust boundaries</title><desc id="kmsDesc">A workload gets a data key, encrypts locally, stores a wrapped key with ciphertext and authenticated context, and later asks KMS to unwrap after policy and audit checks.</desc>
+            <defs><marker id="arrow3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs>
+            <rect x="24" y="40" width="600" height="340" rx="18" class="svg-trust"/><text x="44" y="68" class="svg-small">WORKLOAD TRUST ZONE · PLAINTEXT MAY EXIST</text>
+            <rect x="60" y="105" width="200" height="80" rx="10" class="svg-box"/><text x="160" y="137" text-anchor="middle" class="svg-label">Application</text><text x="160" y="162" text-anchor="middle" class="svg-small">tenant + object + purpose</text>
+            <rect x="370" y="105" width="210" height="80" rx="10" class="svg-box"/><text x="475" y="137" text-anchor="middle" class="svg-label">Local AEAD</text><text x="475" y="162" text-anchor="middle" class="svg-small">DEK + nonce + AAD</text>
+            <rect x="370" y="265" width="210" height="75" rx="10" class="svg-box"/><text x="475" y="296" text-anchor="middle" class="svg-label">Short-lived DEK</text><text x="475" y="320" text-anchor="middle" class="svg-small">zeroize / bounded cache</text>
+            <rect x="710" y="95" width="250" height="115" rx="12" class="svg-box"/><text x="835" y="130" text-anchor="middle" class="svg-label">KMS / HSM boundary</text><text x="835" y="157" text-anchor="middle" class="svg-small">authorize · wrap/unwrap</text><text x="835" y="180" text-anchor="middle" class="svg-small">KEK never leaves</text>
+            <rect x="710" y="280" width="250" height="72" rx="10" class="svg-box"/><text x="835" y="310" text-anchor="middle" class="svg-label">Object store</text><text x="835" y="334" text-anchor="middle" class="svg-small">ct + nonce + wrapped DEK + AAD</text>
+            <path d="M260 145H360M475 255V195M590 145H700M580 305H700" stroke="#74f0bd" stroke-width="2.2" marker-end="url(#arrow3)" fill="none"/><text x="643" y="128" class="svg-small">wrap/unwrap</text><text x="635" y="290" class="svg-small">store</text>
+          </svg>
+          <figcaption>Original architecture redraw. Bind tenant, object, schema/version, and purpose as AEAD/KMS context; otherwise a valid blob may be transplanted into the wrong context.</figcaption>
+        </figure>
+        <div class="grid-2" style="margin-top:1rem">
+          <article class="card"><small>Randomness vocabulary</small><h3>OpenSSL includes a CSPRNG; it is not the entropy source</h3><p><strong>OS entropy / TRNG</strong> provides unpredictable seed input. A <strong>DRBG</strong> expands and periodically reseeds internal state. OpenSSL's <code>RAND_bytes</code> and <code>RAND_priv_bytes</code> are application-facing APIs over that machinery.</p><p>On mainstream systems OpenSSL seeds from the operating system. Check the return code: seeding failure must become operation failure, never weak output.</p></article>
+          <div class="equation" role="img" aria-label="Randomness pipeline from physical events through operating system entropy and DRBG to key generation">physical events / hardware noise<br>↓ health tests + conditioning<br>OS entropy source or secure-element TRNG<br>↓ seed / reseed<br>DRBG / CSPRNG<br>↓ checked RAND API<br>nonce · scalar · symmetric key · salt</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="pq">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">05 · ML-KEM + LMS</p><h2>Post-quantum changes the engineering, too.</h2></div><p>ML-KEM changes handshake sizes and failure rules. LMS trades simple hash assumptions for large signatures and state that must never roll back.</p></div>
+        <div class="grid-2">
+          <figure class="diagram">
+            <svg viewBox="0 0 760 455" role="img" aria-labelledby="hybridTitle hybridDesc"><title id="hybridTitle">Hybrid ECDH and ML-KEM key establishment</title><desc id="hybridDesc">Authenticated ECDH and ML-KEM produce independent shared secrets that feed a length-delimited, transcript-bound HKDF and then separate traffic keys.</desc><defs><marker id="arrow4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs><rect x="40" y="50" width="280" height="78" rx="11" class="svg-box"/><text x="180" y="82" text-anchor="middle" class="svg-label">Authenticated ECDH</text><text x="180" y="106" text-anchor="middle" class="svg-small">ecdh_ss · peer keys validated</text><rect x="440" y="50" width="280" height="78" rx="11" class="svg-box"/><text x="580" y="82" text-anchor="middle" class="svg-label">ML-KEM encapsulation</text><text x="580" y="106" text-anchor="middle" class="svg-small">mlkem_ss · ct · recipient key</text><path d="M180 128V205M580 128V205" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow4)"/><rect x="145" y="215" width="470" height="95" rx="12" class="svg-box"/><text x="380" y="248" text-anchor="middle" class="svg-label">HKDF-Extract</text><text x="380" y="275" text-anchor="middle" class="svg-small">len(ecdh_ss)||ecdh_ss||len(mlkem_ss)||mlkem_ss</text><text x="380" y="295" text-anchor="middle" class="svg-small">salt + negotiated suite + transcript hash</text><path d="M380 310V355" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow4)"/><rect x="195" y="365" width="370" height="58" rx="10" class="svg-box"/><text x="380" y="400" text-anchor="middle" class="svg-label">directional traffic + exporter keys</text></svg>
+            <figcaption>Hybrid security needs an explicit combiner, authentication, algorithm negotiation, downgrade resistance, and fail-closed behavior—not just concatenated buzzwords.</figcaption>
+          </figure>
+          <figure class="diagram">
+            <svg viewBox="0 0 760 455" role="img" aria-labelledby="lmsTitle lmsDesc"><title id="lmsTitle">LMS Merkle tree with LM-OTS leaf and authentication path</title><desc id="lmsDesc">Eight one-time public keys form leaves of a Merkle tree. One selected leaf has a highlighted path to the public root and sibling hashes form its authentication path.</desc><path d="M380 64L190 155M380 64L570 155M190 155L95 255M190 155L285 255M570 155L475 255M570 155L665 255" stroke="#4f867c" stroke-width="2"/><path d="M95 255L48 350M95 255L142 350M285 255L238 350M285 255L332 350M475 255L428 350M475 255L522 350M665 255L618 350M665 255L712 350" stroke="#4f867c" stroke-width="2"/><path d="M238 350L285 255L190 155L380 64" stroke="#ffca69" stroke-width="7" fill="none" opacity=".8"/><g fill="#102d2b" stroke="#4f867c" stroke-width="2"><circle cx="380" cy="64" r="26"/><circle cx="190" cy="155" r="22"/><circle cx="570" cy="155" r="22"/><circle cx="95" cy="255" r="20"/><circle cx="285" cy="255" r="20"/><circle cx="475" cy="255" r="20"/><circle cx="665" cy="255" r="20"/></g><g fill="#102d2b" stroke="#74f0bd" stroke-width="2"><circle cx="48" cy="350" r="16"/><circle cx="142" cy="350" r="16"/><circle cx="238" cy="350" r="18"/><circle cx="332" cy="350" r="16"/><circle cx="428" cy="350" r="16"/><circle cx="522" cy="350" r="16"/><circle cx="618" cy="350" r="16"/><circle cx="712" cy="350" r="16"/></g><text x="380" y="68" text-anchor="middle" class="svg-label">root</text><text x="238" y="398" text-anchor="middle" class="svg-label">LM-OTS q=2</text><text x="380" y="438" text-anchor="middle" class="svg-small">signature = q + one-time signature + sibling authentication path</text></svg>
+            <figcaption>LM-OTS signs once. LMS authenticates many LM-OTS public keys under one Merkle root. HSS stacks LMS trees. Reusing a leaf is a protocol failure.</figcaption>
+          </figure>
+        </div>
+        <section class="lab" style="margin-top:1rem" aria-labelledby="lms-lab-title"><div class="lab-head"><h3 id="lms-lab-title">LMS crash-state simulator</h3><span>8 toy leaves</span></div><div class="grid-2"><div><p><strong>Safe transaction:</strong> durably reserve and advance <code>q</code> before releasing the signature.</p><div class="button-row"><button id="lmsReserve" type="button">1 · reserve q</button><button id="lmsRelease" type="button">2 · release signature</button><button id="lmsCrash" type="button">simulate crash</button><button id="lmsRestore" type="button">restore stale backup</button></div></div><div class="readout" id="lmsReadout" aria-live="polite"></div></div></section>
+      </div>
+    </section>
+
+    <section class="section alt" id="x509">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">06 · X.509 identity</p><h2>A certificate can use ECDSA. X.509 is not ECDSA.</h2></div><p>The container, subject public-key algorithm, and CA signature algorithm are separate choices.</p></div>
+        <div class="grid-2">
+          <div>
+            <div class="equation">Certificate = TBSCertificate + signatureAlgorithm + signatureValue<br><br>SPKI algorithm: id-ecPublicKey + named curve<br>CA signature: ecdsa-with-SHA256 (one possible choice)</div>
+            <p>An EC leaf public key may be signed by an ECDSA CA, an RSA CA, or another supported CA key. Likewise, an RSA leaf can sit below an EC intermediate. The verifier follows each certificate’s declared algorithms and local policy.</p>
+            <div class="callout"><strong>Path validation is a policy computation.</strong> Verify signatures, trust anchor, issuer linkage, basic constraints, path length, key usage/EKU, names, critical extensions, algorithm policy, time model, and revocation or pinning. A certificate is not a secret and possession must still be proven.</div>
+          </div>
+          <figure class="diagram">
+            <svg viewBox="0 0 740 480" role="img" aria-labelledby="certTitle certDesc"><title id="certTitle">X.509 certificate chain and validation checks</title><desc id="certDesc">A locally trusted OEM root signs an intermediate that signs a device leaf. The verifier checks identities, constraints, purpose, validity policy, algorithms, revocation or pinning, and proof of private-key possession.</desc><defs><marker id="arrow5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs><rect x="220" y="35" width="300" height="78" rx="10" class="svg-box"/><text x="370" y="67" text-anchor="middle" class="svg-label">OEM root CA · trust anchor</text><text x="370" y="91" text-anchor="middle" class="svg-small">pinned in ROM / OTP / verifier policy</text><path d="M370 113V160" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow5)"/><rect x="220" y="170" width="300" height="78" rx="10" class="svg-box"/><text x="370" y="202" text-anchor="middle" class="svg-label">Product intermediate CA</text><text x="370" y="226" text-anchor="middle" class="svg-small">CA=true · pathLen · constrained purpose</text><path d="M370 248V295" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow5)"/><rect x="220" y="305" width="300" height="78" rx="10" class="svg-box"/><text x="370" y="337" text-anchor="middle" class="svg-label">Device / firmware leaf</text><text x="370" y="361" text-anchor="middle" class="svg-small">SPKI + identity + EKU + validity</text><rect x="35" y="165" width="145" height="225" rx="10" class="svg-trust"/><text x="107" y="195" text-anchor="middle" class="svg-small">VERIFY EACH HOP</text><text x="53" y="230" class="svg-small">□ signature</text><text x="53" y="258" class="svg-small">□ constraints</text><text x="53" y="286" class="svg-small">□ identity</text><text x="53" y="314" class="svg-small">□ intended use</text><text x="53" y="342" class="svg-small">□ time/revoke</text><text x="53" y="370" class="svg-small">□ algorithm</text><rect x="560" y="305" width="145" height="78" rx="10" class="svg-box"/><text x="632" y="335" text-anchor="middle" class="svg-label">Proof</text><text x="632" y="360" text-anchor="middle" class="svg-small">sign challenge</text><path d="M520 344H550" stroke="#ffca69" stroke-width="2" marker-end="url(#arrow5)"/><text x="370" y="435" text-anchor="middle" class="svg-small">offline MCU: define clock, pinning, update, and revocation model explicitly</text></svg>
+            <figcaption>Original certificate-chain redraw. A verified chain binds a key to a constrained identity; a live challenge or signed manifest proves that key authorized this operation.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="strongbox">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">07 · Android StrongBox</p><h2>Count blobs, trusted metadata, and evidence separately.</h2></div><p>StrongBox is a dedicated secure processor profile, not a standardized flash capacity. Capacity and blob format are implementation-specific.</p></div>
+        <div class="grid-2">
+          <article class="card"><small>What Android specifies</small><h3>Keys are represented by protected blobs</h3><p>KeyMint returns generated/imported material as an encrypted, authenticated key blob. Android Keystore can store that blob outside the secure processor without learning the raw secret; the secure hardware validates authorizations when the key is used.</p><p>Rollback-resistant deletion may need additional replay-protected trusted metadata. That store can fill even when ordinary filesystem space remains.</p></article>
+          <article class="card"><small>What you must measure</small><h3>No universal bytes-per-key quota</h3><p>Measure the returned blob and Keystore database growth on every target device/OS combination. Separately load-test maximum keys, rollback-resistant keys, operation slots, latency, attestation chains, deletion, upgrade, and factory reset.</p><p>Use <code>FEATURE_STRONGBOX_KEYSTORE</code> and handle <code>StrongBoxUnavailableException</code>; StrongBox supports fewer algorithms and concurrent operations than a general TEE-backed implementation.</p></article>
+        </div>
+        <figure class="diagram" style="margin-top:1rem">
+          <svg viewBox="0 0 1080 470" role="img" aria-labelledby="strongPathTitle strongPathDesc"><title id="strongPathTitle">Separate Android StrongBox, BoringSSL, and OpenSSL paths</title><desc id="strongPathDesc">The Android Keystore JCA path crosses Keystore and KeyMint into a dedicated StrongBox processor for hardware-backed ECDH. A separate Android TLS path uses Conscrypt and BoringSSL. A native non-Android path may use OpenSSL and operating-system entropy.</desc><defs><marker id="arrowSb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs><text x="28" y="34" class="svg-small">THREE PATHS OFTEN CONFUSED IN INTERVIEWS</text><rect x="28" y="65" width="1024" height="105" rx="14" class="svg-trust"/><text x="48" y="93" class="svg-small">HARDWARE-BACKED ANDROID KEY OPERATION</text><rect x="55" y="108" width="175" height="42" rx="8" class="svg-box"/><text x="142" y="135" text-anchor="middle" class="svg-label">JCA KeyAgreement</text><rect x="285" y="108" width="175" height="42" rx="8" class="svg-box"/><text x="372" y="135" text-anchor="middle" class="svg-label">Keystore service</text><rect x="515" y="108" width="175" height="42" rx="8" class="svg-box"/><text x="602" y="135" text-anchor="middle" class="svg-label">KeyMint HAL</text><rect x="745" y="100" width="270" height="58" rx="8" class="svg-box"/><text x="880" y="124" text-anchor="middle" class="svg-label">StrongBox secure processor</text><text x="880" y="146" text-anchor="middle" class="svg-small">EC private key + ECDH + TRNG/DRBG</text><path d="M230 129H275M460 129H505M690 129H735" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrowSb)"/><rect x="28" y="210" width="1024" height="90" rx="14" class="svg-box"/><text x="48" y="237" class="svg-small">ANDROID TLS / GENERAL CRYPTO PROVIDER</text><text x="150" y="272" class="svg-label">JCA / JSSE</text><path d="M270 267H390" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrowSb)"/><text x="420" y="272" class="svg-label">Conscrypt</text><path d="M540 267H660" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrowSb)"/><text x="690" y="272" class="svg-label">BoringSSL</text><text x="825" y="272" class="svg-small">Google fork; not OpenSSL API-compatible</text><rect x="28" y="340" width="1024" height="90" rx="14" class="svg-box"/><text x="48" y="367" class="svg-small">SEPARATE NATIVE APPLICATION (WHEN CHOSEN BY THAT APPLICATION)</text><text x="150" y="402" class="svg-label">C / C++ code</text><path d="M270 397H390" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrowSb)"/><text x="420" y="402" class="svg-label">OpenSSL EVP + RAND</text><path d="M640 397H750" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrowSb)"/><text x="780" y="402" class="svg-label">OS entropy / providers</text></svg>
+          <figcaption>StrongBox can perform ECDH when its KeyMint implementation supports an EC key authorized for <code>PURPOSE_AGREE_KEY</code>. Do not infer OpenSSL inside the secure processor; that is vendor-specific implementation detail.</figcaption>
+        </figure>
+        <section class="lab" style="margin-top:1rem" aria-labelledby="storage-title">
+          <div class="lab-head"><h3 id="storage-title">StrongBox storage planning estimator</h3><span>engineering estimate · not a device quota</span></div>
+          <div class="grid-4">
+            <label>Key records<input id="sbCount" type="number" min="1" value="1000"></label>
+            <label>Protected key blob / key (bytes)<input id="sbBlob" type="number" min="0" value="2048"></label>
+            <label>Alias + DB metadata / key (bytes)<input id="sbMeta" type="number" min="0" value="512"></label>
+            <label>Certificate chain / key (bytes)<input id="sbCert" type="number" min="0" value="1536"></label>
+            <label>Filesystem/index overhead<input id="sbOverhead" type="number" min="0" max="200" value="20"><span>%</span></label>
+            <label>Trusted rollback metadata / key (bytes)<input id="sbTrusted" type="number" min="0" value="64"></label>
+          </div>
+          <div class="readout" id="sbReadout" aria-live="polite"></div>
+          <p><small>Starting assumptions only: 2 KiB blob + 0.5 KiB alias/DB + 1.5 KiB EC certificate chain + 20% overhead. Set certificate bytes to zero for a symmetric key without a chain. The 64-byte trusted-metadata value is intentionally hypothetical; vendors do not expose one common layout.</small></p>
+        </section>
+        <div class="table-wrap" style="margin-top:1rem"><table><thead><tr><th>Thing being budgeted</th><th>Where it usually lives</th><th>Planning method</th></tr></thead><tbody><tr><td>Raw AES-256 or P-256 private scalar</td><td>Never exposed from StrongBox; protected by secure hardware</td><td>32 bytes of key material is not the record size</td></tr><tr><td>Authenticated key blob + authorizations</td><td>Keystore-managed storage outside secure processor</td><td>Measure returned blob and DB growth; budget a range</td></tr><tr><td>X.509 attestation/application chain</td><td>Often ordinary storage alongside alias/record</td><td>Measure DER bytes; chain varies by extensions and key types</td></tr><tr><td>Rollback-resistant deletion metadata</td><td>Replay-protected/trusted storage such as RPMB or vendor secure storage</td><td>Vendor-specific capacity; create/delete exhaustion test</td></tr><tr><td>Operation slots and latency</td><td>Secure processor RAM/firmware</td><td>Load test; storage math does not predict concurrency</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="section alt" id="boot">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">08 · MCU boot + TEE</p><h2>Authorize code first. Isolate services second.</h2></div><p>Verified boot and a TEE solve different phases of the problem. Anti-rollback closes the “old but valid” hole.</p></div>
+        <figure class="diagram">
+          <svg viewBox="0 0 1120 540" role="img" aria-labelledby="bootTitle bootDesc"><title id="bootTitle">MCU verified boot chain flowing into a TEE and normal-world application</title><desc id="bootDesc">Immutable ROM and OTP verify a signed first stage, which verifies later firmware and enforces a security version. Runtime separates secure services from an untrusted application and peripherals.</desc><defs><marker id="arrow6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs><text x="28" y="34" class="svg-small">POWER-ON / RESET</text><rect x="25" y="65" width="195" height="105" rx="12" class="svg-box"/><text x="122" y="98" text-anchor="middle" class="svg-label">Immutable boot ROM</text><text x="122" y="124" text-anchor="middle" class="svg-small">hash · verify · fail closed</text><text x="122" y="147" text-anchor="middle" class="svg-small">minimal immutable TCB</text><rect x="25" y="220" width="195" height="100" rx="12" class="svg-trust"/><text x="122" y="252" text-anchor="middle" class="svg-label">OTP / fuses</text><text x="122" y="278" text-anchor="middle" class="svg-small">root digest(s)</text><text x="122" y="300" text-anchor="middle" class="svg-small">min security version</text><path d="M122 220V180" stroke="#ffca69" stroke-width="2" marker-end="url(#arrow6)"/><rect x="300" y="65" width="210" height="105" rx="12" class="svg-box"/><text x="405" y="98" text-anchor="middle" class="svg-label">Signed stage 1</text><text x="405" y="124" text-anchor="middle" class="svg-small">manifest + image digest</text><text x="405" y="147" text-anchor="middle" class="svg-small">target + version + key ID</text><path d="M220 118H290" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow6)"/><rect x="590" y="65" width="210" height="105" rx="12" class="svg-box"/><text x="695" y="98" text-anchor="middle" class="svg-label">App / secure image</text><text x="695" y="124" text-anchor="middle" class="svg-small">verify dependencies</text><text x="695" y="147" text-anchor="middle" class="svg-small">advance version safely</text><path d="M510 118H580" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow6)"/><rect x="880" y="65" width="210" height="105" rx="12" class="svg-box"/><text x="985" y="98" text-anchor="middle" class="svg-label">Recovery slot</text><text x="985" y="124" text-anchor="middle" class="svg-small">A/B · signed · power safe</text><text x="985" y="147" text-anchor="middle" class="svg-small">not a signature bypass</text><path d="M800 118H870" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow6)"/><rect x="300" y="235" width="790" height="260" rx="18" class="svg-trust"/><text x="325" y="266" class="svg-small">RUNTIME ISOLATION · TEE OR TRUSTZONE-M SECURE PARTITION</text><rect x="340" y="300" width="300" height="145" rx="12" class="svg-box"/><text x="490" y="334" text-anchor="middle" class="svg-label">Secure services</text><text x="490" y="362" text-anchor="middle" class="svg-small">key use · secure storage · attest</text><text x="490" y="387" text-anchor="middle" class="svg-small">update authorization · counters</text><text x="490" y="415" text-anchor="middle" class="svg-small">small validated API surface</text><rect x="745" y="300" width="300" height="145" rx="12" class="svg-box"/><text x="895" y="334" text-anchor="middle" class="svg-label">Non-secure application</text><text x="895" y="362" text-anchor="middle" class="svg-small">untrusted buffers + requests</text><text x="895" y="387" text-anchor="middle" class="svg-small">network · UI · business logic</text><text x="895" y="415" text-anchor="middle" class="svg-small">cannot directly read secure keys</text><path d="M745 365H650M650 395H745" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow6)"/><text x="695" y="350" text-anchor="middle" class="svg-small">narrow API</text></svg>
+          <figcaption>Original boot/TEE redraw. Measured boot records hashes; verified boot blocks unauthorized images. TrustZone supplies partitioning mechanisms but secure software, memory/peripheral attribution, and the boot root determine whether it forms a useful TEE.</figcaption>
+        </figure>
+        <div class="grid-2" style="margin-top:1rem">
+          <section class="lab" aria-labelledby="boot-lab-title"><div class="lab-head"><h3 id="boot-lab-title">Boot policy decision</h3><span>all checks must pass</span></div><label><span><input id="bootSig" type="checkbox" checked> Manifest signature and chain valid</span></label><label><span><input id="bootTarget" type="checkbox" checked> Target/device and load policy match</span></label><label><span><input id="bootVersion" type="checkbox" checked> Security version ≥ protected minimum</span></label><label><span><input id="bootDigest" type="checkbox" checked> Image digest and dependencies match</span></label><label><span><input id="bootDebug" type="checkbox" checked> Debug lifecycle policy satisfied</span></label><div class="readout" id="bootReadout" aria-live="polite"></div></section>
+          <article class="card"><small>Interview distinction</small><h3>Three claims, three mechanisms</h3><p><strong>X.509:</strong> this public key is authorized for a constrained identity/purpose under my local root policy.</p><p><strong>Verified boot:</strong> this exact code/manifest is authorized and new enough to execute.</p><p><strong>TEE:</strong> this selected runtime code/data remains isolated from the normal environment under the stated hardware and boot assumptions.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="ds28c40">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">09 · DS28C40</p><h2>A component root of trust—not a magic security chip.</h2></div><p>The authenticator protects identity and cryptographic operations. The ECU still owns certificate policy, freshness, enforcement, and bypass resistance.</p></div>
+        <div class="grid-2">
+          <figure class="diagram">
+            <svg viewBox="0 0 780 540" role="img" aria-labelledby="dsBlockTitle dsBlockDesc"><title id="dsBlockTitle">Original functional block diagram of the DS28C40</title><desc id="dsBlockDesc">The I2C command boundary feeds control logic connected to unique identity, random generation, secured OTP memory, ECC P-256, SHA-256 HMAC, keys and certificates, and an authenticated GPIO.</desc><rect x="25" y="45" width="730" height="455" rx="20" class="svg-trust"/><text x="50" y="78" class="svg-small">DS28C40 HARDWARE SECURITY BOUNDARY · CONCEPTUAL REDRAW</text><rect x="55" y="110" width="190" height="85" rx="10" class="svg-box"/><text x="150" y="145" text-anchor="middle" class="svg-label">I²C interface</text><text x="150" y="170" text-anchor="middle" class="svg-small">commands · buffer · control</text><rect x="295" y="110" width="190" height="85" rx="10" class="svg-box"/><text x="390" y="145" text-anchor="middle" class="svg-label">ECC P-256</text><text x="390" y="170" text-anchor="middle" class="svg-small">ECDSA · ECDH</text><rect x="535" y="110" width="190" height="85" rx="10" class="svg-box"/><text x="630" y="145" text-anchor="middle" class="svg-label">SHA-256 / HMAC</text><text x="630" y="170" text-anchor="middle" class="svg-small">fast symmetric auth</text><rect x="55" y="245" width="190" height="85" rx="10" class="svg-box"/><text x="150" y="280" text-anchor="middle" class="svg-label">ROM ID + TRNG</text><text x="150" y="305" text-anchor="middle" class="svg-small">unique ID · randomness</text><rect x="295" y="245" width="190" height="85" rx="10" class="svg-box"/><text x="390" y="280" text-anchor="middle" class="svg-label">Secured OTP</text><text x="390" y="305" text-anchor="middle" class="svg-small">user + key/secret regions</text><rect x="535" y="245" width="190" height="85" rx="10" class="svg-box"/><text x="630" y="280" text-anchor="middle" class="svg-label">Keys + certificates</text><text x="630" y="305" text-anchor="middle" class="svg-small">provisioned lifecycle</text><rect x="295" y="385" width="190" height="75" rx="10" class="svg-box"/><text x="390" y="416" text-anchor="middle" class="svg-label">Authenticated GPIO</text><text x="390" y="440" text-anchor="middle" class="svg-small">physical enforcement signal</text><path d="M245 152H285M485 152H525M150 195V235M390 195V235M630 195V235M390 330V375" stroke="#74f0bd" stroke-width="2"/></svg>
+            <figcaption>Conceptual functional redraw based on Analog Devices product documentation; it is not a pinout or replacement for the current datasheet.</figcaption>
+          </figure>
+          <figure class="diagram">
+            <svg viewBox="0 0 780 540" role="img" aria-labelledby="dsSeqTitle dsSeqDesc"><title id="dsSeqTitle">DS28C40 certificate-based component authentication sequence</title><desc id="dsSeqDesc">An ECU with a pinned OEM root sends a fresh challenge to a peripheral authenticator, receives device identity, certificate and signature, validates the path and freshness, and then enforces an allow or deny decision.</desc><defs><marker id="arrow7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#74f0bd"/></marker></defs><rect x="35" y="35" width="245" height="70" rx="10" class="svg-box"/><text x="157" y="65" text-anchor="middle" class="svg-label">ECU / secure verifier</text><text x="157" y="88" text-anchor="middle" class="svg-small">pinned OEM root + policy</text><rect x="500" y="35" width="245" height="70" rx="10" class="svg-box"/><text x="622" y="65" text-anchor="middle" class="svg-label">Peripheral DS28C40</text><text x="622" y="88" text-anchor="middle" class="svg-small">device key + cert + ROM ID</text><path d="M157 105V490M622 105V490" stroke="#28504a" stroke-width="2" stroke-dasharray="5 6"/><path d="M167 155H612" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow7)"/><text x="390" y="143" text-anchor="middle" class="svg-small">fresh random challenge + context + requested data</text><rect x="500" y="185" width="245" height="70" rx="10" class="svg-box"/><text x="622" y="214" text-anchor="middle" class="svg-label">Sign in hardware</text><text x="622" y="237" text-anchor="middle" class="svg-small">challenge || context || identity</text><path d="M612 290H167" stroke="#74f0bd" stroke-width="2" marker-end="url(#arrow7)"/><text x="390" y="278" text-anchor="middle" class="svg-small">ROM ID + device cert + signature + protected data</text><rect x="35" y="320" width="245" height="120" rx="10" class="svg-box"/><text x="157" y="350" text-anchor="middle" class="svg-label">Verify before trust</text><text x="157" y="377" text-anchor="middle" class="svg-small">1 path → pinned root</text><text x="157" y="399" text-anchor="middle" class="svg-small">2 identity / EKU / lifecycle</text><text x="157" y="421" text-anchor="middle" class="svg-small">3 signature + exact freshness</text><path d="M280 380H490" stroke="#ffca69" stroke-width="2" marker-end="url(#arrow7)"/><rect x="500" y="340" width="245" height="80" rx="10" class="svg-box"/><text x="622" y="372" text-anchor="middle" class="svg-label">Enforce decision</text><text x="622" y="396" text-anchor="middle" class="svg-small">enable · pair · read · deny · log</text><text x="390" y="505" text-anchor="middle" class="svg-small">host compromise or a GPIO bypass can defeat a correct cryptographic transcript</text></svg>
+            <figcaption>Original system sequence inspired by ADI use cases. The host must use an unpredictable challenge, validate the entire credential policy, and make the result non-bypassable.</figcaption>
+          </figure>
+        </div>
+        <div class="grid-3" style="margin-top:1rem">
+          <article class="card"><small>Authenticate</small><h3>Challenge + certificate</h3><p>Prove a provisioned component key answered a fresh challenge. A certificate can carry the P-256 public key and be signed with ECDSA under an OEM chain.</p></article>
+          <article class="card"><small>Pair + protect</small><h3>ECDH then HMAC</h3><p>Use authenticated ECDH-derived material to establish pairing or protect memory operations. After provisioning, HMAC can support faster recurring authentication when the system lifecycle permits it.</p></article>
+          <article class="card"><small>Enforce</small><h3>Authenticated GPIO</h3><p>Gate a physical function only after authentication. Analyze alternate traces, MCU pin reconfiguration, fault injection, and compromised-host bypass paths.</p></article>
+        </div>
+        <div class="callout danger" style="margin-top:1rem"><strong>Interview trap:</strong> “the DS28C40 secures boot” is incomplete. It can contribute an external identity, verification decision, secret, or gated signal. The MCU boot ROM and surrounding hardware must still enforce what executes and prevent bypass.</div>
+      </div>
+    </section>
+
+    <section class="section alt" id="interview">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">10 · system design interview</p><h2>Whiteboard the failure path.</h2></div><p>Use seven moves: asset, adversary, boundary, root, transcript, lifecycle, evidence.</p></div>
+        <div class="grid-2">
+          <ol class="flow-list"><li><strong>Security property</strong><br>Name confidentiality, integrity, authenticity, freshness, rollback resistance, or availability.</li><li><strong>Adversary</strong><br>Network, malicious app, compromised OS, physical attacker, factory insider, or supply-chain substitution?</li><li><strong>Trust boundaries</strong><br>Draw where plaintext, keys, certificates, counters, and decisions cross.</li><li><strong>Protocol transcript</strong><br>Write exact inputs, context, encodings, roles, versions, and verification.</li><li><strong>Lifecycle</strong><br>Provision, use, rotate, revoke, crash, update, recover, decommission.</li><li><strong>Catastrophic misuse</strong><br>Choose one: nonce reuse, stale LMS state, rollback, invalid chain, KMS outage, or bypass.</li><li><strong>Evidence</strong><br>Logs, tests, attestation, measurements, negative vectors, and residual risk.</li></ol>
+          <div>
+            <details open><summary>Explain ECDH without hiding behind the paint</summary><div>Write <code>a(bG)=b(aG)</code>, state the discrete-log assumption, validate peer points, explain active MITM, then authenticate and feed the encoded shared result into a transcript-bound KDF. Say explicitly where the paint analogy stops.</div></details>
+            <details><summary>Explain ECDSA and recover a key from reused k</summary><div>Write the signing equation and algebra for recovering <code>k</code> and <code>d</code>. Then cover trusted public-key provenance, encoding/range checks, deterministic nonce generation, constant-time code, and fault leakage.</div></details>
+            <details><summary>Why LM-OTS, LMS, and HSS?</summary><div>Hash assumptions remain attractive under the quantum threat. LM-OTS is one-time; LMS authenticates many LM-OTS public keys with one Merkle root; HSS stacks trees. Spend most of the answer on durable state, concurrency, cloning, backups, and crash recovery.</div></details>
+            <details><summary>Does X.509 use ECDSA?</summary><div>It can. Separate the leaf SPKI algorithm from each issuer’s signature algorithm. Then explain full path validation and proof of private-key possession. On an MCU, define trust anchor, clock, revocation/update, and key-purpose policy.</div></details>
+            <details><summary>Design MCU verified boot plus a TEE</summary><div>Start at immutable ROM and OTP, authenticate a manifest/image before execute, bind target and version, enforce anti-rollback, add power-safe A/B recovery and key rotation, then minimize the secure runtime service API. Explain measured versus verified boot.</div></details>
+            <details><summary>What does a DS28C40 do?</summary><div>Describe a hardware-protected automotive I²C authenticator with ECC, ECDH, HMAC, protected storage, random generation, and authenticated GPIO. Draw challenge/certificate/signature verification and assign enforcement and bypass resistance to the ECU/system.</div></details>
+            <details><summary>How much storage do 1,000 StrongBox keys need?</summary><div>Reject a single universal number. Explain encrypted key blobs versus trusted rollback metadata; measure target-device blob/DB and certificate-chain growth. A planning example at 2 KiB blob + 0.5 KiB metadata + 1.5 KiB cert chain + 20% overhead is about 4.7 MiB outside the secure processor, plus vendor-specific trusted storage. Then load-test key count and operation slots.</div></details>
+          </div>
+        </div>
+        <div class="table-wrap" style="margin-top:2rem"><table><thead><tr><th>Score</th><th>Threat model</th><th>Crypto</th><th>Lifecycle</th><th>Communication</th></tr></thead><tbody><tr><td>0</td><td>Absent</td><td>Algorithm names only</td><td>Happy path only</td><td>Magic boxes</td></tr><tr><td>1</td><td>Generic attacker</td><td>Basic purpose</td><td>Mentions rotation</td><td>Components named</td></tr><tr><td>2</td><td>Assets/capabilities explicit</td><td>Protocol inputs and outputs correct</td><td>Provision/update/revoke/recover</td><td>Clear diagram and assumptions</td></tr><tr><td>3</td><td>Physical, supply-chain, insider prioritized</td><td>Validation, domains, failures, misuse</td><td>Crash, rollback, clone, decommission tested</td><td>Tradeoffs and residual risk crisp</td></tr></tbody></table></div>
+      </div>
+    </section>
+
+    <section class="section" id="sources">
+      <div class="shell">
+        <div class="section-head"><div><p class="eyebrow">Primary sources</p><h2>Read the specification behind the sketch.</h2></div><p>Version-sensitive claims should be checked against the exact library, OS, service, silicon revision, and certification profile you deploy.</p></div>
+        <ul class="source-list">
+          <li><a href="https://csrc.nist.gov/pubs/fips/186-5/final">NIST FIPS 186-5 · Digital Signature Standard</a></li>
+          <li><a href="https://csrc.nist.gov/pubs/sp/800/56/a/r3/final">NIST SP 800-56A Rev. 3 · ECC key establishment</a></li>
+          <li><a href="https://www.rfc-editor.org/rfc/rfc5869">RFC 5869 · HKDF</a></li>
+          <li><a href="https://csrc.nist.gov/pubs/fips/203/final">NIST FIPS 203 · ML-KEM</a></li>
+          <li><a href="https://www.rfc-editor.org/rfc/rfc8554">RFC 8554 · LMS and HSS</a></li>
+          <li><a href="https://docs.openssl.org/3.5/man7/EVP_KEM-ML-KEM/">OpenSSL 3.5 · ML-KEM provider</a></li>
+          <li><a href="https://docs.openssl.org/3.5/man3/EVP_PKEY_derive/">OpenSSL 3.5 · EVP key derivation</a></li>
+          <li><a href="https://docs.aws.amazon.com/kms/latest/developerguide/kms-cryptography.html">AWS KMS · cryptographic details and envelope encryption</a></li>
+          <li><a href="https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/use-kms-ecdh-keyring.html">AWS Encryption SDK · ECDH keyring example</a></li>
+          <li><a href="https://source.android.com/docs/security/features/keystore">AOSP · hardware-backed Keystore architecture</a></li>
+          <li><a href="https://source.android.com/docs/security/features/keystore/implementer-ref">AOSP · KeyMint key blobs and rollback resistance</a></li>
+          <li><a href="https://developer.android.com/privacy-and-security/keystore">Android Developers · StrongBox usage and limits</a></li>
+          <li><a href="https://developer.android.com/reference/android/security/keystore/KeyProperties">Android KeyProperties · ECDH agreement and security levels</a></li>
+          <li><a href="https://source.android.com/docs/core/ota/modular-system/conscrypt">AOSP · Conscrypt and BoringSSL</a></li>
+          <li><a href="https://docs.openssl.org/3.5/man3/RAND_bytes/">OpenSSL 3.5 · RAND bytes and entropy failure</a></li>
+          <li><a href="https://www.analog.com/en/products/ds28c40.html">Analog Devices · DS28C40 product page</a></li>
+          <li><a href="https://www.analog.com/media/en/technical-documentation/data-sheets/DS28C40.pdf">Analog Devices · DS28C40 datasheet</a></li>
+          <li><a href="https://www.analog.com/en/resources/app-notes/an-2580.html">Analog Devices AN-2580 · DS28C40 use cases</a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="shell footer-row"><div><strong>WutPack Security Engineering Lab</strong><br>Original diagrams and simulations · version 0.2.0</div><div>Built by <code>wut security-lab</code><br><a href="https://github.com/sfungwinbond/Gstackwut">Source on GitHub</a></div></div></footer>
+
+  <script>
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+    const mod = (value, p) => ((value % p) + p) % p;
+    function inv(value, p) { let a=mod(value,p), b=p, x=1, y=0; while (b) { const q=Math.floor(a/b); [a,b]=[b,a%b]; [x,y]=[y,x-q*y]; } if (a!==1) throw new Error("no inverse"); return mod(x,p); }
+    function pointAdd(P,Q) { const p=17,a=2; if (!P) return Q; if (!Q) return P; if (P.x===Q.x && mod(P.y+Q.y,p)===0) return null; const slope = P.x===Q.x && P.y===Q.y ? mod((3*P.x*P.x+a)*inv(2*P.y,p),p) : mod((Q.y-P.y)*inv(Q.x-P.x,p),p); const x=mod(slope*slope-P.x-Q.x,p); return {x,y:mod(slope*(P.x-x)-P.y,p)}; }
+    function scalar(k,P) { let n=k, result=null, addend=P; while(n>0){ if(n&1) result=pointAdd(result,addend); addend=pointAdd(addend,addend); n>>=1; } return result; }
+    const pointText = (P) => P ? `(${P.x}, ${P.y})` : "O";
+    function updateCurve(){ const a=+$('aliceScalar').value,b=+$('bobScalar').value,G={x:5,y:1}; $('aliceScalarValue').value=a; $('bobScalarValue').value=b; const A=scalar(a,G),B=scalar(b,G),sA=scalar(a,B),sB=scalar(b,A); $('curveReadout').innerHTML=`Alice public A = aG = <strong>${pointText(A)}</strong><br>Bob public B = bG = <strong>${pointText(B)}</strong><br>Alice computes aB = <strong>${pointText(sA)}</strong><br>Bob computes bA = <strong>${pointText(sB)}</strong><br>Match: <strong>${pointText(sA)===pointText(sB) ? 'yes' : 'no'}</strong>`; }
+    $('aliceScalar').addEventListener('input',updateCurve); $('bobScalar').addEventListener('input',updateCurve); updateCurve();
+
+    async function deriveHkdf(){ const encoder=new TextEncoder(); const ikm=encoder.encode($('hkdfIkm').value), info=encoder.encode($('hkdfInfo').value); try { const base=await crypto.subtle.importKey('raw',ikm,'HKDF',false,['deriveBits']); const bits=await crypto.subtle.deriveBits({name:'HKDF',hash:'SHA-256',salt:encoder.encode('wutlab-public-demo-salt'),info},base,256); $('hkdfReadout').innerHTML=`Output = <strong>${[...new Uint8Array(bits)].map(x=>x.toString(16).padStart(2,'0')).join('')}</strong><br>Public demo salt = wutlab-public-demo-salt`; } catch(error){ $('hkdfReadout').textContent=`WebCrypto HKDF unavailable in this context: ${error.message}`; } }
+    $('deriveButton').addEventListener('click',deriveHkdf);
+
+    function updateNonce(){ const n=101,r=26,z1=13,z2=42,d=+$('nonceD').value,k=+$('nonceK').value; $('nonceDValue').value=d; $('nonceKValue').value=k; const s1=mod(inv(k,n)*(z1+r*d),n),s2=mod(inv(k,n)*(z2+r*d),n); const recoveredK=mod((z1-z2)*inv(s1-s2,n),n), recoveredD=mod((s1*recoveredK-z1)*inv(r,n),n); $('nonceReadout').innerHTML=`signature 1: (r, s₁) = (26, ${s1})<br>signature 2: (r, s₂) = (26, ${s2})<br>attacker recovers k = <strong>${recoveredK}</strong><br>attacker recovers d = <strong>${recoveredD}</strong>`; }
+    $('nonceD').addEventListener('input',updateNonce); $('nonceK').addEventListener('input',updateNonce); updateNonce();
+
+    let lms={durable:0,reserved:null,released:[],backup:0,warning:"none"};
+    function showLms(){ const exhausted=lms.durable>=8; $('lmsReadout').innerHTML=`durable next q = <strong>${lms.durable}</strong><br>reserved = <strong>${lms.reserved===null?'none':lms.reserved}</strong><br>released signatures = <strong>${lms.released.join(', ')||'none'}</strong><br>stale backup next q = <strong>${lms.backup}</strong><br>state = <strong>${exhausted?'tree exhausted':lms.warning}</strong>`; }
+    $('lmsReserve').addEventListener('click',()=>{ if(lms.durable>=8){lms.warning='no leaves remain';showLms();return;} lms.reserved=lms.durable; lms.durable++; lms.warning='q persisted before output'; showLms(); });
+    $('lmsRelease').addEventListener('click',()=>{ if(lms.reserved===null){lms.warning='blocked: reserve first';showLms();return;} if(lms.released.includes(lms.reserved)) lms.warning='CATASTROPHIC: leaf reused'; else {lms.released.push(lms.reserved);lms.warning='signature safely released';} lms.reserved=null;showLms();});
+    $('lmsCrash').addEventListener('click',()=>{ lms.reserved=null;lms.warning='crash: reserved leaf is burned, never reused';showLms(); });
+    $('lmsRestore').addEventListener('click',()=>{ lms.durable=lms.backup;lms.reserved=null;lms.warning=lms.released.some(q=>q>=lms.durable)?'DANGER: stale restore makes released leaves available again':'restored';showLms(); }); showLms();
+
+    function fmtBytes(bytes){ const units=['B','KiB','MiB','GiB']; let v=bytes,u=0; while(v>=1024&&u<units.length-1){v/=1024;u++;} return `${v.toFixed(v<10&&u?2:1)} ${units[u]}`; }
+    function updateStrongbox(){ const count=Math.max(0,+$('sbCount').value||0),blob=Math.max(0,+$('sbBlob').value||0),meta=Math.max(0,+$('sbMeta').value||0),cert=Math.max(0,+$('sbCert').value||0),over=Math.max(0,+$('sbOverhead').value||0),trusted=Math.max(0,+$('sbTrusted').value||0); const external=count*(blob+meta+cert)*(1+over/100),secure=count*trusted; $('sbReadout').innerHTML=`external Keystore planning total = <strong>${fmtBytes(external)}</strong> (${Math.round(external).toLocaleString()} bytes)<br>hypothetical trusted rollback metadata = <strong>${fmtBytes(secure)}</strong><br>per external record with headroom = <strong>${fmtBytes((blob+meta+cert)*(1+over/100))}</strong><br><br>These are capacity-planning assumptions, not StrongBox guarantees. Measure blobs, DB, certificates, and exhaustion behavior on target hardware.`; }
+    ['sbCount','sbBlob','sbMeta','sbCert','sbOverhead','sbTrusted'].forEach(id=>$(id).addEventListener('input',updateStrongbox)); updateStrongbox();
+
+    function updateBoot(){ const checks=[['bootSig','signature/chain'],['bootTarget','target policy'],['bootVersion','anti-rollback'],['bootDigest','image digest'],['bootDebug','debug lifecycle']]; const failed=checks.filter(([id])=>!$(id).checked).map(([,name])=>name); $('bootReadout').innerHTML=failed.length?`<span class="status bad">DO NOT BOOT</span><br>failed: <strong>${failed.join(', ')}</strong><br>Enter authenticated recovery or remain fail-closed; do not silently downgrade.`:`<span class="status">AUTHORIZED TO TRANSFER CONTROL</span><br>All modeled checks pass. Record measurements/events, then enter the verified image through the defined security-state transition.`; }
+    ['bootSig','bootTarget','bootVersion','bootDigest','bootDebug'].forEach(id=>$(id).addEventListener('change',updateBoot)); updateBoot();
+  </script>
+</body>
+</html>

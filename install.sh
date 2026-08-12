@@ -31,6 +31,7 @@ EXPECTED_SKILLS=(
   publish-docs
   research-brief
   review-gate
+  security-engineer
   ship-check
   spreadsheet-lab
   system-diagram
@@ -84,7 +85,8 @@ validate_source_tree() {
     manifests/node-agents.txt manifests/node-retired.txt \
     manifests/python-core.txt manifests/python-ml.txt \
     manifests/python-agents.txt \
-    skills/technical-deck/scripts/new_technical_deck.mjs; do
+    skills/technical-deck/scripts/new_technical_deck.mjs \
+    skills/security-engineer/scripts/build_security_lab.py; do
     if [ ! -f "$root/$required_file" ]; then
       printf 'WutPack source is incomplete: missing %s\n' "$required_file" >&2
       return 1
@@ -109,7 +111,7 @@ validate_source_tree() {
   for skill_dir in "$root"/skills/*; do
     [ -d "$skill_dir" ] || continue
     case "$(basename "$skill_dir")" in
-      code-build|data-lab|debug-lab|document-studio|pdf-forensics|publish-docs|research-brief|review-gate|ship-check|spreadsheet-lab|system-diagram|technical-deck)
+      code-build|data-lab|debug-lab|document-studio|pdf-forensics|publish-docs|research-brief|review-gate|security-engineer|ship-check|spreadsheet-lab|system-diagram|technical-deck)
         skill_count=$((skill_count + 1))
         ;;
       *)

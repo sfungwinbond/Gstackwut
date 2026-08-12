@@ -1,0 +1,4 @@
+interface:
+  display_name: "[wutlabs] Security Engineer"
+  short_description: "Applied cryptography systems, simulations, and interview design"
+  default_prompt: "Use $security-engineer to explain, model, or review this security system with explicit trust boundaries, cryptographic assumptions, and verification steps."

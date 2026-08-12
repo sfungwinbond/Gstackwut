@@ -25,6 +25,7 @@ EXPECTED_SKILLS = {
     "code-build",
     "debug-lab",
     "review-gate",
+    "security-engineer",
     "ship-check",
 }
 
@@ -335,9 +336,9 @@ def validate_agent_cli_policy(errors: list[str]) -> None:
 
 def validate_readme_examples(errors: list[str]) -> None:
     text = (ROOT / "README.md").read_text(encoding="utf-8")
-    heading = "## Twelve-specialist consulting walkthrough"
+    heading = "## Thirteen-specialist consulting walkthrough"
     if heading not in text:
-        fail(errors, "README.md: missing twelve-specialist consulting walkthrough")
+        fail(errors, "README.md: missing thirteen-specialist consulting walkthrough")
         return
     section = text.split(heading, 1)[1].split("\n## ", 1)[0]
     for name in sorted(EXPECTED_SKILLS):
@@ -673,6 +674,51 @@ def validate_landing_page(errors: list[str]) -> None:
         fail(errors, f"{key_path.relative_to(ROOT)}: key contents must match its filename")
 
 
+def validate_security_lab(errors: list[str]) -> None:
+    path = ROOT / "site/security-engineer.html"
+    if not path.is_file():
+        fail(errors, "missing site/security-engineer.html")
+        return
+
+    text = path.read_text(encoding="utf-8")
+    parser = LandingPageParser()
+    parser.feed(text)
+    duplicate_ids = sorted({value for value in parser.ids if parser.ids.count(value) > 1})
+    if duplicate_ids:
+        fail(errors, f"site/security-engineer.html: duplicate ids {duplicate_ids}")
+    id_set = set(parser.ids)
+    required_ids = {
+        "main", "math", "ecdh", "ecdsa", "systems", "pq", "x509",
+        "strongbox", "boot", "ds28c40", "interview", "sources",
+    }
+    for required_id in required_ids:
+        if required_id not in id_set:
+            fail(errors, f"site/security-engineer.html: missing section id {required_id!r}")
+    for target in parser.links:
+        if target.startswith("#") and target[1:] not in id_set:
+            fail(errors, f"site/security-engineer.html: broken page anchor {target}")
+
+    required_fragments = (
+        "A certificate can use ECDSA. X.509 is not ECDSA.",
+        "StrongBox storage planning estimator",
+        "OpenSSL includes a CSPRNG",
+        "PURPOSE_AGREE_KEY",
+        "MCU boot + TEE",
+        "DS28C40 HARDWARE SECURITY BOUNDARY",
+        "Nonce-reuse autopsy",
+        "LMS crash-state simulator",
+        "NIST FIPS 203",
+        "RFC 8554",
+    )
+    for fragment in required_fragments:
+        if fragment not in text:
+            fail(errors, f"site/security-engineer.html: missing required content {fragment!r}")
+    if re.search(r'<(?:script|link)[^>]+(?:src|href)=["\']https?://', text, re.IGNORECASE):
+        fail(errors, "site/security-engineer.html: runtime assets must be self-contained")
+    if text.count('role="img"') < 8:
+        fail(errors, "site/security-engineer.html: expected at least eight accessible diagrams")
+
+
 def validate_repository(errors: list[str]) -> None:
     required = [
         "README.md",
@@ -690,6 +736,7 @@ def validate_repository(errors: list[str]) -> None:
         "docs/profession-packs.md",
         "docs/release-v0.2.0.md",
         "site/index.html",
+        "site/security-engineer.html",
         "site/toolpacks.html",
         "site/assets/toolpacks.css",
         "site/assets/toolpacks.js",
@@ -717,6 +764,22 @@ def validate_repository(errors: list[str]) -> None:
         if re.search(r"\b(?:TODO|TBD|FIXME)\b", text, re.IGNORECASE):
             fail(errors, f"{path.relative_to(ROOT)}: unfinished placeholder")
 
+    security_check = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "skills/security-engineer/scripts/build_security_lab.py"),
+            "--output",
+            str(ROOT / "site/security-engineer.html"),
+            "--check",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if security_check.returncode:
+        fail(errors, security_check.stderr.strip() or security_check.stdout.strip())
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -735,6 +798,7 @@ def main() -> int:
         validate_tool_gallery(errors)
         validate_toolpack_catalog(errors)
         validate_landing_page(errors)
+        validate_security_lab(errors)
     if errors:
         for error in errors:
             print(f"ERROR: {error}", file=sys.stderr)
