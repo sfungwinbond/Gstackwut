@@ -780,6 +780,17 @@ def validate_repository(errors: list[str]) -> None:
     if security_check.returncode:
         fail(errors, security_check.stderr.strip() or security_check.stdout.strip())
 
+    fresh_install = (ROOT / ".github/workflows/fresh-install.yml").read_text(encoding="utf-8")
+    for host in ("codex", "claude"):
+        count_match = re.search(rf'test "\${host}_count" = (\d+)', fresh_install)
+        if not count_match:
+            fail(errors, f"fresh-install.yml: missing {host} skill-count assertion")
+        elif int(count_match.group(1)) != len(EXPECTED_SKILLS):
+            fail(
+                errors,
+                f"fresh-install.yml: {host} skill count must be {len(EXPECTED_SKILLS)}",
+            )
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()

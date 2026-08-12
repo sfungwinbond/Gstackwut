@@ -115,7 +115,7 @@ jobs:
                 printf '::error title=WutPack setup::%s\n' "$failure"
               done
 
-      - name: Verify persistent environments and all twelve skills
+      - name: Verify persistent environments and all thirteen skills
         shell: bash
         run: |
           set -euo pipefail
@@ -183,8 +183,8 @@ jobs:
 
           codex_count="$(find "$WUTPACK_TEST_ROOT/.codex/skills" -name SKILL.md | wc -l | tr -d ' ')"
           claude_count="$(find "$WUTPACK_TEST_ROOT/.claude/skills" -name SKILL.md | wc -l | tr -d ' ')"
-          test "$codex_count" = 12
-          test "$claude_count" = 12
+          test "$codex_count" = 13
+          test "$claude_count" = 13
           diff \
             <(find "$WUTPACK_TEST_ROOT/.codex/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -exec dirname {} \; | xargs -n1 basename | sort) \
             <(find "$WUTPACK_TEST_ROOT/.claude/skills" -mindepth 2 -maxdepth 2 -name SKILL.md -exec dirname {} \; | xargs -n1 basename | sort)
